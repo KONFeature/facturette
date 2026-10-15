@@ -21,3 +21,9 @@ dist/
 
 # logs
 *.log
+
+# local tooling / test output
+.tools/
+test-results/
+playwright-report/
+.out/
