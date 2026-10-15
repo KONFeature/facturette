@@ -438,3 +438,25 @@ export const expectedFilename = (number: string): string =>
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")}-facturx.pdf`
+
+// ---- keyboard ---------------------------------------------------------------------------------
+
+/**
+ * Press Tab until the focused element matches `selector` (and has exactly `text` when given).
+ * Fails after `max` presses.
+ */
+export async function tabTo(page: Page, selector: string, text?: string, max = 400): Promise<void> {
+  for (let i = 0; i < max; i++) {
+    const hit = await page.evaluate(
+      ([sel, txt]) => {
+        const el = document.activeElement
+        if (!el?.matches(sel)) return false
+        return txt === null || el.textContent?.trim() === txt
+      },
+      [selector, text ?? null] as const,
+    )
+    if (hit) return
+    await page.keyboard.press("Tab")
+  }
+  throw new Error(`${selector} ${text ?? ""} not reachable with Tab`)
+}
