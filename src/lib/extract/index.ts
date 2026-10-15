@@ -15,3 +15,4 @@ export function extractInvoice(
 }
 
 export type * from "./types"
+export { PREFILL_THRESHOLD } from "./types"

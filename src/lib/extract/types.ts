@@ -1,5 +1,11 @@
 import type { InvoiceDraft } from "../../domain/invoice"
 
+/**
+ * Suggestions at or above this confidence are folded into `ExtractionResult.draft` (the form is
+ * pre-filled with them). Below it, a suggestion is only offered to the user, never pre-filled.
+ */
+export const PREFILL_THRESHOLD = 0.6
+
 export interface BoundingBox {
   /** 1-based. Same coordinate system as `PdfTextItem` (top-left origin, PDF points). */
   page: number
@@ -30,7 +36,7 @@ export interface ExtractionOptions {
 export interface ExtractionResult {
   /** All candidates. Several may share a `path`; sorted by confidence, best first. */
   suggestions: Suggestion[]
-  /** Best suggestion per path folded into a draft (what the form is pre-filled with). */
+  /** Best suggestion per path with confidence >= PREFILL_THRESHOLD (what the form is pre-filled with). */
   draft: InvoiceDraft
   /** Human-readable French notes, e.g. "Aucun texte détecté : PDF scanné ?" */
   warnings: string[]
