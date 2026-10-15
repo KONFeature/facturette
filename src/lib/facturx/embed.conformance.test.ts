@@ -11,7 +11,7 @@ import { join, resolve } from "node:path"
 import { cmyk, PDFDocument } from "@cantoo/pdf-lib"
 import { describe, expect, it } from "vitest"
 import { type ValidationResult, validateFacturX } from "../../../scripts/validate-facturx"
-import { type EmbedOptions, embedFacturX } from "./embed"
+import { type EmbedOptions, embedFacturX, embedFacturXDetailed } from "./embed"
 import { decoratePdf, makeHelveticaPdf, TEST_INVOICE } from "./embed.testkit"
 
 const hasJava = spawnSync("java", ["-version"]).status === 0
@@ -19,6 +19,10 @@ const enabled = process.env.MUSTANG === "1" && hasJava
 
 const assets = resolve(import.meta.dirname, "assets")
 const input = (name: string) => new Uint8Array(readFileSync(resolve(assets, "test-inputs", name)))
+const fixture = (name: string) =>
+  new Uint8Array(
+    readFileSync(resolve(import.meta.dirname, "..", "..", "..", "fixtures", "invoices", name)),
+  )
 const XML = readFileSync(resolve(assets, "sample-en16931.xml"), "utf8")
 const BASIC_XML = XML.replace(
   "<ram:ID>urn:cen.eu:en16931:2017</ram:ID>",
@@ -113,6 +117,28 @@ describe.skipIf(!enabled)("embedFacturX conformance (Mustang)", () => {
           OPTIONS,
         ),
     ],
+    // Non-embedded fonts repaired by substitution (Arimo / Tinos / Cousine).
+    ["3-helvetica", async () => embedFacturX(await makeHelveticaPdf(), XML, OPTIONS)],
+    [
+      "fonts-fixture-13-pdflib-helvetica",
+      async () => embedFacturX(fixture("13-pdflib-helvetica.pdf"), XML, OPTIONS),
+    ],
+    ["fonts-reportlab", async () => embedFacturX(input("reportlab-invoice.pdf"), XML, OPTIONS)],
+    ["fonts-fpdf2-multipage", async () => embedFacturX(input("fpdf2-multipage.pdf"), XML, OPTIONS)],
+    [
+      "fonts-pdflib-standard12",
+      async () => embedFacturX(input("pdflib-standard12.pdf"), XML, OPTIONS),
+    ],
+    ["fonts-descriptor", async () => embedFacturX(input("descriptor-fonts.pdf"), XML, OPTIONS)],
+    [
+      "fonts-reembed",
+      async () =>
+        embedFacturX(
+          await embedFacturX(input("reportlab-invoice.pdf"), XML, OPTIONS),
+          XML,
+          OPTIONS,
+        ),
+    ],
     [
       "basic-profile",
       async () =>
@@ -126,15 +152,36 @@ describe.skipIf(!enabled)("embedFacturX conformance (Mustang)", () => {
 
   // Known limitations: the original PDF itself breaks PDF/A rules we cannot repair client-side.
   it(
-    "3-helvetica (non-embedded font) fails PDF/A 6.2.11.4.1",
+    "unrepairable fonts (Symbol, ZapfDingbats, Type0) are reported and fail PDF/A 6.2.11.4.1",
     async () => {
-      const r = await validate(
-        "3-helvetica",
-        await embedFacturX(await makeHelveticaPdf(), XML, OPTIONS),
+      const { pdf, report } = await embedFacturXDetailed(
+        input("unrepairable-fonts.pdf"),
+        XML,
+        OPTIONS,
       )
+      expect(report.fontsUnrepairable.map((f) => f.name)).toEqual([
+        "Symbol",
+        "ZapfDingbats",
+        "ArialMT",
+      ])
+      const r = await validate("unrepairable-fonts", pdf)
       expect(r.xml).toBe("valid")
       expect(r.pdf).toBe("invalid")
-      expect(failedPdfaClauses("3-helvetica")).toEqual(["6.2.11.4.1-1"])
+      expect(failedPdfaClauses("unrepairable-fonts")).toEqual(["6.2.11.4.1-1"])
+    },
+    TIMEOUT,
+  )
+
+  it(
+    "repairFonts: false keeps the non-embedded font (fails PDF/A 6.2.11.4.1)",
+    async () => {
+      const pdf = await embedFacturX(await makeHelveticaPdf(), XML, {
+        ...OPTIONS,
+        repairFonts: false,
+      })
+      const r = await validate("3-helvetica-no-repair", pdf)
+      expect(r.pdf).toBe("invalid")
+      expect(failedPdfaClauses("3-helvetica-no-repair")).toEqual(["6.2.11.4.1-1"])
     },
     TIMEOUT,
   )

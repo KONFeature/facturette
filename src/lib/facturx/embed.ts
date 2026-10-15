@@ -13,7 +13,11 @@ import {
   PDFString,
 } from "@cantoo/pdf-lib"
 import { SRGB_ICC_BASE64 } from "./assets/srgb-icc"
+import type { FontUse } from "./fonts/repair"
+import type { FontRepairReport, ReplacedFont, UnrepairableFont } from "./fonts/types"
 import { DEFAULT_PROFILE, type FacturXProfile } from "./types"
+
+export type { ReplacedFont, UnrepairableFont }
 
 export interface EmbedOptions {
   profile?: FacturXProfile
@@ -21,7 +25,15 @@ export interface EmbedOptions {
   invoice: { number: string; issueDate: string; sellerName: string; typeCode?: "380" | "381" }
   /** Timestamp written as modification/metadata date. Defaults to the current time. */
   now?: Date
+  /**
+   * Replace non-embedded fonts by embedded metric-compatible ones (Arimo, Tinos, Cousine) so
+   * the file can be PDF/A-3. Text positions are unchanged. Default: true.
+   */
+  repairFonts?: boolean
 }
+
+/** What `embedFacturXDetailed` changed besides attaching the XML, for an honest UI recap. */
+export type EmbedReport = FontRepairReport
 
 export interface PreflightIssue {
   code: string
@@ -29,6 +41,8 @@ export interface PreflightIssue {
   severity: "blocker" | "warning"
   /** French, user-facing. */
   message: string
+  /** For `fonts-not-embedded`: true if `embedFacturX` will replace these fonts itself. */
+  repairable?: boolean
 }
 
 export interface PreflightReport {
@@ -66,7 +80,9 @@ const AF_RELATIONSHIP: Record<FacturXProfile, string> = {
 /**
  * Turn an ordinary PDF into a Factur-X PDF: attach `factur-x.xml` (AFRelationship, /AF, names
  * tree), write the XMP metadata (PDF/A-3 identification + Factur-X extension schema), add an
- * sRGB output intent when needed. The visual content of the original PDF is untouched.
+ * sRGB output intent when needed. Page content streams are never modified. Non-embedded simple
+ * fonts are replaced (unless `repairFonts: false`) by embedded metric-compatible fonts with the
+ * same widths: text stays in place, glyph shapes may differ slightly.
  * Runs in the browser; pure bytes in, bytes out.
  *
  * Re-running it on its own output replaces the previous `factur-x.xml` (never duplicates it).
@@ -79,6 +95,18 @@ export async function embedFacturX(
   xml: string,
   options: EmbedOptions,
 ): Promise<Uint8Array> {
+  return (await embedFacturXDetailed(pdf, xml, options)).pdf
+}
+
+/**
+ * Same as `embedFacturX`, also reporting the non-embedded fonts that were replaced by embedded
+ * metric-compatible substitutes and those that could not be (the output is then not PDF/A).
+ */
+export async function embedFacturXDetailed(
+  pdf: Uint8Array,
+  xml: string,
+  options: EmbedOptions,
+): Promise<{ pdf: Uint8Array; report: EmbedReport }> {
   const doc = await loadPdf(pdf)
   if (doc.isEncrypted) {
     throw new Error("Ce PDF est chiffré : impossible d'y intégrer les données Factur-X.")
@@ -93,6 +121,7 @@ export async function embedFacturX(
 
   removeLinearizationDicts(doc)
   removeJavaScript(doc)
+  const report = await repairFonts(doc, options.repairFonts ?? true)
 
   const creationDate = readInfoDate(doc, "CreationDate") ?? now
   attachInvoiceXml(doc, xml, profile, now)
@@ -101,7 +130,35 @@ export async function embedFacturX(
   writeXmp(doc, options, profile, creationDate, now)
   writeTrailerId(doc)
 
-  return doc.save({ addDefaultPage: false, updateFieldAppearances: false, useObjectStreams: true })
+  const bytes = await doc.save({
+    addDefaultPage: false,
+    updateFieldAppearances: false,
+    useObjectStreams: true,
+  })
+  return { pdf: bytes, report }
+}
+
+/**
+ * Substitute the non-embedded fonts. The repair code and the font programs are loaded on
+ * demand: documents whose fonts are all embedded never download them.
+ */
+async function repairFonts(doc: PDFDocument, enabled: boolean): Promise<FontRepairReport> {
+  const uses = nonEmbeddedFontUses(doc)
+  const fontName = (use: FontUse) =>
+    (nameOf(doc, use.font.get(N("BaseFont"))) ?? "").replace(/^[A-Z]{6}\+/, "") || "police sans nom"
+  const unrepaired = (reason: string): FontRepairReport => ({
+    fontsReplaced: [],
+    fontsUnrepairable: [...new Set(uses.map(fontName))].map((name) => ({ name, reason })),
+  })
+  if (uses.length === 0) return { fontsReplaced: [], fontsUnrepairable: [] }
+  if (!enabled) return unrepaired("remplacement des polices désactivé")
+  let repair: typeof import("./fonts/repair")
+  try {
+    repair = await import("./fonts/repair")
+  } catch {
+    return unrepaired("polices de remplacement indisponibles (chargement impossible)")
+  }
+  return repair.repairNonEmbeddedFonts(doc, uses)
 }
 
 async function loadPdf(pdf: Uint8Array): Promise<PDFDocument> {
@@ -642,14 +699,27 @@ export async function preflightPdf(pdf: Uint8Array): Promise<PreflightReport> {
     })
   }
 
-  const missingFonts = nonEmbeddedFonts(doc)
-  if (missingFonts.length > 0) {
+  // Dry run of the repair on this throwaway copy: the answer is exactly what embedFacturX does.
+  const fonts = await repairFonts(doc, true)
+  const replacedNames = [...new Set(fonts.fontsReplaced.map((f) => f.original))]
+  if (replacedNames.length > 0) {
+    const substitutes = [
+      ...new Set(fonts.fontsReplaced.map((f) => f.substitute.replace(/-.*$/, ""))),
+    ]
     issues.push({
       code: "fonts-not-embedded",
       severity: "warning",
-      message: `Polices non intégrées au PDF (${missingFonts.slice(0, 5).join(", ")}${
-        missingFonts.length > 5 ? "…" : ""
-      }). Le PDF/A exige des polices intégrées : le fichier produit ne sera pas conforme. Réexportez la facture en intégrant les polices (option « Incorporer les polices » ou « PDF/A » de votre logiciel).`,
+      repairable: true,
+      message: `Polices non intégrées au PDF (${listNames(replacedNames)}). Elles seront remplacées par des polices équivalentes de même largeur (${substitutes.join(", ")}) : le texte ne bouge pas, seul le dessin des caractères peut légèrement différer.`,
+    })
+  }
+  const unrepairableNames = fonts.fontsUnrepairable.map((f) => f.name)
+  if (unrepairableNames.length > 0) {
+    issues.push({
+      code: "fonts-not-embedded",
+      severity: "warning",
+      repairable: false,
+      message: `Polices non intégrées au PDF et impossibles à remplacer (${listNames(unrepairableNames)}). Le fichier produit ne pourra pas être conforme PDF/A-3 et pourra être refusé par certaines plateformes. Réexportez la facture en intégrant les polices (option « Incorporer les polices » ou « PDF/A » de votre logiciel).`,
     })
   }
 
@@ -749,13 +819,17 @@ function hasJavaScript(doc: PDFDocument): boolean {
   return false
 }
 
-/** Walk the resource dictionaries of every page, including nested form XObjects and patterns. */
-function forEachResources(doc: PDFDocument, visit: (resources: PDFDict) => void) {
-  const seen = new Set<PDFDict>()
+/**
+ * Walk the resource dictionaries of every page (1-based `page`), including nested form XObjects,
+ * patterns, Type3 glyph procedures and annotation appearance streams.
+ */
+function forEachResources(doc: PDFDocument, visit: (resources: PDFDict, page: number) => void) {
+  let seen = new Set<PDFDict>()
+  let page = 0
   const walk = (resources: PDFDict | undefined) => {
     if (!resources || seen.has(resources)) return
     seen.add(resources)
-    visit(resources)
+    visit(resources, page)
     for (const key of ["XObject", "Pattern"]) {
       const group = dictOf(doc, resources.get(N(key)))
       for (const value of group?.values() ?? []) {
@@ -768,12 +842,36 @@ function forEachResources(doc: PDFDocument, visit: (resources: PDFDict) => void)
       walk(dictOf(doc, dictOf(doc, value)?.get(N("Resources"))))
     }
   }
-  for (const page of doc.getPages()) walk(dictOf(doc, page.node.get(N("Resources"))))
+  const walkAppearance = (obj: PDFObject | undefined) => {
+    const value = deref(doc, obj)
+    if (value instanceof PDFStream) walk(dictOf(doc, value.dict.get(N("Resources"))))
+    else if (value instanceof PDFDict) {
+      // Appearance subdictionary: one stream per state.
+      for (const state of value.values()) {
+        const stream = deref(doc, state)
+        if (stream instanceof PDFStream) walk(dictOf(doc, stream.dict.get(N("Resources"))))
+      }
+    }
+  }
+  doc.getPages().forEach((p, index) => {
+    seen = new Set<PDFDict>()
+    page = index + 1
+    walk(dictOf(doc, p.node.get(N("Resources"))))
+    for (const annotObj of arrayOf(doc, p.node.get(N("Annots")))?.asArray() ?? []) {
+      const ap = dictOf(doc, dictOf(doc, annotObj)?.get(N("AP")))
+      for (const key of ["N", "R", "D"]) walkAppearance(ap?.get(N(key)))
+    }
+  })
 }
 
-function nonEmbeddedFonts(doc: PDFDocument): string[] {
-  const missing = new Set<string>()
-  forEachResources(doc, (resources) => {
+function listNames(names: string[]): string {
+  return `${names.slice(0, 5).join(", ")}${names.length > 5 ? "…" : ""}`
+}
+
+/** Every non-embedded, non-Type3 font dictionary with the pages that can use it. */
+function nonEmbeddedFontUses(doc: PDFDocument): FontUse[] {
+  const uses = new Map<PDFDict, Set<number>>()
+  forEachResources(doc, (resources, page) => {
     for (const value of dictOf(doc, resources.get(N("Font")))?.values() ?? []) {
       const font = dictOf(doc, value)
       if (!font) continue
@@ -785,10 +883,13 @@ function nonEmbeddedFonts(doc: PDFDocument): string[] {
           : font
       const descriptor = dictOf(doc, target?.get(N("FontDescriptor")))
       const embedded = ["FontFile", "FontFile2", "FontFile3"].some((k) => descriptor?.has(N(k)))
-      if (!embedded) missing.add(nameOf(doc, font.get(N("BaseFont"))) ?? "police sans nom")
+      if (embedded) continue
+      const pages = uses.get(font) ?? new Set<number>()
+      pages.add(page)
+      uses.set(font, pages)
     }
   })
-  return [...missing]
+  return [...uses].map(([font, pages]) => ({ font, pages: [...pages].sort((a, b) => a - b) }))
 }
 
 function hasTransparencyGroup(doc: PDFDocument): boolean {
