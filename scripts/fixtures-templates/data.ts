@@ -93,7 +93,8 @@ function company(
     name,
     kind: "company",
     siren,
-    siret: makeSiret(siren, nic),
+    // makeSiret appends the Luhn digit itself: it takes the 4 sequence digits of the NIC only.
+    siret: makeSiret(siren, nic.slice(0, 4)),
     ...(withVat ? { vatNumber: makeFrenchVat(siren) } : {}),
     address,
     ...extra,

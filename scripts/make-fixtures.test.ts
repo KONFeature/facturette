@@ -112,8 +112,12 @@ describe("fixture corpus", () => {
 
       it("identifiers are checksum-valid", () => {
         for (const party of [invoice.seller, invoice.buyer]) {
-          if (party.siren) expect(isLuhnValid(party.siren)).toBe(true)
+          if (party.siren) {
+            expect(party.siren, "a SIREN has exactly 9 digits").toMatch(/^\d{9}$/)
+            expect(isLuhnValid(party.siren)).toBe(true)
+          }
           if (party.siret) {
+            expect(party.siret, "a SIRET has exactly 14 digits").toMatch(/^\d{14}$/)
             expect(isLuhnValid(party.siret)).toBe(true)
             expect(party.siret.startsWith(party.siren ?? "")).toBe(true)
           }
