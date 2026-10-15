@@ -56,17 +56,46 @@ function collect(xml: string, tag: string): string[] {
   return out
 }
 
+/**
+ * veraPDF failures are not XML elements: Mustang prints them as plain text inside <pdf>…</pdf>
+ * ("TestAssertion [ruleId=RuleId [specification=…, clause=…, testNumber=…], status=failed,
+ * message=…, location=…"). Fold them into one readable line per rule, with an occurrence count.
+ */
+function collectPdfaFailures(stdout: string): string[] {
+  const pdf = stdout.match(/<pdf>([\s\S]*?)<\/pdf>/)?.[1] ?? ""
+  const re =
+    /TestAssertion \[ruleId=RuleId \[specification=([^,\]]+), clause=([^,\]]+), testNumber=(\d+)\], status=failed, message=([\s\S]*?), location=/g
+  const byRule = new Map<string, { text: string; count: number }>()
+  for (const m of pdf.matchAll(re)) {
+    const key = `${m[1]} ${m[2]}#${m[3]}`
+    const seen = byRule.get(key)
+    if (seen) seen.count += 1
+    else byRule.set(key, { text: decode(m[4] ?? ""), count: 1 })
+  }
+  return [...byRule].map(
+    ([key, { text, count }]) => `[PDF/A ${key}${count > 1 ? ` x${count}` : ""}] ${text}`,
+  )
+}
+
 export function parseMustangOutput(stdout: string): ValidationResult {
   const section = (name: string) => {
     const m = stdout.match(new RegExp(`<${name}>[\\s\\S]*?<summary status="(\\w+)"`))
     return m?.[1] ?? null
   }
+  // The LAST <summary> is Mustang's overall verdict, but it stays "valid" when only the PDF/A
+  // section failed (regression: a non-embedded-font PDF printed VALID). Require every section.
   const overall = [...stdout.matchAll(/<summary status="(\w+)"/g)].pop()?.[1] ?? "invalid"
+  const pdf = section("pdf")
+  const xml = section("xml")
   return {
-    valid: overall === "valid",
-    pdf: section("pdf"),
-    xml: section("xml"),
-    errors: [...collect(stdout, "error"), ...collect(stdout, "exception")],
+    valid: overall === "valid" && pdf !== "invalid" && xml !== "invalid",
+    pdf,
+    xml,
+    errors: [
+      ...collect(stdout, "error"),
+      ...collect(stdout, "exception"),
+      ...collectPdfaFailures(stdout),
+    ],
     warnings: collect(stdout, "warning"),
     notices: collect(stdout, "notice"),
   }

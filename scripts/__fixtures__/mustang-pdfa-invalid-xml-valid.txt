@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<validation filename="helv-out.pdf" datetime="2026-10-16 01:08:53">
+  <pdf>ValidationResult [flavour=3b, totalAssertions=1828, assertions=[TestAssertion [ruleId=RuleId [specification=ISO 19005-3:2012, clause=6.2.11.4.1, testNumber=1], status=failed, message=The font programs for all fonts used for rendering within a conforming file shall be embedded within that file, as defined in ISO 32000-1:2008, 9.9, location=Location [level=CosDocument, context=root/document[0]/pages[0](4 0 obj PDPage)/contentStream[0]/operators[6]/font[0](Helvetica-Bold)], locationContext=null, errorMessage=The font program is not embedded], TestAssertion [ruleId=RuleId [specification=ISO 19005-3:2012, clause=6.2.11.4.1, testNumber=1], status=failed, message=The font programs for all fonts used for rendering within a conforming file shall be embedded within that file, as defined in ISO 32000-1:2008, 9.9, location=Location [level=CosDocument, context=root/document[0]/pages[0](4 0 obj PDPage)/contentStream[0]/operators[26]/font[0](Helvetica)], locationContext=null, errorMessage=The font program is not embedded]], isCompliant=false]
+    <info>
+      <signature>unknown</signature>
+      <duration unit="ms">907</duration>
+    </info>
+    <summary status="invalid"/>
+  </pdf>  
+  <xml>
+    <info>
+      <version>2</version>
+      <profile>urn:cen.eu:en16931:2017</profile>
+      <validator version="2.26.0"/>
+      <rules>
+        <fired>15</fired>
+        <failed>4</failed>
+      </rules>
+      <duration unit="ms">1145</duration>
+    </info>
+    <messages>
+      <notice type="27" location="/rsm:CrossIndustryInvoice/rsm:ExchangedDocumentContext[1]" criterion="ram:BusinessProcessSpecifiedDocumentContextParameter/ram:ID">Business process MUST be provided. [ID PEPPOL-EN16931-R001] from /xslt/XR_30/XRechnung-CII-validation.xslt)</notice>  
+      <notice type="27" location="/rsm:CrossIndustryInvoice" criterion="rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerReference[boolean(normalize-space(.))]">[BR-DE-15] Das Element "Buyer reference" (BT-10) muss übermittelt werden. [ID BR-DE-15] from /xslt/XR_30/XRechnung-CII-validation.xslt)</notice>  
+      <notice type="27" location="/rsm:CrossIndustryInvoice/rsm:ExchangedDocumentContext[1]" criterion="ram:GuidelineSpecifiedDocumentContextParameter/ram:ID = $XR-CIUS-ID or ram:GuidelineSpecifiedDocumentContextParameter/ram:ID = $XR-EXTENSION-ID or ram:GuidelineSpecifiedDocumentContextParameter/ram:ID = $XR-CVD-ID">[BR-DE-21] Das Element "Specification identifier" (BT-24) soll syntaktisch der Kennung des Standards XRechnung entsprechen. [ID BR-DE-21] from /xslt/XR_30/XRechnung-CII-validation.xslt)</notice>  
+      <notice type="27" location="/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction[1]/ram:ApplicableHeaderTradeAgreement[1]/ram:SellerTradeParty[1]" criterion="ram:DefinedTradeContact">[BR-DE-2] Die Gruppe "SELLER CONTACT" (BG-6) muss übermittelt werden. [ID BR-DE-2] from /xslt/XR_30/XRechnung-CII-validation.xslt)</notice> 
+    </messages>
+    <summary status="valid"/>
+  </xml>
+  <messages></messages>
+  <summary status="valid"/>
+</validation>
+
