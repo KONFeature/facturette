@@ -35,7 +35,11 @@ function DoneStep() {
       .then((result) => {
         if (cancelled) return
         try {
-          defaultDeps.rememberInvoiceNumber(result.invoice.number)
+          // The numbering counter belongs to the saved company profile: remember the number only
+          // when the user opted in to saving their company. Otherwise nothing is written.
+          if (defaultDeps.loadSellerProfile()) {
+            defaultDeps.rememberInvoiceNumber(result.invoice.number)
+          }
         } catch {
           // Remembering the number is a convenience; never block the download on it.
         }

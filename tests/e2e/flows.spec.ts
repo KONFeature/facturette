@@ -134,9 +134,9 @@ test("privacy: no foreign request and the exact localStorage keys without consen
     `[privacy] localStorage after a flow with no save box ticked: ${JSON.stringify(entries)}`,
   )
   console.log(`[privacy] ${requests.all.length} requests, foreign: ${requests.foreign.length}`)
-  // FINDING: the done step remembers the invoice number without any opt-in.
-  expect(Object.keys(entries)).toEqual(["facturette:v1:lastInvoiceNumber"])
-  expect(entries["facturette:v1:lastInvoiceNumber"]).toContain(fixture.expected.number)
+  // « Rien n’est enregistré sans votre accord » : with no box ticked, NOTHING is written.
+  // (The invoice-number memory used to leak here; it is now part of the opt-in company profile.)
+  expect(Object.keys(entries)).toEqual([])
   expect(requests.foreign).toEqual([])
 })
 
@@ -152,9 +152,8 @@ test.describe("13 non-embedded Helvetica", () => {
     console.log(`[preflight 13] ${text.join(" | ").replace(/\s+/g, " ")}`)
   })
 
-  // Font substitution is the facturx-fonts lane (not on main yet): until then veraPDF rejects the
-  // non-embedded standard fonts (PDF/A-3 6.2.11.4.1).
-  test.fixme("the result is VALID (needs the facturx-fonts lane)", async ({ page }, testInfo) => {
+  // Non-embedded standard fonts are replaced by embedded, metric-compatible ones (facturx-fonts).
+  test("the result is VALID once the fonts are substituted", async ({ page }, testInfo) => {
     const fixture = readFixture("13")
     await importToReview(page, fixture.pdfPath)
     await fillMissingFromExpected(page, fixture, { record: false })

@@ -42,3 +42,33 @@ jobs:
           key: mustang-2.26.0
       - run: bun install --frozen-lockfile
       - run: MUSTANG=1 bunx vitest run src/lib/facturx scripts/validate-facturx.test.ts
+
+  # The whole product in a real browser against the production build: import a PDF, review,
+  # generate, download, then validate the downloaded file with Mustang.
+  e2e:
+    name: End-to-end (Playwright + Mustang)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.3
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: actions/cache@v6
+        with:
+          path: .tools/mustang.jar
+          key: mustang-2.26.0
+      - run: bun install --frozen-lockfile
+      - run: bunx playwright install --with-deps chromium
+      - run: bun run test:e2e
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-results
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore

@@ -59,7 +59,7 @@ export function SaveOptions({
           label="Mémoriser mon entreprise pour les prochaines factures"
           hint={
             canMemorizeSeller
-              ? "Vendeur, coordonnées bancaires, mentions légales et TVA par défaut."
+              ? "Vendeur, coordonnées bancaires, mentions légales, TVA par défaut et dernier numéro de facture."
               : "Disponible quand les informations du vendeur sont complètes et valides."
           }
           checked={rememberSeller && canMemorizeSeller}
