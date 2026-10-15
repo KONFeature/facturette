@@ -1,0 +1,182 @@
+{
+  "number": "FAC-2026-1187",
+  "typeCode": "380",
+  "issueDate": "2026-10-12",
+  "dueDate": "2026-12-11",
+  "operationCategory": "services",
+  "currency": "EUR",
+  "seller": {
+    "name": "Axiome Transformation SAS",
+    "kind": "company",
+    "siren": "604819375",
+    "siret": "60481937500477",
+    "vatNumber": "FR96604819375",
+    "address": {
+      "line1": "55 rue de la Vilaine",
+      "line2": "Immeuble Le Colisée, 3e étage",
+      "postalCode": "35000",
+      "city": "Rennes",
+      "countryCode": "FR"
+    },
+    "email": "administration@axiome-transformation.example",
+    "phone": "02 61 91 40 11",
+    "legalForm": "SAS",
+    "shareCapital": "100 000 €",
+    "registration": "RCS Rennes 604 819 375"
+  },
+  "buyer": {
+    "name": "Groupe Hospitalier Val-de-Loire",
+    "kind": "company",
+    "siren": "291847366",
+    "siret": "29184736600205",
+    "vatNumber": "FR31291847366",
+    "address": {
+      "line1": "1 avenue du Docteur Roux",
+      "line2": "Direction des affaires financières",
+      "postalCode": "37000",
+      "city": "Tours",
+      "countryCode": "FR"
+    }
+  },
+  "orderReference": "BC-2026-3391",
+  "buyerReference": "DAF-SERVICE-07",
+  "lines": [
+    {
+      "name": "Cadrage du projet de dématérialisation",
+      "description": "Entretiens avec les responsables de service, recensement des flux documentaires existants et rédaction d'une note de cadrage validée par le comité de pilotage.",
+      "quantity": 2,
+      "unitCode": "DAY",
+      "unitPrice": 780,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Cartographie des processus d'achat",
+      "description": "Modélisation de la chaîne commande, réception, facture et paiement sur les trois sites, avec identification des points de ressaisie et des délais de validation.",
+      "quantity": 3.5,
+      "unitCode": "DAY",
+      "unitPrice": 780,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Paramétrage de la plateforme de facturation",
+      "description": "Création des circuits de validation, des modèles de documents et des profils utilisateurs, y compris la configuration des accès par établissement.",
+      "quantity": 21,
+      "unitCode": "HUR",
+      "unitPrice": 95,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Reprise des fournisseurs actifs",
+      "description": "Import et nettoyage de 412 fiches fournisseurs : doublons, SIRET manquants, coordonnées bancaires à vérifier auprès des comptables.",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": 1350,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Interface avec le logiciel comptable",
+      "description": "Développement et recette de l'export des écritures vers le logiciel comptable de l'établissement, avec journal de contrôle quotidien.",
+      "quantity": 4,
+      "unitCode": "DAY",
+      "unitPrice": 820,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Formation des gestionnaires (session 1)",
+      "description": "Deux demi-journées en présentiel pour douze gestionnaires : saisie, validation, relances, traitement des rejets et des avoirs.",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": 1200,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Formation des gestionnaires (session 2)",
+      "description": "Même programme que la session 1, pour les services techniques et la pharmacie, avec support de cours remis en version papier.",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": 1200,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Support de démarrage, semaine 1",
+      "description": "Assistance sur site et à distance pendant la première semaine de production, traitement prioritaire des anomalies bloquantes.",
+      "quantity": 16,
+      "unitCode": "HUR",
+      "unitPrice": 88,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Support de démarrage, semaine 2",
+      "description": "Assistance à distance, point quotidien de vingt minutes avec la direction financière et suivi des indicateurs de rejet.",
+      "quantity": 9,
+      "unitCode": "HUR",
+      "unitPrice": 88,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Documentation utilisateur",
+      "description": "Guide pas à pas illustré de captures d'écran, fiches réflexes pour les valideurs et foire aux questions mise à jour après la phase de démarrage.",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": 640,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Tests de montée en charge",
+      "description": "Simulation de 5 000 factures par mois, mesure des temps de traitement et rapport de recette signé par la maîtrise d'ouvrage.",
+      "quantity": 1.5,
+      "unitCode": "DAY",
+      "unitPrice": 820,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Licence annuelle de la plateforme",
+      "description": "Abonnement pour 40 utilisateurs nommés, hébergement en France, sauvegardes quotidiennes et mises à jour réglementaires comprises.",
+      "quantity": 12,
+      "unitCode": "MON",
+      "unitPrice": 210,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Conduite du changement",
+      "description": "Communication interne, lettres d'information aux fournisseurs et accompagnement des référents de chaque pôle jusqu'à la clôture du projet.",
+      "quantity": 2.5,
+      "unitCode": "DAY",
+      "unitPrice": 780,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Comité de pilotage de clôture",
+      "description": "Préparation et animation du comité final, bilan chiffré, recommandations pour la phase 2 et remise du dossier d'exploitation.",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": 450,
+      "vatCategory": "S",
+      "vatRate": 20
+    }
+  ],
+  "payment": {
+    "meansCode": "58",
+    "iban": "FR7613335002010009876543173",
+    "bic": "CEPAFRPP333",
+    "termsText": "Règlement à 60 jours date de facture"
+  },
+  "legalNotes": {
+    "latePaymentPenalty": "En cas de retard de paiement, une pénalité égale à 3 fois le taux d'intérêt légal sera appliquée.",
+    "recoveryFee": "Indemnité forfaitaire pour frais de recouvrement en cas de retard de paiement : 40 €.",
+    "earlyPaymentDiscount": "Pas d'escompte pour paiement anticipé."
+  }
+}

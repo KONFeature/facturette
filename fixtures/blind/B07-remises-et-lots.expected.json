@@ -1,0 +1,101 @@
+{
+  "number": "FAC-26-0198",
+  "typeCode": "380",
+  "issueDate": "2026-10-14",
+  "dueDate": "2026-11-30",
+  "operationCategory": "mixed",
+  "currency": "EUR",
+  "seller": {
+    "name": "Bâtiments Lemaire & Cie SAS",
+    "kind": "company",
+    "siren": "493817266",
+    "siret": "49381726600437",
+    "vatNumber": "FR07493817266",
+    "address": {
+      "line1": "63 avenue de la République",
+      "postalCode": "59800",
+      "city": "Lille",
+      "countryCode": "FR"
+    },
+    "email": "compta@lemaire-batiment.example",
+    "phone": "03 53 01 44 90",
+    "legalForm": "SAS",
+    "shareCapital": "250 000 €",
+    "registration": "RCS Lille Métropole 493 817 266"
+  },
+  "buyer": {
+    "name": "Syndicat des copropriétaires Résidence Les Tilleuls",
+    "kind": "company",
+    "siren": "819374521",
+    "siret": "81937452100170",
+    "vatNumber": "FR15819374521",
+    "address": {
+      "line1": "4 rue des Tilleuls",
+      "postalCode": "59000",
+      "city": "Lille",
+      "countryCode": "FR"
+    }
+  },
+  "orderReference": "Marché 2026-044",
+  "lines": [
+    {
+      "name": "Démolition de cloison",
+      "quantity": 18,
+      "unitCode": "MTK",
+      "unitPrice": 108,
+      "vatCategory": "S",
+      "vatRate": 10
+    },
+    {
+      "name": "Chape ciment ravoir",
+      "quantity": 42,
+      "unitCode": "MTK",
+      "unitPrice": 200,
+      "vatCategory": "S",
+      "vatRate": 10
+    },
+    {
+      "name": "Évacuation des gravats (benne)",
+      "quantity": 3,
+      "unitCode": "C62",
+      "unitPrice": 245,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Fenêtre PVC double vitrage 120x135",
+      "quantity": 6,
+      "unitCode": "C62",
+      "unitPrice": 380,
+      "vatCategory": "S",
+      "vatRate": 10
+    },
+    {
+      "name": "Volet roulant électrique",
+      "quantity": 6,
+      "unitCode": "C62",
+      "unitPrice": 288,
+      "vatCategory": "S",
+      "vatRate": 10
+    },
+    {
+      "name": "Joint de finition silicone",
+      "quantity": 12,
+      "unitCode": "MTR",
+      "unitPrice": 6.5,
+      "vatCategory": "S",
+      "vatRate": 20
+    }
+  ],
+  "payment": {
+    "meansCode": "58",
+    "iban": "FR7630003008900001122334411",
+    "bic": "SOGEFRPPXXX",
+    "termsText": "Règlement à 30 jours fin de mois"
+  },
+  "legalNotes": {
+    "latePaymentPenalty": "En cas de retard de paiement, une pénalité égale à 3 fois le taux d'intérêt légal sera appliquée.",
+    "recoveryFee": "Indemnité forfaitaire pour frais de recouvrement en cas de retard de paiement : 40 €.",
+    "earlyPaymentDiscount": "Pas d'escompte pour paiement anticipé."
+  }
+}

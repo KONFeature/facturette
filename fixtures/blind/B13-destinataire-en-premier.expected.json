@@ -1,0 +1,101 @@
+{
+  "number": "FV-26-005871",
+  "typeCode": "380",
+  "issueDate": "2026-10-08",
+  "dueDate": "2026-11-07",
+  "deliveryDate": "2026-10-07",
+  "operationCategory": "goods",
+  "currency": "EUR",
+  "seller": {
+    "name": "Maison Aubrac Distribution SAS",
+    "kind": "company",
+    "siren": "371928466",
+    "siret": "37192846600619",
+    "vatNumber": "FR36371928466",
+    "address": {
+      "line1": "ZI Les Ancizes, rue de l'Artisanat",
+      "postalCode": "63000",
+      "city": "Clermont-Ferrand",
+      "countryCode": "FR"
+    },
+    "email": "commandes@maison-aubrac.example",
+    "phone": "04 65 71 02 93",
+    "legalForm": "SAS",
+    "shareCapital": "200 000 €",
+    "registration": "RCS Clermont-Ferrand 371 928 466"
+  },
+  "buyer": {
+    "name": "Restaurant Le Cèdre Bleu SARL",
+    "kind": "company",
+    "siren": "812647394",
+    "siret": "81264739400285",
+    "vatNumber": "FR66812647394",
+    "address": {
+      "line1": "18 rue de Bonne",
+      "postalCode": "38000",
+      "city": "Grenoble",
+      "countryCode": "FR"
+    }
+  },
+  "deliveryAddress": {
+    "line1": "Cuisine centrale, quai 4",
+    "line2": "ZI des Iles Cordées",
+    "postalCode": "38330",
+    "city": "Saint-Ismier",
+    "countryCode": "FR"
+  },
+  "orderReference": "BC-2026-7781",
+  "lines": [
+    {
+      "name": "Entrecôte d'Aubrac maturée",
+      "quantity": 18.5,
+      "unitCode": "KGM",
+      "unitPrice": 34.8,
+      "vatCategory": "S",
+      "vatRate": 5.5
+    },
+    {
+      "name": "Fromage de Salers AOP (meule)",
+      "quantity": 4,
+      "unitCode": "C62",
+      "unitPrice": 62,
+      "vatCategory": "S",
+      "vatRate": 5.5
+    },
+    {
+      "name": "Huile de noix vierge",
+      "quantity": 24,
+      "unitCode": "LTR",
+      "unitPrice": 12.9,
+      "vatCategory": "S",
+      "vatRate": 5.5
+    },
+    {
+      "name": "Vin rouge Côtes d'Auvergne",
+      "quantity": 60,
+      "unitCode": "C62",
+      "unitPrice": 7.4,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Remise commerciale fidélité",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": -85,
+      "vatCategory": "S",
+      "vatRate": 5.5
+    }
+  ],
+  "payment": {
+    "meansCode": "58",
+    "iban": "FR7612579630000005566778801",
+    "bic": "CEPAFRPP125",
+    "termsText": "Paiement à 30 jours date de facture"
+  },
+  "legalNotes": {
+    "latePaymentPenalty": "En cas de retard de paiement, une pénalité égale à 3 fois le taux d'intérêt légal sera appliquée.",
+    "recoveryFee": "Indemnité forfaitaire pour frais de recouvrement en cas de retard de paiement : 40 €.",
+    "earlyPaymentDiscount": "Pas d'escompte pour paiement anticipé."
+  }
+}

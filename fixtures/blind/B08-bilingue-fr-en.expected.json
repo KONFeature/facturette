@@ -1,0 +1,77 @@
+{
+  "number": "2026-FR-0031",
+  "typeCode": "380",
+  "issueDate": "2026-10-07",
+  "dueDate": "2026-11-06",
+  "operationCategory": "services",
+  "currency": "EUR",
+  "seller": {
+    "name": "Alpine Logistics France SAS",
+    "kind": "company",
+    "siren": "562938175",
+    "siret": "56293817500295",
+    "vatNumber": "FR14562938175",
+    "address": {
+      "line1": "Zone Cargo Sud, bât. 4",
+      "postalCode": "73000",
+      "city": "Chambéry",
+      "countryCode": "FR"
+    },
+    "email": "billing@alpine-logistics.example",
+    "phone": "04 65 71 88 12",
+    "legalForm": "SAS",
+    "shareCapital": "75 000 €",
+    "registration": "RCS Chambéry 562 938 175"
+  },
+  "buyer": {
+    "name": "Savoie Équipements Industriels SA",
+    "kind": "company",
+    "siren": "637182940",
+    "siret": "63718294000113",
+    "vatNumber": "FR96637182940",
+    "address": {
+      "line1": "120 rue du Mont Blanc",
+      "postalCode": "74000",
+      "city": "Annecy",
+      "countryCode": "FR"
+    }
+  },
+  "orderReference": "PO-88412",
+  "lines": [
+    {
+      "name": "Transport de palettes Lyon - Milan",
+      "quantity": 6,
+      "unitCode": "C62",
+      "unitPrice": 410,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Dédouanement / Customs clearance",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": 180,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Assurance marchandises / Cargo insurance",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": 95.5,
+      "vatCategory": "S",
+      "vatRate": 20
+    }
+  ],
+  "payment": {
+    "meansCode": "58",
+    "iban": "FR7618206002010076543219672",
+    "bic": "AGRIFRPPXXX",
+    "termsText": "30 jours / 30 days net"
+  },
+  "legalNotes": {
+    "latePaymentPenalty": "Pénalités de retard : 3 fois le taux d'intérêt légal en vigueur.",
+    "recoveryFee": "Indemnité forfaitaire de recouvrement en cas de retard : 40 euros.",
+    "earlyPaymentDiscount": "Escompte pour règlement anticipé : néant."
+  }
+}

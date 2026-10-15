@@ -1,0 +1,76 @@
+{
+  "number": "2026-0412",
+  "typeCode": "380",
+  "issueDate": "2026-10-10",
+  "dueDate": "2026-11-09",
+  "operationCategory": "services",
+  "currency": "EUR",
+  "seller": {
+    "name": "Pixelforge Studio SARL",
+    "kind": "company",
+    "siren": "581739240",
+    "siret": "58173924000355",
+    "vatNumber": "FR37581739240",
+    "address": {
+      "line1": "17 rue de la Tannerie",
+      "postalCode": "29200",
+      "city": "Brest",
+      "countryCode": "FR"
+    },
+    "email": "hello@pixelforge.example",
+    "phone": "02 61 91 73 05",
+    "legalForm": "SARL",
+    "shareCapital": "7 500 €",
+    "registration": "RCS Brest 581 739 240"
+  },
+  "buyer": {
+    "name": "Ar Mor Vins & Spiritueux SARL",
+    "kind": "company",
+    "siren": "473819266",
+    "siret": "47381926600262",
+    "vatNumber": "FR22473819266",
+    "address": {
+      "line1": "5 quai Tourville",
+      "postalCode": "29200",
+      "city": "Brest",
+      "countryCode": "FR"
+    }
+  },
+  "lines": [
+    {
+      "name": "Création du site e-commerce (forfait)",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": 4800,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Hébergement et maintenance, 1re année",
+      "quantity": 12,
+      "unitCode": "MON",
+      "unitPrice": 15,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Acompte versé à la commande (30 %)",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": -1440,
+      "vatCategory": "S",
+      "vatRate": 20
+    }
+  ],
+  "payment": {
+    "meansCode": "58",
+    "iban": "FR7615589290000007654321716",
+    "bic": "CMBRFR2BXXX",
+    "termsText": "Paiement à 30 jours"
+  },
+  "legalNotes": {
+    "latePaymentPenalty": "En cas de retard de paiement, une pénalité égale à 3 fois le taux d'intérêt légal sera appliquée.",
+    "recoveryFee": "Indemnité forfaitaire pour frais de recouvrement en cas de retard de paiement : 40 €.",
+    "earlyPaymentDiscount": "Pas d'escompte pour paiement anticipé."
+  }
+}

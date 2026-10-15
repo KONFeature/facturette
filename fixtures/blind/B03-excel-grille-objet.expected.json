@@ -1,0 +1,90 @@
+{
+  "number": "2026-0301",
+  "typeCode": "380",
+  "issueDate": "2026-10-02",
+  "dueDate": "2026-10-17",
+  "deliveryDate": "2026-09-29",
+  "operationCategory": "mixed",
+  "currency": "EUR",
+  "seller": {
+    "name": "Cuisines Delmas SARL",
+    "kind": "company",
+    "siren": "451287304",
+    "siret": "45128730400278",
+    "vatNumber": "FR41451287304",
+    "address": {
+      "line1": "19 avenue Jean Jaurès",
+      "postalCode": "33000",
+      "city": "Bordeaux",
+      "countryCode": "FR"
+    },
+    "email": "devis@cuisines-delmas.example",
+    "phone": "05 36 49 77 31",
+    "legalForm": "SARL",
+    "shareCapital": "15 000 €",
+    "registration": "RCS Bordeaux 451 287 304"
+  },
+  "buyer": {
+    "name": "Mme Sophie Lambert",
+    "kind": "individual",
+    "address": {
+      "line1": "22 rue Nationale",
+      "postalCode": "33200",
+      "city": "Bordeaux",
+      "countryCode": "FR"
+    }
+  },
+  "lines": [
+    {
+      "name": "Caisson haut 60 cm",
+      "quantity": 6,
+      "unitCode": "C62",
+      "unitPrice": 142,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Plan de travail stratifié",
+      "quantity": 3.2,
+      "unitCode": "MTR",
+      "unitPrice": 118,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Hotte aspirante inox",
+      "quantity": 1,
+      "unitCode": "C62",
+      "unitPrice": 389,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Dépose de l'ancienne cuisine",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": 450,
+      "vatCategory": "S",
+      "vatRate": 10
+    },
+    {
+      "name": "Pose et raccordements",
+      "quantity": 14,
+      "unitCode": "HUR",
+      "unitPrice": 48,
+      "vatCategory": "S",
+      "vatRate": 10
+    }
+  ],
+  "payment": {
+    "meansCode": "20",
+    "termsText": "Règlement à 15 jours par chèque ou virement",
+    "iban": "FR7630002005500007654321055",
+    "bic": "CRLYFRPPXXX"
+  },
+  "legalNotes": {
+    "latePaymentPenalty": "Pénalités de retard : 3 fois le taux d'intérêt légal en vigueur.",
+    "recoveryFee": "Indemnité forfaitaire de recouvrement en cas de retard : 40 euros.",
+    "earlyPaymentDiscount": "Escompte pour règlement anticipé : néant."
+  }
+}

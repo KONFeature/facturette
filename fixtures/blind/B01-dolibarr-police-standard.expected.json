@@ -1,0 +1,85 @@
+{
+  "number": "FA2610-0042",
+  "typeCode": "380",
+  "issueDate": "2026-10-12",
+  "dueDate": "2026-11-11",
+  "operationCategory": "mixed",
+  "currency": "EUR",
+  "seller": {
+    "name": "Sonorys Audiovisuel SAS",
+    "kind": "company",
+    "siren": "418273645",
+    "siret": "41827364500022",
+    "vatNumber": "FR41418273645",
+    "address": {
+      "line1": "12 allée des Sonneurs",
+      "postalCode": "31000",
+      "city": "Toulouse",
+      "countryCode": "FR"
+    },
+    "email": "contact@sonorys.example",
+    "phone": "05 36 49 20 18",
+    "legalForm": "SAS",
+    "shareCapital": "50 000 €",
+    "registration": "RCS Toulouse 418 273 645"
+  },
+  "buyer": {
+    "name": "Boulangerie Maison Pellerin SARL",
+    "kind": "company",
+    "siren": "509182739",
+    "siret": "50918273900011",
+    "vatNumber": "FR86509182739",
+    "address": {
+      "line1": "3 place du Capitole",
+      "postalCode": "31000",
+      "city": "Toulouse",
+      "countryCode": "FR"
+    }
+  },
+  "orderReference": "CMD-2610-17",
+  "lines": [
+    {
+      "name": "Enceinte amplifiée 8 pouces (modèle EA-8)",
+      "quantity": 4,
+      "unitCode": "C62",
+      "unitPrice": 189.9,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Câble XLR 5 m",
+      "quantity": 8,
+      "unitCode": "C62",
+      "unitPrice": 12.5,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Installation et réglage sur site",
+      "quantity": 3.5,
+      "unitCode": "HUR",
+      "unitPrice": 65,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Guide d'utilisation imprimé",
+      "quantity": 2,
+      "unitCode": "C62",
+      "unitPrice": 24.5,
+      "vatCategory": "S",
+      "vatRate": 5.5
+    }
+  ],
+  "payment": {
+    "meansCode": "58",
+    "iban": "FR7630004008010001234567858",
+    "bic": "SONOFRPPXXX",
+    "termsText": "30 jours date de facture"
+  },
+  "legalNotes": {
+    "latePaymentPenalty": "En cas de retard de paiement, une pénalité égale à 3 fois le taux d'intérêt légal sera appliquée.",
+    "recoveryFee": "Indemnité forfaitaire pour frais de recouvrement en cas de retard de paiement : 40 €.",
+    "earlyPaymentDiscount": "Pas d'escompte pour paiement anticipé."
+  }
+}

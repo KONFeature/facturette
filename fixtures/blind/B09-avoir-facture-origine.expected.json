@@ -1,0 +1,70 @@
+{
+  "number": "AV-2026-0007",
+  "typeCode": "381",
+  "issueDate": "2026-10-13",
+  "operationCategory": "goods",
+  "currency": "EUR",
+  "seller": {
+    "name": "Studio Parallèle SAS",
+    "kind": "company",
+    "siren": "729183459",
+    "siret": "72918345900522",
+    "vatNumber": "FR84729183459",
+    "address": {
+      "line1": "31 rue des Frères Lumière",
+      "postalCode": "67000",
+      "city": "Strasbourg",
+      "countryCode": "FR"
+    },
+    "email": "gestion@studio-parallele.example",
+    "phone": "03 53 01 27 66",
+    "legalForm": "SAS",
+    "shareCapital": "30 000 €",
+    "registration": "RCS Strasbourg 729 183 459"
+  },
+  "buyer": {
+    "name": "Imprimerie Haag & Wolff SARL",
+    "kind": "company",
+    "siren": "409271368",
+    "siret": "40927136800147",
+    "vatNumber": "FR47409271368",
+    "address": {
+      "line1": "9 rue du Maire Kuss",
+      "postalCode": "67200",
+      "city": "Strasbourg",
+      "countryCode": "FR"
+    }
+  },
+  "precedingInvoice": {
+    "number": "F-2026-0231",
+    "issueDate": "2026-09-02"
+  },
+  "lines": [
+    {
+      "name": "Retour marchandise : support d'écran articulé",
+      "quantity": 25,
+      "unitCode": "C62",
+      "unitPrice": 45,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Frais de transport refacturés",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": 38.9,
+      "vatCategory": "S",
+      "vatRate": 20
+    }
+  ],
+  "payment": {
+    "meansCode": "58",
+    "iban": "FR7630087330800019876543243",
+    "bic": "CMCIFRPPXXX",
+    "termsText": "Avoir à déduire de votre prochain règlement"
+  },
+  "legalNotes": {
+    "recoveryFee": "Indemnité forfaitaire de recouvrement en cas de retard : 40 euros."
+  },
+  "notes": "Avoir sur facture F-2026-0231 du 02/09/2026"
+}

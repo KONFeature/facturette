@@ -1,0 +1,74 @@
+{
+  "number": "FA-2026-023",
+  "typeCode": "380",
+  "issueDate": "2026-10-15",
+  "dueDate": "2026-10-30",
+  "deliveryDate": "2026-10-09",
+  "operationCategory": "services",
+  "currency": "EUR",
+  "seller": {
+    "name": "Camille Fournier",
+    "kind": "company",
+    "siren": "830174520",
+    "siret": "83017452000197",
+    "address": {
+      "line1": "6 rue Sainte-Catherine",
+      "postalCode": "33000",
+      "city": "Bordeaux",
+      "countryCode": "FR"
+    },
+    "legalForm": "Micro-entrepreneur",
+    "email": "camille@fournier-dev.example",
+    "phone": "06 39 98 12 40"
+  },
+  "buyer": {
+    "name": "Association Les Jardins d'Elsa",
+    "kind": "company",
+    "siren": "791204688",
+    "siret": "79120468800133",
+    "address": {
+      "line1": "33 cours de l'Yser",
+      "postalCode": "33800",
+      "city": "Bordeaux",
+      "countryCode": "FR"
+    }
+  },
+  "lines": [
+    {
+      "name": "Développement application web, sprint 1",
+      "quantity": 12,
+      "unitCode": "DAY",
+      "unitPrice": 450,
+      "vatCategory": "E",
+      "vatRate": 0
+    },
+    {
+      "name": "Support et maintenance",
+      "quantity": 6.5,
+      "unitCode": "HUR",
+      "unitPrice": 60,
+      "vatCategory": "E",
+      "vatRate": 0
+    },
+    {
+      "name": "Hébergement et nom de domaine (annuel)",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": 120,
+      "vatCategory": "E",
+      "vatRate": 0
+    }
+  ],
+  "vatExemptionReason": "TVA non applicable, art. 293 B du CGI",
+  "payment": {
+    "meansCode": "58",
+    "iban": "FR7630066100410001111111132",
+    "bic": "CMCIFRPPXXX",
+    "termsText": "Paiement à réception de facture, par virement"
+  },
+  "legalNotes": {
+    "latePaymentPenalty": "Pénalités de retard : 3 fois le taux d'intérêt légal en vigueur.",
+    "recoveryFee": "Indemnité forfaitaire de recouvrement en cas de retard : 40 euros.",
+    "earlyPaymentDiscount": "Escompte pour règlement anticipé : néant."
+  }
+}

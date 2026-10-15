@@ -1,0 +1,69 @@
+{
+  "number": "BRU-2026-10-0412",
+  "typeCode": "380",
+  "issueDate": "2026-10-01",
+  "dueDate": "2026-10-31",
+  "operationCategory": "services",
+  "currency": "EUR",
+  "seller": {
+    "name": "Brumeo Software SAS",
+    "kind": "company",
+    "siren": "841290570",
+    "siret": "84129057000362",
+    "vatNumber": "FR10841290570",
+    "address": {
+      "line1": "8 rue du Faubourg Saint-Honoré",
+      "postalCode": "75008",
+      "city": "Paris",
+      "countryCode": "FR"
+    },
+    "email": "facturation@brumeo.example",
+    "phone": "01 99 00 63 20",
+    "legalForm": "SAS",
+    "shareCapital": "120 000 €",
+    "registration": "RCS Paris 841 290 570"
+  },
+  "buyer": {
+    "name": "Kestrel Mobilité SAS",
+    "kind": "company",
+    "siren": "918273400",
+    "siret": "91827340000195",
+    "vatNumber": "FR36918273400",
+    "address": {
+      "line1": "14 rue Racine",
+      "postalCode": "69002",
+      "city": "Lyon",
+      "countryCode": "FR"
+    }
+  },
+  "lines": [
+    {
+      "name": "Abonnement Équipe, 12 utilisateurs (octobre 2026)",
+      "quantity": 12,
+      "unitCode": "MON",
+      "unitPrice": 79,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Support prioritaire",
+      "quantity": 1,
+      "unitCode": "MON",
+      "unitPrice": 120,
+      "vatCategory": "S",
+      "vatRate": 20
+    }
+  ],
+  "payment": {
+    "meansCode": "58",
+    "iban": "FR7617806002000012345679133",
+    "bic": "BRUMFRPPXXX",
+    "reference": "BRU-2026-10-0412",
+    "termsText": "Paiement à 30 jours par virement"
+  },
+  "legalNotes": {
+    "latePaymentPenalty": "Pénalités de retard : 3 fois le taux d'intérêt légal en vigueur.",
+    "recoveryFee": "Indemnité forfaitaire de recouvrement en cas de retard : 40 euros.",
+    "earlyPaymentDiscount": "Escompte pour règlement anticipé : néant."
+  }
+}

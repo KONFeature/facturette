@@ -1,0 +1,76 @@
+{
+  "number": "2026/0415",
+  "typeCode": "380",
+  "issueDate": "2026-10-09",
+  "dueDate": "2026-11-08",
+  "operationCategory": "goods",
+  "currency": "EUR",
+  "seller": {
+    "name": "Menuiserie Vincent-Roche SARL",
+    "kind": "company",
+    "siren": "337812457",
+    "siret": "33781245700584",
+    "vatNumber": "FR07337812457",
+    "address": {
+      "line1": "8 rue des Tanneurs",
+      "postalCode": "69007",
+      "city": "Lyon",
+      "countryCode": "FR"
+    },
+    "email": "contact@vincent-roche.example",
+    "phone": "04 65 71 20 31",
+    "legalForm": "SARL",
+    "shareCapital": "10 000 €",
+    "registration": "RCS Lyon 337 812 457"
+  },
+  "buyer": {
+    "name": "Hôtel Les Glycines SAS",
+    "kind": "company",
+    "siren": "785231465",
+    "siret": "78523146500226",
+    "vatNumber": "FR34785231465",
+    "address": {
+      "line1": "2 chemin de la Combe",
+      "postalCode": "69160",
+      "city": "Tassin-la-Demi-Lune",
+      "countryCode": "FR"
+    }
+  },
+  "lines": [
+    {
+      "name": "Porte intérieure chêne, 83 cm",
+      "quantity": 12,
+      "unitCode": "C62",
+      "unitPrice": 214,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Poignée inox satinée",
+      "quantity": 12,
+      "unitCode": "C62",
+      "unitPrice": 18.5,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Pose des blocs-portes",
+      "quantity": 16,
+      "unitCode": "HUR",
+      "unitPrice": 52,
+      "vatCategory": "S",
+      "vatRate": 10
+    }
+  ],
+  "payment": {
+    "meansCode": "58",
+    "iban": "FR7642559000010004123456795",
+    "bic": "CCOPFRPPXXX",
+    "termsText": "Paiement à 30 jours"
+  },
+  "legalNotes": {
+    "latePaymentPenalty": "Pénalités de retard : 3 fois le taux d'intérêt légal en vigueur.",
+    "recoveryFee": "Indemnité forfaitaire de recouvrement en cas de retard : 40 euros.",
+    "earlyPaymentDiscount": "Escompte pour règlement anticipé : néant."
+  }
+}

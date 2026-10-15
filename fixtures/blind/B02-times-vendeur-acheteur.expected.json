@@ -1,0 +1,85 @@
+{
+  "number": "2026-118",
+  "typeCode": "380",
+  "issueDate": "2026-10-05",
+  "dueDate": "2026-11-15",
+  "operationCategory": "mixed",
+  "currency": "EUR",
+  "seller": {
+    "name": "Garage Rivière & Fils SARL",
+    "kind": "company",
+    "siren": "384729158",
+    "siret": "38472915800186",
+    "vatNumber": "FR06384729158",
+    "address": {
+      "line1": "41 route de Vannes",
+      "postalCode": "35700",
+      "city": "Rennes",
+      "countryCode": "FR"
+    },
+    "email": "atelier@riviere-fils.example",
+    "phone": "02 61 91 55 02",
+    "legalForm": "SARL",
+    "shareCapital": "8 000 €",
+    "registration": "RCS Rennes 384 729 158"
+  },
+  "buyer": {
+    "name": "Transports Kervella SAS",
+    "kind": "company",
+    "siren": "629173543",
+    "siret": "62917354300345",
+    "vatNumber": "FR66629173543",
+    "address": {
+      "line1": "ZA de Kerpont",
+      "postalCode": "56100",
+      "city": "Lorient",
+      "countryCode": "FR"
+    }
+  },
+  "lines": [
+    {
+      "name": "Vidange moteur 5W30 (filtre à huile inclus)",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": 189,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Plaquettes de frein avant (jeu)",
+      "quantity": 2,
+      "unitCode": "C62",
+      "unitPrice": 74.9,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Main d'oeuvre mécanique",
+      "quantity": 11.5,
+      "unitCode": "HUR",
+      "unitPrice": 62,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Remplacement de la courroie d'accessoires",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": 245.5,
+      "vatCategory": "S",
+      "vatRate": 20
+    }
+  ],
+  "prepaidAmount": 100,
+  "payment": {
+    "meansCode": "58",
+    "iban": "FR7620041010050098765432151",
+    "bic": "GARIFR2RXXX",
+    "termsText": "À régler avant le 15/11/2026"
+  },
+  "legalNotes": {
+    "latePaymentPenalty": "Pénalités de retard : 3 fois le taux d'intérêt légal en vigueur.",
+    "recoveryFee": "Indemnité forfaitaire de recouvrement en cas de retard : 40 euros.",
+    "earlyPaymentDiscount": "Escompte pour règlement anticipé : néant."
+  }
+}
