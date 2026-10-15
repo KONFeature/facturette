@@ -442,22 +442,14 @@ export const scenarios: Scenario[] = [
     profiles: ["EN16931", "BASIC"],
   },
   {
-    name: "credit-note-zero-and-negative-lines",
+    name: "credit-note-zero-quantity-line",
     invoice: make({
       number: "AV-2026-0002",
       typeCode: "381",
       lines: [
         {
-          name: "Prestation facturée",
+          name: "Prestation annulée",
           quantity: 5,
-          unitCode: "HUR",
-          unitPrice: 80,
-          vatCategory: "S",
-          vatRate: 20,
-        },
-        {
-          name: "Heures annulées",
-          quantity: -2,
           unitCode: "HUR",
           unitPrice: 80,
           vatCategory: "S",
@@ -468,6 +460,39 @@ export const scenarios: Scenario[] = [
           quantity: 0,
           unitCode: "C62",
           unitPrice: 10,
+          vatCategory: "S",
+          vatRate: 20,
+        },
+      ],
+    }),
+    profiles: ["EN16931", "BASIC"],
+  },
+  {
+    name: "discount-negative-unit-price",
+    invoice: make({
+      number: "FA-2026-0021",
+      lines: [
+        {
+          name: "Prestation de conseil",
+          quantity: 4,
+          unitCode: "HUR",
+          unitPrice: 90,
+          vatCategory: "S",
+          vatRate: 20,
+        },
+        {
+          name: "Remise commerciale",
+          quantity: 1,
+          unitCode: "C62",
+          unitPrice: -36,
+          vatCategory: "S",
+          vatRate: 20,
+        },
+        {
+          name: "Remise à 3 décimales",
+          quantity: 3,
+          unitCode: "C62",
+          unitPrice: -1.125,
           vatCategory: "S",
           vatRate: 20,
         },

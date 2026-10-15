@@ -277,6 +277,11 @@ function lineNodes(invoice: Invoice, totals: InvoiceTotals, profile: FacturXProf
     const category = line.vatCategory
     const rate = category === "S" ? line.vatRate : 0
     const net = totals.lineNets[index] ?? 0
+    // BR-27: the net price may not be negative. Move the sign into the quantity so that
+    // quantity x price still equals the signed line net (e.g. a "Remise commerciale" line).
+    const negativePrice = line.unitPrice < 0
+    const price = negativePrice ? -line.unitPrice : line.unitPrice
+    const quantity = negativePrice ? -line.quantity : line.quantity
     return node("ram:IncludedSupplyChainTradeLineItem", [
       node("ram:AssociatedDocumentLineDocument", [leaf("ram:LineID", String(index + 1))]),
       node("ram:SpecifiedTradeProduct", [
@@ -286,10 +291,10 @@ function lineNodes(invoice: Invoice, totals: InvoiceTotals, profile: FacturXProf
           : undefined,
       ]),
       node("ram:SpecifiedLineTradeAgreement", [
-        node("ram:NetPriceProductTradePrice", [leaf("ram:ChargeAmount", precise(line.unitPrice))]),
+        node("ram:NetPriceProductTradePrice", [leaf("ram:ChargeAmount", precise(price))]),
       ]),
       node("ram:SpecifiedLineTradeDelivery", [
-        leaf("ram:BilledQuantity", precise(line.quantity), { unitCode: line.unitCode }),
+        leaf("ram:BilledQuantity", precise(quantity), { unitCode: line.unitCode }),
       ]),
       node("ram:SpecifiedLineTradeSettlement", [
         taxNode(category, rate, {}),

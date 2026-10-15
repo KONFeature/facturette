@@ -207,17 +207,28 @@ describe("lines and amounts", () => {
     expect(price(std[0])).toBe("500.00")
   })
 
-  it("keeps negative and zero quantities of a credit note", () => {
+  it("credit note keeps positive quantities and prices, zero quantity allowed", () => {
     const lines = arr(
-      txn(build("credit-note-zero-and-negative-lines"))["ram:IncludedSupplyChainTradeLineItem"],
+      txn(build("credit-note-zero-quantity-line"))["ram:IncludedSupplyChainTradeLineItem"],
     )
+    const qty = (l: Tree) => l["ram:SpecifiedLineTradeDelivery"]["ram:BilledQuantity"]["#text"]
+    expect(lines.map(qty)).toEqual(["5.00", "0.00"])
+  })
+
+  it("negative unit price: absolute price, negated quantity, signed line net", () => {
+    const t = build("discount-negative-unit-price")
+    const lines = arr(txn(t)["ram:IncludedSupplyChainTradeLineItem"])
+    const price = (l: Tree) =>
+      l["ram:SpecifiedLineTradeAgreement"]["ram:NetPriceProductTradePrice"]["ram:ChargeAmount"]
     const qty = (l: Tree) => l["ram:SpecifiedLineTradeDelivery"]["ram:BilledQuantity"]["#text"]
     const net = (l: Tree) =>
       l["ram:SpecifiedLineTradeSettlement"]["ram:SpecifiedTradeSettlementLineMonetarySummation"][
         "ram:LineTotalAmount"
       ]
-    expect(lines.map(qty)).toEqual(["5.00", "-2.00", "0.00"])
-    expect(lines.map(net)).toEqual(["400.00", "-160.00", "0.00"])
+    expect(lines.map(price)).toEqual(["90.00", "36.00", "1.125"])
+    expect(lines.map(qty)).toEqual(["4.00", "-1.00", "-3.00"])
+    expect(lines.map(net)).toEqual(["360.00", "-36.00", "-3.38"])
+    expect(JSON.stringify(t)).not.toMatch(/ChargeAmount":"-/)
   })
 
   it("writes the prepaid amount and the amount due", () => {
