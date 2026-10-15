@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Typecheck, lint, unit tests, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.3
+      - run: bun install --frozen-lockfile
+      - run: bun run verify
+      - run: bun run build
+
+  # The Factur-X XML and the PDF/A-3 output are validated by Mustang (XSD + Schematron + veraPDF).
+  # "Looks right" is not good enough for a compliance tool, so this runs on every push.
+  conformance:
+    name: Factur-X conformance (Mustang)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.3
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: actions/cache@v4
+        with:
+          path: .tools/mustang.jar
+          key: mustang-2.26.0
+      - run: bun install --frozen-lockfile
+      - run: MUSTANG=1 bunx vitest run src/lib/facturx scripts/validate-facturx.test.ts
