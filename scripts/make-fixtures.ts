@@ -118,7 +118,9 @@ Fichiers (générés par \`bun scripts/make-fixtures.ts\`, ne pas éditer à la 
   listés : ils ne sont pas imprimés tels quels.
 
 Convention des avoirs : \`expected.json\` contient des montants positifs et \`typeCode: "381"\` ;
-le PDF imprime les montants en négatif.
+le PDF imprime les montants en négatif (tag \`signed-amounts-printed\`). EN 16931 BR-27 interdit un
+prix unitaire négatif : l'extraction doit normaliser le signe (valeurs absolues + type 381) quand
+elle détecte un avoir. Aucun \`expected.json\` ne contient de quantité ou de prix négatif.
 
 ${rows}`
 }

@@ -488,7 +488,13 @@ export const FIXTURES: FixtureDef[] = [
     title: "Avoir avec renvoi à la facture d'origine",
     description:
       "Avoir (type 381) : montants imprimés en négatif, mention « Avoir sur facture F-2026-0412 du 12/09/2026 ». Convention retenue pour la vérité terrain : quantités et prix positifs dans expected.json, le type 381 porte le signe (convention EN 16931).",
-    tags: ["credit-note", "negative-amounts", "reference-original-invoice", "vat-20"],
+    tags: [
+      "credit-note",
+      "signed-amounts-printed",
+      "negative-amounts",
+      "reference-original-invoice",
+      "vat-20",
+    ],
     invoice: {
       number: "AV-2026-0031",
       typeCode: "381",

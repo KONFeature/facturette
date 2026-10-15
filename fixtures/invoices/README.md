@@ -16,7 +16,9 @@ Fichiers (générés par `bun scripts/make-fixtures.ts`, ne pas éditer à la ma
   listés : ils ne sont pas imprimés tels quels.
 
 Convention des avoirs : `expected.json` contient des montants positifs et `typeCode: "381"` ;
-le PDF imprime les montants en négatif.
+le PDF imprime les montants en négatif (tag `signed-amounts-printed`). EN 16931 BR-27 interdit un
+prix unitaire négatif : l'extraction doit normaliser le signe (valeurs absolues + type 381) quand
+elle détecte un avoir. Aucun `expected.json` ne contient de quantité ou de prix négatif.
 
 ### 01-freelance-franchise-tva.pdf
 
@@ -54,7 +56,7 @@ le PDF imprime les montants en négatif.
 
 **Avoir avec renvoi à la facture d'origine**. Avoir (type 381) : montants imprimés en négatif, mention « Avoir sur facture F-2026-0412 du 12/09/2026 ». Convention retenue pour la vérité terrain : quantités et prix positifs dans expected.json, le type 381 porte le signe (convention EN 16931).
 
-- Tags : credit-note, negative-amounts, reference-original-invoice, vat-20
+- Tags : credit-note, signed-amounts-printed, negative-amounts, reference-original-invoice, vat-20
 - Pages : 1
 - Champs imprimés : 32 / 33 (non imprimés : deliveryDate)
 

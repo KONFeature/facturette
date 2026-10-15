@@ -420,7 +420,13 @@
       "legalNotes.earlyPaymentDiscount",
       "notes"
     ],
-    "tags": ["credit-note", "negative-amounts", "reference-original-invoice", "vat-20"],
+    "tags": [
+      "credit-note",
+      "signed-amounts-printed",
+      "negative-amounts",
+      "reference-original-invoice",
+      "vat-20"
+    ],
     "formats": {
       "date": "dmy",
       "number": {

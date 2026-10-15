@@ -59,6 +59,7 @@ describe("fixture corpus", () => {
       "vat-summary-table",
       "multi-page",
       "credit-note",
+      "signed-amounts-printed",
       "individual-customer",
       "alt-wording",
       "date-iso",
@@ -122,6 +123,13 @@ describe("fixture corpus", () => {
           }
         }
         if (invoice.payment.iban) expect(isIbanValid(invoice.payment.iban)).toBe(true)
+      })
+
+      it("has no negative quantity or unit price (BR-27)", () => {
+        for (const l of invoice.lines) {
+          expect(l.quantity).toBeGreaterThanOrEqual(0)
+          expect(l.unitPrice).toBeGreaterThanOrEqual(0)
+        }
       })
 
       it("totals are consistent", () => {
