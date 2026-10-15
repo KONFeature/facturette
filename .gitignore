@@ -1,0 +1,23 @@
+# deps
+node_modules/
+
+# build
+dist/
+*.tsbuildinfo
+
+# tanstack router cache (routeTree.gen.ts is committed on purpose)
+.tanstack/
+
+# env
+.env
+.env.*
+!.env.example
+
+# editor / os
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# logs
+*.log
