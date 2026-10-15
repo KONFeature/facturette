@@ -89,6 +89,8 @@ interface ParsedLine {
   vatRate?: number
   total?: number
   hasDiscount: boolean
+  /** The unit price column is labelled TTC: gross prices, not the net price the invoice needs. */
+  grossPrice: boolean
   cells: Record<string, Cell[]>
   rowCells: Cell[]
 }
@@ -100,13 +102,18 @@ function classifyHeader(text: string): ColumnKind | undefined {
 }
 
 /** Header items merged into labels: words closer than half a font size belong together. */
+/** True for the header row of a line-item table ("Désignation | Qté | PU HT | Montant"). */
+export function isItemTableHeader(row: Row): boolean {
+  return headerColumns(row) !== undefined
+}
+
 function headerColumns(row: Row): Column[] | undefined {
   const items = row.cells.flatMap((c) => c.items).sort((a, b) => a.x - b.x)
   const groups: PdfTextItem[][] = []
   for (const item of items) {
     const g = groups[groups.length - 1]
     const prev = g?.[g.length - 1]
-    if (g && prev && item.x - (prev.x + prev.width) < 0.6 * Math.min(prev.fontSize, item.fontSize))
+    if (g && prev && item.x - (prev.x + prev.width) < 1.2 * Math.min(prev.fontSize, item.fontSize))
       g.push(item)
     else groups.push([item])
   }
@@ -238,6 +245,7 @@ function parseRow(
       : undefined,
     total,
     hasDiscount: values.has("discount"),
+    grossPrice: false,
     cells,
     rowCells: row.cells,
   }
@@ -245,6 +253,7 @@ function parseRow(
 
 function findTable(layout: Layout, style: DecimalStyle): ParsedLine[] {
   const lines: ParsedLine[] = []
+  let grossPrice = false
   let cols: Column[] | undefined
   let qtyUnitHint: string | undefined
   let open = false
@@ -255,6 +264,7 @@ function findTable(layout: Layout, style: DecimalStyle): ParsedLine[] {
     const header = headerColumns(row)
     if (header) {
       cols = header
+      grossPrice = /\bttc\b/.test(fold(header.find((c) => c.kind === "unitPrice")?.label ?? ""))
       const qtyLabel = fold(header.find((c) => c.kind === "qty")?.label ?? "")
       qtyUnitHint = /heure|hour/.test(qtyLabel)
         ? "HUR"
@@ -298,6 +308,7 @@ function findTable(layout: Layout, style: DecimalStyle): ParsedLine[] {
       }
       continue
     }
+    parsed.grossPrice = grossPrice
     lines.push(parsed)
     last = { line: parsed, row }
   }
@@ -378,6 +389,9 @@ export function extractLines(
   context: { isCreditNote: boolean; exemptCategory?: string; exemptReason?: string },
 ): void {
   const parsed = findTable(layout, style)
+  if (parsed.some((p) => p.grossPrice)) {
+    collector.warn("Les prix du tableau semblent TTC : vérifiez les prix unitaires hors taxes.")
+  }
   const printed = readPrintedTotals(layout, style)
   const sign = (n: number | undefined) =>
     n === undefined ? undefined : context.isCreditNote ? Math.abs(n) : n
@@ -424,9 +438,9 @@ export function extractLines(
     }
     let implicit = false
     if (quantity === undefined && unitPrice === undefined && total !== undefined && !p.cells.qty) {
-      // Amount-only table: one unit at the line amount.
-      quantity = 1
-      unitPrice = total
+      // Amount-only table: one unit at the line amount (a negative amount is a negative quantity).
+      quantity = total < 0 ? -1 : 1
+      unitPrice = Math.abs(total)
       implicit = true
     }
     if (
@@ -479,11 +493,12 @@ export function extractLines(
       l.unitPrice !== undefined &&
       Math.abs(lineNet({ quantity: l.quantity, unitPrice: l.unitPrice }) - l.total) < 0.005
     // Structure (header columns) gives 0.75; arithmetic on the line and on the whole table confirms.
-    let base = 0.75
+    let base = p.grossPrice ? 0.5 : 0.75
     if (lineOk) base += 0.1
     if (htMatches) base += 0.08
     if (!lineOk && l.total !== undefined && !p.hasDiscount) base -= 0.15
     if (printedHt !== undefined && !htMatches) base = Math.min(base, 0.62)
+    if (p.grossPrice) base = Math.min(base, 0.5)
     if (l.implicit) base -= 0.12
     const at = (k: string) => [...(p.cells[k] ?? [])]
     const path = `lines.${i}`

@@ -11,6 +11,7 @@ import {
   normalizeVatNumber,
 } from "../validation/identifiers"
 import type { Collector } from "./collect"
+import { wrappedPairs } from "./labels"
 import { blockOfCell, type Cell, cellToTheRight, type Layout, partsOf } from "./layout"
 import { compact, fold, normalizeSpaces } from "./text"
 import type { ExtractionOptions } from "./types"
@@ -149,7 +150,12 @@ function labelledBlock(layout: Layout, labelCell: Cell, labelLength: number): Pa
 function findLabelledBlocks(layout: Layout): PartyBlock[] {
   const blocks: PartyBlock[] = []
   const buyerLabels: Array<{ cell: Cell; folded: string; length: number }> = []
+  // Fragments of wrapped labels ("Référence / client") are not party labels.
+  const wrapped = new Set(
+    wrappedPairs(layout).flatMap((p) => p.labelCells.slice(1).map((c) => c.id)),
+  )
   for (const cell of layout.cells) {
+    if (wrapped.has(cell.id) || !/^[^\p{L}]*\p{Lu}/u.test(cell.text)) continue
     for (const [re, role] of [
       [BUYER_LABEL_RE, "buyer"],
       [DELIVERY_LABEL_RE, "delivery"],
@@ -243,11 +249,12 @@ function footerLines(layout: Layout, used: Set<number>): PartyLine[] {
   return out
 }
 
+/** Returns the ids of the cells read as the buyer's block (its IBAN is not the payee's). */
 export function extractParties(
   layout: Layout,
   collector: Collector,
   options?: ExtractionOptions,
-): void {
+): Set<number> {
   const hints = options?.hints
   const labelled = findLabelledBlocks(layout)
   const used = new Set<number>()
@@ -338,6 +345,12 @@ export function extractParties(
     else parseParty(party, party.role, collector)
   }
   checkSirenConsistency(collector)
+  // The whole layout block, including rows after a stop line (e.g. the buyer's own bank details).
+  return new Set(
+    parties
+      .filter((p) => p.role === "buyer")
+      .flatMap((p) => p.lines.flatMap((l) => blockOfCell(layout, l.cell).map((c) => c.id))),
+  )
 }
 
 function parseParty(party: PartyBlock, prefix: "seller" | "buyer", collector: Collector): void {

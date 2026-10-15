@@ -41,14 +41,14 @@ function run(doc: PdfTextDocument, options?: ExtractionOptions): ExtractionResul
   const style = detectDecimalStyle(doc.text)
 
   const { isCreditNote } = extractHeader(layout, collector)
-  extractParties(layout, collector, options)
+  const buyerCells = extractParties(layout, collector, options)
   const exemption = extractVatExemption(layout, collector)
   extractLines(layout, collector, style, {
     isCreditNote,
     exemptCategory: exemption?.category,
     exemptReason: exemption?.reason,
   })
-  extractPayment(layout, collector, isCreditNote)
+  extractPayment(layout, collector, isCreditNote, buyerCells)
 
   resolveConflicts(collector)
   const suggestions = [...collector.suggestions].sort(

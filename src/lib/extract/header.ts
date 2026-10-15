@@ -5,6 +5,7 @@
 import type { Collector } from "./collect"
 import { findLabeled, readFreeText, readReference, type ValueReader } from "./labels"
 import type { Layout } from "./layout"
+import { isItemTableHeader } from "./table"
 import { findDates, parseDate } from "./text"
 
 const readDate: ValueReader<string> = (s) => {
@@ -66,13 +67,13 @@ const ISSUE_DATE_LABELS: LabelRule[] = [
     rule: "issue-date-label",
   },
   { re: /^(emise?|etablie?|editee?)\s+le\b/, confidence: 0.85, rule: "issue-date-label" },
-  { re: /^date\b(?!\s*(d'|de |du |des |limite|d’))/, confidence: 0.8, rule: "issue-date-plain" },
+  { re: /^date\b(?!\s*(d'|de\b|du\b|des\b|limite|d’))/, confidence: 0.8, rule: "issue-date-plain" },
   { re: /^([a-z' -]{2,30},\s*)?le\b/, confidence: 0.66, rule: "issue-date-letter" },
 ]
 
 const DUE_DATE_LABELS: LabelRule[] = [
   {
-    re: /^(date\s*(d'|de |d )?\s*echeance|echeance|date limite de (paiement|reglement)|a (regler|payer) (avant|au plus tard|le|pour)( le)?|payable (le|avant le|au plus tard le|au)|date de (paiement|reglement)|paiement (avant|au plus tard)( le)?|due date|payment due|date d'exigibilite)\b/,
+    re: /^(date\s*(d'|de |d )?\s*echeance|echeance|date limite de (paiement|reglement)|a (regler|payer) (avant|au plus tard|le|pour)( le)?|payable (le|avant le|au plus tard le|au)|date de (paiement|reglement)|paiement (avant|au plus tard)( le)?|due date|due|payment due|date d'exigibilite)\b/,
     confidence: 0.86,
     rule: "due-date-label",
   },
@@ -129,6 +130,9 @@ function applyLabels<T extends string>(
 ): void {
   for (const rule of rules) {
     for (const m of findLabeled(layout, rule.re, read)) {
+      // A "Date" column of the line-item table is not a document date.
+      const labelRow = layout.rows[m.labelCell.line]
+      if (m.placement === "below" && labelRow && isItemTableHeader(labelRow)) continue
       const penalty = m.placement === "below" ? 0.06 : 0
       const cells = m.valueCell === m.labelCell ? [m.labelCell] : [m.labelCell, m.valueCell]
       collector.add(

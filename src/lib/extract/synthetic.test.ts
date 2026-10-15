@@ -422,6 +422,120 @@ describe("party layouts", () => {
   })
 })
 
+describe("harder layouts", () => {
+  /** Right-aligned rows ending at x = 556 (text width is estimated as 4.5 pt per character). */
+  const flushRight = (y: number, texts: string[]): SynthRow[] =>
+    texts.map((text, i) => [y + i * 13, [[556 - text.length * 4.5, text]]])
+
+  it("reads a seller letterhead printed flush right", () => {
+    const parties: SynthRow[] = [
+      ...flushRight(40, SELLER),
+      [180, [[40, "Factur\u00e9 \u00e0"]]],
+      ...stackedRows(40, 194, BUYER),
+    ]
+    const draft = extractInvoice(
+      baseInvoice({ parties, header: meta([["Facture n\u00b0", "A-1"]], 250) }),
+    ).draft
+    expect(draft.seller?.name).toBe("Atelier Lumi\u00e8re SARL")
+    expect(draft.seller?.address).toMatchObject({ line1: "12 rue des Lilas", postalCode: "69001" })
+    expect(draft.seller?.email).toBe("contact@atelier.example")
+    expect(draft.buyer?.name).toBe("Horizon Immobilier SA")
+  })
+
+  it("reads labels wrapped over two rows in a narrow label column", () => {
+    const header: SynthRow[] = [
+      [
+        40,
+        [
+          [400, "Facture n\u00b0"],
+          [470, "A-1"],
+        ],
+      ],
+      [56, [[400, "Date"]]],
+      [61, [[470, "09/10/2026"]]],
+      [68, [[400, "d'\u00e9mission"]]],
+      [84, [[400, "\u00c0 r\u00e9gler"]]],
+      [89, [[470, "08/11/2026"]]],
+      [96, [[400, "avant le"]]],
+      [
+        112,
+        [
+          [400, "R\u00e9f\u00e9rence"],
+          [470, "Service"],
+        ],
+      ],
+      [
+        124,
+        [
+          [400, "client"],
+          [470, "achats"],
+        ],
+      ],
+    ]
+    const draft = extractInvoice(baseInvoice({ header })).draft
+    expect(draft.issueDate).toBe("2026-10-09")
+    expect(draft.dueDate).toBe("2026-11-08")
+    expect(draft.buyerReference).toBe("Service achats")
+    expect(draft.buyer?.name).toBe("Horizon Immobilier SA")
+  })
+
+  it("does not take an IBAN printed in the buyer block, nor a direct-debit account, as the payee's", () => {
+    const buyer = [...BUYER, "IBAN : FR76 3000 6000 0112 3456 7890 189"]
+    const parties: SynthRow[] = [
+      ...stackedRows(40, 40, SELLER),
+      [170, [[320, "Client"]]],
+      ...stackedRows(320, 184, buyer),
+    ]
+    const res = extractInvoice(
+      syntheticDoc([[...meta([["Facture n\u00b0", "A-1"]]), ...parties, ...TABLE, ...TOTALS]]),
+    )
+    expect(res.draft.payment?.iban).toBeUndefined()
+
+    const debit = extractInvoice(
+      syntheticDoc([
+        [
+          ...meta([["Facture n\u00b0", "A-1"]]),
+          ...TABLE,
+          ...stackedRows(40, 450, [
+            "Pr\u00e9l\u00e8vement SEPA le 15/11/2026 sur le compte",
+            "IBAN : FR76 3000 6000 0112 3456 7890 189",
+          ]),
+        ],
+      ]),
+    )
+    expect(debit.draft.payment?.iban).toBeUndefined()
+    expect(debit.suggestions.find((s) => s.path === "payment.iban")?.value).toBe(
+      "FR7630006000011234567890189",
+    )
+  })
+
+  it("never pre-fills unit prices from a column labelled TTC", () => {
+    const table: SynthRow[] = [
+      [
+        300,
+        [
+          [46, "D\u00e9signation"],
+          [300, "Qt\u00e9"],
+          [350, "PU TTC"],
+          [480, "Total TTC"],
+        ],
+      ],
+      [
+        320,
+        [
+          [46, "Coupe et brushing"],
+          [300, "1"],
+          [350, "36,00 \u20ac"],
+          [480, "36,00 \u20ac"],
+        ],
+      ],
+    ]
+    const res = extractInvoice(syntheticDoc([[...meta([["Facture n\u00b0", "A-1"]]), ...table]]))
+    expect(res.draft.lines?.[0]?.unitPrice).toBeUndefined()
+    expect(res.warnings.join(" ")).toMatch(/TTC/)
+  })
+})
+
 describe("totals wordings and arithmetic cross-check", () => {
   it.each([
     ["Total HT", "Total TTC"],

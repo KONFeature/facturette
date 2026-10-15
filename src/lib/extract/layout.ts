@@ -50,7 +50,7 @@ export interface Layout {
 const CELL_GAP_RATIO = 1.1
 /** Two vertically consecutive cells chain into one block within this many font sizes. */
 const BLOCK_GAP_RATIO = 1.0
-/** Left edges of cells in one block may differ by this many points. */
+/** Left (or right) edges of cells in one block may differ by this many points. */
 const BLOCK_ALIGN_TOLERANCE = 4
 
 export function bboxOf(items: PdfTextItem[]): BoundingBox | undefined {
@@ -159,7 +159,10 @@ function buildBlocks(cells: Cell[]): { blocks: Cell[][]; blockOf: number[] } {
       const block = blocks[b]
       const last = block?.[block.length - 1]
       if (!last || last.page !== cell.page || last.line === cell.line) continue
-      if (Math.abs(last.x0 - cell.x0) > BLOCK_ALIGN_TOLERANCE) continue
+      // Left-aligned or right-aligned (letterheads printed flush right).
+      const leftAligned = Math.abs(last.x0 - cell.x0) <= BLOCK_ALIGN_TOLERANCE
+      const rightAligned = Math.abs(last.x1 - cell.x1) <= BLOCK_ALIGN_TOLERANCE
+      if (!leftAligned && !rightAligned) continue
       const gap = cell.y - last.y1
       const ref = Math.max(last.fontSize, cell.fontSize)
       if (gap < -0.5 * ref || gap > BLOCK_GAP_RATIO * ref) continue
@@ -209,12 +212,18 @@ export interface Part {
 
 const PART_SEPARATOR_RE = /\s+[–—|•·]\s+|\s+-\s+(?=[\p{Lu}])/u
 
+const partsCache = new WeakMap<Cell, Part[]>()
+
 export function partsOf(cell: Cell): Part[] {
-  return cell.text
+  const cached = partsCache.get(cell)
+  if (cached) return cached
+  const parts = cell.text
     .split(PART_SEPARATOR_RE)
     .map((t) => t.trim())
     .filter((t) => t !== "")
     .map((text) => ({ cell, text, folded: fold(text) }))
+  partsCache.set(cell, parts)
+  return parts
 }
 
 export function evidenceOf(cells: Cell[], text?: string): { text: string; bbox?: BoundingBox } {

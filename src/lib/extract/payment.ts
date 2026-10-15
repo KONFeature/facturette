@@ -21,8 +21,10 @@ function validIbanPrefix(raw: string): string | undefined {
   return undefined
 }
 
-function extractBank(layout: Layout, collector: Collector): void {
+function extractBank(layout: Layout, collector: Collector, buyerCells: Set<number>): void {
   let ibanCountry: string | undefined
+  // With a direct debit, the printed IBAN is usually the buyer's debited account.
+  const directDebit = layout.cells.some((c) => /\bprelev(ement|e)\b/.test(c.folded))
   for (const cell of layout.cells) {
     for (const part of partsOf(cell)) {
       const labelled =
@@ -33,7 +35,10 @@ function extractBank(layout: Layout, collector: Collector): void {
       // Stop at the next label ("IBAN : FR76… BIC : …" in one run).
       const raw = m[1].split(/\s(?=BIC|SWIFT|CODE)/)[0] ?? m[1]
       const valid = validIbanPrefix(raw)
-      if (valid) {
+      if (valid && (buyerCells.has(cell.id) || directDebit)) {
+        collector.add("payment.iban", valid, 0.45, [cell], "iban-buyer-or-debit")
+        ibanCountry = valid.slice(0, 2)
+      } else if (valid) {
         collector.add("payment.iban", valid, labelled ? 0.97 : 0.9, [cell], "iban-checksum")
         ibanCountry = valid.slice(0, 2)
       } else if (labelled) {
@@ -50,7 +55,11 @@ function extractBank(layout: Layout, collector: Collector): void {
       const bic = m[1].replace(/\s/g, "").toUpperCase()
       if (!/^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/.test(bic)) continue
       const matchesIban = ibanCountry !== undefined && bic.slice(4, 6) === ibanCountry
-      collector.add("payment.bic", bic, matchesIban ? 0.93 : 0.78, [cell], "bic-label")
+      if (buyerCells.has(cell.id) || directDebit) {
+        collector.add("payment.bic", bic, 0.45, [cell], "bic-buyer-or-debit")
+      } else {
+        collector.add("payment.bic", bic, matchesIban ? 0.93 : 0.78, [cell], "bic-label")
+      }
     }
   }
 }
@@ -111,7 +120,7 @@ function extractMeans(layout: Layout, collector: Collector): void {
 const TERMS_RE =
   /(\b\d{1,3}\s*jours\b|\b\d{1,3}\s*days\b|\ba (la )?reception\b|\bcomptant\b|\bfin de mois\b|\ba l'echeance\b|\bimmediat|\bsous huitaine\b|\bdes reception\b|\bau plus tard\b|\bnet\s*\d+\b)/
 const TERMS_START_RE =
-  /^(paiement|payable|reglement|solde|a regler|a payer|delai de paiement|conditions de (paiement|reglement)|termes de paiement|echeance|net a \d+|montant a deduire|a deduire|cet avoir)/
+  /^(paiement|payable|reglement|solde|a regler|a payer|delai de paiement|conditions de (paiement|reglement)|termes de paiement|echeance|net a \d+|net \d+ (jours|days)|montant a deduire|a deduire|cet avoir)/
 const TERMS_LABEL_RE =
   /^(conditions de (paiement|reglement)|delais? de paiement|termes de paiement|modalites de paiement|payment terms)\s*:\s*(.+)$/
 const LEGAL_NOTE_RE = /penalite|indemnite|recouvrement|escompte|interet/
@@ -232,8 +241,13 @@ export function extractVatExemption(
   return undefined
 }
 
-export function extractPayment(layout: Layout, collector: Collector, isCreditNote: boolean): void {
-  extractBank(layout, collector)
+export function extractPayment(
+  layout: Layout,
+  collector: Collector,
+  isCreditNote: boolean,
+  buyerCells: Set<number>,
+): void {
+  extractBank(layout, collector, buyerCells)
   extractMeans(layout, collector)
   extractTerms(layout, collector, isCreditNote)
   extractLegalNotes(layout, collector)
