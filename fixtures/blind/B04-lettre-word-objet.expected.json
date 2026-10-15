@@ -39,7 +39,7 @@
   },
   "lines": [
     {
-      "name": "Audit de l'organisation logistique (phase 1)",
+      "name": "Audit logistique (phase 1)",
       "quantity": 4,
       "unitCode": "DAY",
       "unitPrice": 850,
@@ -47,7 +47,7 @@
       "vatRate": 20
     },
     {
-      "name": "Rédaction du rapport de recommandations",
+      "name": "Rédaction du rapport",
       "quantity": 2,
       "unitCode": "DAY",
       "unitPrice": 850,

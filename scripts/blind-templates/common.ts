@@ -7,7 +7,12 @@ import {
   formatNumber,
   type NumberStyle,
 } from "../fixtures-templates/format"
-import { makeFrenchIban, makeFrenchVat, makeSiren, makeSiret } from "../fixtures-templates/identifiers"
+import {
+  makeFrenchIban,
+  makeFrenchVat,
+  makeSiren,
+  makeSiret,
+} from "../fixtures-templates/identifiers"
 
 export interface BlindFormats {
   date: DateStyle

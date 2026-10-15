@@ -5,6 +5,7 @@
  * expected.json, manifest.json and README.md are byte-identical across runs. PDFs get fixed
  * metadata dates; Chromium-rendered ones depend on the fonts installed on the machine.
  */
+import { spawnSync } from "node:child_process"
 import { mkdir, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
@@ -58,7 +59,10 @@ async function renderPdf(browser: Browser, def: BlindDef): Promise<Uint8Array> {
   await page.setContent(render(c), { waitUntil: "load" })
   const pdf = await page.pdf({ format: "A4", printBackground: true, preferCSSPageSize: true })
   await page.close()
-  return normalise(pdf, `${def.invoice.typeCode === "381" ? "Avoir" : "Facture"} ${def.invoice.number}`)
+  return normalise(
+    pdf,
+    `${def.invoice.typeCode === "381" ? "Avoir" : "Facture"} ${def.invoice.number}`,
+  )
 }
 
 const json = (value: unknown) => `${JSON.stringify(value, null, 2)}\n`
@@ -113,14 +117,24 @@ async function main(): Promise<void> {
       const pages = (await PDFDocument.load(bytes)).getPageCount()
       entries.push({
         def,
-        entry: { file, expected, printed: printedOf(def), tags: def.tags, formats: def.formats, pages },
+        entry: {
+          file,
+          expected,
+          printed: printedOf(def),
+          tags: def.tags,
+          formats: def.formats,
+          pages,
+        },
       })
       console.log(`${file}  ${(bytes.length / 1024).toFixed(1)} KB  ${pages} p`)
     }
   } finally {
     await browser.close()
   }
-  await writeFile(path.join(OUT_DIR, "manifest.json"), json(entries.map((e) => e.entry)))
+  const manifestPath = path.join(OUT_DIR, "manifest.json")
+  await writeFile(manifestPath, json(entries.map((e) => e.entry)))
+  // Same compact array style as the repo formatter, so `bun run check` stays green.
+  spawnSync("bunx", ["biome", "format", "--write", manifestPath], { stdio: "ignore" })
   await writeFile(path.join(OUT_DIR, "README.md"), readme(entries))
 }
 

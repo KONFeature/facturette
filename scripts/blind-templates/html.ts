@@ -89,11 +89,12 @@ function letter(c: Ctx): string {
     .join("")
   return shell(
     `Facture ${inv.number}`,
-    `body{font-family:"Times New Roman",Tinos,Times,serif;font-size:11.5pt;padding:22mm 22mm 18mm 25mm;line-height:1.35}
+    `body{font-family:Georgia,"Times New Roman",serif;font-size:11.5pt;padding:22mm 22mm 18mm 25mm;line-height:1.35}
 .lh{border-bottom:1.5px solid #333;padding-bottom:6px;margin-bottom:22px}
 .lh .n{font-size:16pt;font-weight:bold;letter-spacing:1px}
 .lh small{font-size:8.5pt;color:#333}
-td,th{padding:3px 6px;border-bottom:1px solid #999}`,
+td,th{padding:3px 6px;border-bottom:1px solid #999}
+td:not(:first-child),th:not(:first-child){white-space:nowrap}`,
     `<div class="lh"><div class="n">${esc(s.name)}</div><small>${esc(s.address.line1)}, ${esc(`${s.address.postalCode} ${s.address.city}`)} - Tél. ${esc(s.phone ?? "")} - ${esc(s.email ?? "")}<br>${esc(s.legalForm ?? "")} au capital de ${esc(s.shareCapital ?? "")} - ${esc(s.registration ?? "")} - SIRET ${groupSiret(s.siret ?? "")} - N° TVA ${esc(s.vatNumber ?? "")}</small></div>
 <div style="display:flex;justify-content:space-between"><div></div><div style="width:55%"><b>${esc(inv.buyer.name)}</b><br>${addrLines(inv.buyer.address)}<br>SIREN ${groupSiren(inv.buyer.siren ?? "")}<br>N° TVA ${esc(inv.buyer.vatNumber ?? "")}</div></div>
 <p style="text-align:right;margin:18px 0">Nantes, le ${f.date(inv.issueDate)}</p>
@@ -217,7 +218,7 @@ function sections(c: Ctx): string {
     .join("")
   return shell(
     `Facture ${inv.number}`,
-    `body{font-family:Arial,Helvetica,sans-serif;font-size:9pt;padding:14mm 14mm}
+    `body{font-family:Helvetica,Arial,sans-serif;font-size:9pt;padding:14mm 14mm}
 td,th{padding:4px 5px;border:1px solid #bbb}
 th{background:#e8eef4;font-size:8pt}
 .sec td{background:#f4f4f4;font-weight:bold}
@@ -247,8 +248,7 @@ function bilingual(c: Ctx): string {
     .join("")
   const vat = vatRows(c)
     .map(
-      (v) =>
-        `<tr><td>VAT / TVA ${f.qty(v.rate)} %</td><td class="r">${f.money(v.tax)}</td></tr>`,
+      (v) => `<tr><td>VAT / TVA ${f.qty(v.rate)} %</td><td class="r">${f.money(v.tax)}</td></tr>`,
     )
     .join("")
   return shell(
@@ -259,7 +259,7 @@ td,th{padding:5px 6px;border-bottom:1px solid #ccc;text-align:left}
 th{font-size:7.5pt;color:#0b3d5c;border-bottom:2px solid #0b3d5c}
 .k{color:#555}`,
     `<div class="hd"><div style="font-size:14pt;font-weight:bold">${esc(s.name)}</div><div class="r" style="font-size:12pt">Facture / Invoice</div></div>
-<table style="width:100%;margin-top:12px"><tr><td style="border:none;width:50%;vertical-align:top">${addrLines(s.address)}<br>${esc(s.email ?? "")} - ${esc(s.phone ?? "")}<br>${esc(s.legalForm ?? "")} au capital de ${esc(s.shareCapital ?? "")} - ${esc(s.registration ?? "")}<br>SIRET ${groupSiret(s.siret ?? "")}<br>VAT / TVA ${esc(s.vatNumber ?? "")}</td>
+<table style="width:100%;margin-top:12px"><tr><td style="border:none;width:50%;vertical-align:top">${addrLines(s.address)}<br>${esc(s.email ?? "")} - ${esc(s.phone ?? "")}<br>${esc(s.legalForm ?? "")} au capital de ${esc(s.shareCapital ?? "")}<br>${esc(s.registration ?? "")}<br>SIRET ${groupSiret(s.siret ?? "")}<br>VAT / TVA ${esc(s.vatNumber ?? "")}</td>
 <td style="border:none;vertical-align:top"><b>Facture / Invoice No. ${esc(inv.number)}</b><br>Date / Date of issue : ${f.date(inv.issueDate)}<br>Due date / Échéance : ${f.date(inv.dueDate ?? inv.issueDate)}<br>Your ref. / Votre réf. : ${esc(inv.orderReference ?? "")}</td></tr></table>
 <div style="margin:14px 0;padding:8px 10px;background:#eef3f6"><b>Client / Customer</b><br>${esc(inv.buyer.name)}<br>${esc(inv.buyer.address.line1)}, ${esc(`${inv.buyer.address.postalCode} ${inv.buyer.address.city}`)}<br>SIREN ${groupSiren(inv.buyer.siren ?? "")} - VAT / TVA ${esc(inv.buyer.vatNumber ?? "")}</div>
 <table style="width:100%"><tr><th>Description</th><th class="r">Qty / Qté</th><th class="r">Unit price / PU</th><th class="r">VAT / TVA</th><th class="r">Amount / Montant</th></tr>${rows}</table>
@@ -281,10 +281,7 @@ function credit(c: Ctx): string {
     )
     .join("")
   const vat = vatRows(c)
-    .map(
-      (v) =>
-        `<tr><td>TVA ${f.qty(v.rate)} %</td><td class="r">${neg(v.tax)}</td></tr>`,
-    )
+    .map((v) => `<tr><td>TVA ${f.qty(v.rate)} %</td><td class="r">${neg(v.tax)}</td></tr>`)
     .join("")
   const pre = inv.precedingInvoice
   return shell(
@@ -376,10 +373,7 @@ function long(c: Ctx): string {
     )
     .join("")
   const vat = vatRows(c)
-    .map(
-      (v) =>
-        `<tr><td>TVA ${f.qty(v.rate)} %</td><td class="r">${f.money(v.tax)}</td></tr>`,
-    )
+    .map((v) => `<tr><td>TVA ${f.qty(v.rate)} %</td><td class="r">${f.money(v.tax)}</td></tr>`)
     .join("")
   return shell(
     `Facture ${inv.number}`,

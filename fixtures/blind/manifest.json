@@ -46,13 +46,7 @@
       "legalNotes.recoveryFee",
       "legalNotes.earlyPaymentDiscount"
     ],
-    "tags": [
-      "dolibarr",
-      "non-embedded-font",
-      "multi-rate",
-      "footer-identity",
-      "order-reference"
-    ],
+    "tags": ["dolibarr", "non-embedded-font", "multi-rate", "footer-identity", "order-reference"],
     "formats": {
       "date": "dmy",
       "number": {
@@ -84,7 +78,6 @@
       "seller.registration",
       "buyer.name",
       "buyer.siren",
-      "buyer.siret",
       "buyer.vatNumber",
       "buyer.address.line1",
       "buyer.address.postalCode",
@@ -113,12 +106,7 @@
       "legalNotes.recoveryFee",
       "legalNotes.earlyPaymentDiscount"
     ],
-    "tags": [
-      "non-embedded-font",
-      "deposit-prepaid",
-      "dot-thousands-code",
-      "alt-wording"
-    ],
+    "tags": ["non-embedded-font", "deposit-prepaid", "dot-thousands-code", "alt-wording"],
     "formats": {
       "date": "dmy",
       "number": {
@@ -180,14 +168,7 @@
       "legalNotes.recoveryFee",
       "legalNotes.earlyPaymentDiscount"
     ],
-    "tags": [
-      "excel",
-      "grid",
-      "ttc-column",
-      "individual-customer",
-      "multi-rate",
-      "subject-line"
-    ],
+    "tags": ["excel", "grid", "ttc-column", "individual-customer", "multi-rate", "subject-line"],
     "formats": {
       "date": "dmy",
       "number": {
@@ -220,7 +201,6 @@
       "seller.registration",
       "buyer.name",
       "buyer.siren",
-      "buyer.siret",
       "buyer.vatNumber",
       "buyer.address.line1",
       "buyer.address.postalCode",
@@ -244,13 +224,7 @@
       "legalNotes.recoveryFee",
       "legalNotes.earlyPaymentDiscount"
     ],
-    "tags": [
-      "word",
-      "letter",
-      "date-long-fr",
-      "subject-line",
-      "terms-end-of-month"
-    ],
+    "tags": ["word", "letter", "date-long-fr", "subject-line", "terms-end-of-month"],
     "formats": {
       "date": "long",
       "number": {
@@ -280,9 +254,6 @@
       "seller.shareCapital",
       "seller.registration",
       "buyer.name",
-      "buyer.siren",
-      "buyer.siret",
-      "buyer.vatNumber",
       "buyer.address.line1",
       "buyer.address.postalCode",
       "buyer.address.city",
@@ -302,13 +273,7 @@
       "legalNotes.recoveryFee",
       "legalNotes.earlyPaymentDiscount"
     ],
-    "tags": [
-      "saas",
-      "stripe-like",
-      "date-long-fr",
-      "total-top",
-      "tiny-footer"
-    ],
+    "tags": ["saas", "stripe-like", "date-long-fr", "total-top", "tiny-footer"],
     "formats": {
       "date": "long",
       "number": {
@@ -339,9 +304,6 @@
       "seller.shareCapital",
       "seller.registration",
       "buyer.name",
-      "buyer.siren",
-      "buyer.siret",
-      "buyer.vatNumber",
       "buyer.address.line1",
       "buyer.address.postalCode",
       "buyer.address.city",
@@ -364,13 +326,7 @@
       "legalNotes.recoveryFee",
       "legalNotes.earlyPaymentDiscount"
     ],
-    "tags": [
-      "footer-identity-only",
-      "date-iso",
-      "euro-before",
-      "number-dot-decimal",
-      "multi-rate"
-    ],
+    "tags": ["footer-identity-only", "date-iso", "euro-before", "number-dot-decimal", "multi-rate"],
     "formats": {
       "date": "iso",
       "number": {
@@ -400,9 +356,6 @@
       "seller.shareCapital",
       "seller.registration",
       "buyer.name",
-      "buyer.siren",
-      "buyer.siret",
-      "buyer.vatNumber",
       "buyer.address.line1",
       "buyer.address.postalCode",
       "buyer.address.city",
@@ -434,13 +387,7 @@
       "legalNotes.recoveryFee",
       "legalNotes.earlyPaymentDiscount"
     ],
-    "tags": [
-      "discount-column",
-      "sections",
-      "subtotals",
-      "terms-end-of-month",
-      "multi-rate"
-    ],
+    "tags": ["discount-column", "sections", "subtotals", "terms-end-of-month", "multi-rate"],
     "formats": {
       "date": "dmy",
       "number": {
@@ -472,7 +419,6 @@
       "seller.registration",
       "buyer.name",
       "buyer.siren",
-      "buyer.siret",
       "buyer.vatNumber",
       "buyer.address.line1",
       "buyer.address.postalCode",
@@ -496,11 +442,7 @@
       "legalNotes.recoveryFee",
       "legalNotes.earlyPaymentDiscount"
     ],
-    "tags": [
-      "bilingual",
-      "dot-thousands-code",
-      "order-reference"
-    ],
+    "tags": ["bilingual", "dot-thousands-code", "order-reference"],
     "formats": {
       "date": "dmy",
       "number": {
@@ -525,13 +467,11 @@
       "seller.address.postalCode",
       "seller.address.city",
       "seller.email",
-      "seller.phone",
       "seller.legalForm",
       "seller.shareCapital",
       "seller.registration",
       "buyer.name",
       "buyer.siren",
-      "buyer.siret",
       "buyer.vatNumber",
       "buyer.address.line1",
       "buyer.address.postalCode",
@@ -549,14 +489,11 @@
       "payment.iban",
       "payment.bic",
       "payment.termsText",
-      "legalNotes.recoveryFee"
+      "legalNotes.latePaymentPenalty",
+      "legalNotes.recoveryFee",
+      "legalNotes.earlyPaymentDiscount"
     ],
-    "tags": [
-      "credit-note",
-      "signed-amounts-printed",
-      "preceding-invoice",
-      "sellsy-like"
-    ],
+    "tags": ["credit-note", "signed-amounts-printed", "preceding-invoice", "sellsy-like"],
     "formats": {
       "date": "dmy",
       "number": {
@@ -588,7 +525,6 @@
       "seller.registration",
       "buyer.name",
       "buyer.siren",
-      "buyer.siret",
       "buyer.vatNumber",
       "buyer.address.line1",
       "buyer.address.postalCode",
@@ -612,12 +548,7 @@
       "legalNotes.recoveryFee",
       "legalNotes.earlyPaymentDiscount"
     ],
-    "tags": [
-      "deposit",
-      "negative-line",
-      "quickbooks-like",
-      "dot-thousands"
-    ],
+    "tags": ["deposit", "negative-line", "quickbooks-like", "dot-thousands"],
     "formats": {
       "date": "dmy",
       "number": {
@@ -666,13 +597,7 @@
       "legalNotes.recoveryFee",
       "legalNotes.earlyPaymentDiscount"
     ],
-    "tags": [
-      "freelance",
-      "franchise-tva",
-      "category-E",
-      "rib-block",
-      "units-h-j"
-    ],
+    "tags": ["freelance", "franchise-tva", "category-E", "rib-block", "units-h-j"],
     "formats": {
       "date": "dmy",
       "number": {
@@ -829,7 +754,6 @@
       "seller.registration",
       "buyer.name",
       "buyer.siren",
-      "buyer.siret",
       "buyer.vatNumber",
       "buyer.address.line1",
       "buyer.address.postalCode",
@@ -866,13 +790,7 @@
       "legalNotes.recoveryFee",
       "legalNotes.earlyPaymentDiscount"
     ],
-    "tags": [
-      "buyer-first",
-      "delivery-address",
-      "negative-line",
-      "multi-rate",
-      "order-reference"
-    ],
+    "tags": ["buyer-first", "delivery-address", "negative-line", "multi-rate", "order-reference"],
     "formats": {
       "date": "dmy",
       "number": {

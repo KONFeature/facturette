@@ -3,14 +3,7 @@
  * FPDF and ReportLab produce with core fonts).
  */
 import { PDFDocument, type PDFFont, type PDFPage, rgb, StandardFonts } from "@cantoo/pdf-lib"
-import {
-  type Ctx,
-  groupIban,
-  groupSiret,
-  groupSiren,
-  unitLabel,
-  vatRows,
-} from "./common"
+import { type Ctx, groupIban, groupSiren, groupSiret, unitLabel, vatRows } from "./common"
 
 const FIXED_DATE = new Date("2026-10-16T08:00:00Z")
 const grey = rgb(0.85, 0.85, 0.85)
@@ -27,14 +20,13 @@ interface Pen {
   hline: (x1: number, x2: number, y: number, w?: number) => void
 }
 
-async function newPen(
-  c: Ctx,
-  family: "helvetica" | "times",
-): Promise<Pen> {
+async function newPen(c: Ctx, family: "helvetica" | "times"): Promise<Pen> {
   const doc = await PDFDocument.create()
   doc.setCreationDate(FIXED_DATE)
   doc.setModificationDate(FIXED_DATE)
-  doc.setProducer(family === "helvetica" ? "TCPDF 6.6.5 (fixture imitation)" : "FPDF 1.86 (fixture imitation)")
+  doc.setProducer(
+    family === "helvetica" ? "TCPDF 6.6.5 (fixture imitation)" : "FPDF 1.86 (fixture imitation)",
+  )
   doc.setCreator("Facturette blind fixtures")
   doc.setTitle(`Facture ${c.inv.number}`)
   const page = doc.addPage([595.28, 841.89])
@@ -98,7 +90,14 @@ export async function renderDolibarr(c: Ctx): Promise<Uint8Array> {
   p.text("Code client : CU2610-0012", 330, 764, 9)
   if (inv.orderReference) p.text(`Réf. client : ${inv.orderReference}`, 330, 753, 9)
 
-  p.page.drawRectangle({ x: 330, y: 665, width: 225, height: 70, borderWidth: 0.7, borderColor: black })
+  p.page.drawRectangle({
+    x: 330,
+    y: 665,
+    width: 225,
+    height: 70,
+    borderWidth: 0.7,
+    borderColor: black,
+  })
   p.text("Adresse de facturation", 336, 725, 8)
   p.text(inv.buyer.name, 336, 712, 10, true)
   p.text(inv.buyer.address.line1, 336, 700, 9)
@@ -125,7 +124,14 @@ export async function renderDolibarr(c: Ctx): Promise<Uint8Array> {
   p.hline(L, R, y + 6)
   y -= 14
   const tr = (label: string, value: string, strong = false) => {
-    p.page.drawRectangle({ x: 340, y: y - 4, width: 215, height: 15, borderWidth: 0.4, borderColor: black })
+    p.page.drawRectangle({
+      x: 340,
+      y: y - 4,
+      width: 215,
+      height: 15,
+      borderWidth: 0.4,
+      borderColor: black,
+    })
     p.text(label, 345, y, 9, strong)
     p.right(value, R - 4, y, 9, strong)
     y -= 15
@@ -192,7 +198,7 @@ export async function renderTimes(c: Ctx): Promise<Uint8Array> {
     `${s.legalForm ?? ""} au capital de ${s.shareCapital ?? ""} - ${s.registration ?? ""}`,
     `${s.email ?? ""} - ${s.phone ?? ""}`,
   ]
-  sl.forEach((l, i) => p.text(l, L, y - i * 12, 10, i === 0))
+  for (const [i, l] of sl.entries()) p.text(l, L, y - i * 12, 10, i === 0)
   const b = inv.buyer
   const bl = [
     b.name,
@@ -201,7 +207,7 @@ export async function renderTimes(c: Ctx): Promise<Uint8Array> {
     `SIREN ${groupSiren(b.siren ?? "")}`,
     `TVA : ${b.vatNumber ?? ""}`,
   ]
-  bl.forEach((l, i) => p.text(l, 310, y - i * 12, 10, i === 0))
+  for (const [i, l] of bl.entries()) p.text(l, 310, y - i * 12, 10, i === 0)
   y -= sl.length * 12 + 26
 
   p.hline(L, R, y + 12, 1)

@@ -40,7 +40,7 @@ Fichiers (générés par `bun scripts/make-blind-fixtures.ts`, ne pas éditer à
 - Pages : 1
 - Police standard **non incorporée** (aucun FontFile)
 - Formats : dates `dmy`, nombres séparateur de milliers « . », décimale « , », devise `code`
-- Champs imprimés : 45 / 45 (non imprimés : deliveryDate)
+- Champs imprimés : 44 / 45 (non imprimés : deliveryDate, buyer.siret)
 
 ### B03-excel-grille-objet.pdf
 
@@ -62,7 +62,7 @@ Fichiers (générés par `bun scripts/make-blind-fixtures.ts`, ne pas éditer à
 - Tags : word, letter, date-long-fr, subject-line, terms-end-of-month
 - Pages : 1
 - Formats : dates `long`, nombres séparateur de milliers «   », décimale « , », devise `suffix`
-- Champs imprimés : 41 / 41 (non imprimés : aucun)
+- Champs imprimés : 40 / 41 (non imprimés : buyer.siret)
 
 ### B05-saas-montant-du.pdf
 
@@ -73,7 +73,7 @@ Fichiers (générés par `bun scripts/make-blind-fixtures.ts`, ne pas éditer à
 - Tags : saas, stripe-like, date-long-fr, total-top, tiny-footer
 - Pages : 1
 - Formats : dates `long`, nombres séparateur de milliers «   », décimale « , », devise `suffix`
-- Champs imprimés : 36 / 37 (non imprimés : seller.phone)
+- Champs imprimés : 33 / 37 (non imprimés : seller.phone, buyer.siren, buyer.siret, buyer.vatNumber)
 
 ### B06-identite-en-pied.pdf
 
@@ -84,7 +84,7 @@ Fichiers (générés par `bun scripts/make-blind-fixtures.ts`, ne pas éditer à
 - Tags : footer-identity-only, date-iso, euro-before, number-dot-decimal, multi-rate
 - Pages : 1
 - Formats : dates `iso`, nombres séparateur de milliers « , », décimale « . », devise `prefix`
-- Champs imprimés : 40 / 40 (non imprimés : aucun)
+- Champs imprimés : 37 / 40 (non imprimés : buyer.siren, buyer.siret, buyer.vatNumber)
 
 ### B07-remises-et-lots.pdf
 
@@ -95,7 +95,7 @@ Fichiers (générés par `bun scripts/make-blind-fixtures.ts`, ne pas éditer à
 - Tags : discount-column, sections, subtotals, terms-end-of-month, multi-rate
 - Pages : 1
 - Formats : dates `dmy`, nombres séparateur de milliers «   », décimale « , », devise `suffix`
-- Champs imprimés : 48 / 53 (non imprimés : dueDate, lines.0.unitPrice, lines.1.unitPrice, lines.4.unitPrice, lines.3.unitPrice)
+- Champs imprimés : 45 / 53 (non imprimés : dueDate, lines.0.unitPrice, lines.1.unitPrice, lines.3.unitPrice, lines.4.unitPrice, buyer.siren, buyer.siret, buyer.vatNumber)
 
 ### B08-bilingue-fr-en.pdf
 
@@ -106,7 +106,7 @@ Fichiers (générés par `bun scripts/make-blind-fixtures.ts`, ne pas éditer à
 - Tags : bilingual, dot-thousands-code, order-reference
 - Pages : 1
 - Formats : dates `dmy`, nombres séparateur de milliers « . », décimale « , », devise `code`
-- Champs imprimés : 40 / 41 (non imprimés : deliveryDate, payment.termsText)
+- Champs imprimés : 39 / 41 (non imprimés : deliveryDate, payment.termsText, buyer.siret)
 
 ### B09-avoir-facture-origine.pdf
 
@@ -117,7 +117,7 @@ Fichiers (générés par `bun scripts/make-blind-fixtures.ts`, ne pas éditer à
 - Tags : credit-note, signed-amounts-printed, preceding-invoice, sellsy-like
 - Pages : 1
 - Formats : dates `dmy`, nombres séparateur de milliers «   », décimale « , », devise `suffix`
-- Champs imprimés : 35 / 36 (non imprimés : deliveryDate, dueDate, notes)
+- Champs imprimés : 35 / 38 (non imprimés : deliveryDate, dueDate, notes, seller.phone, buyer.siret)
 
 ### B10-solde-acompte-negatif.pdf
 
@@ -128,7 +128,7 @@ Fichiers (générés par `bun scripts/make-blind-fixtures.ts`, ne pas éditer à
 - Tags : deposit, negative-line, quickbooks-like, dot-thousands
 - Pages : 1
 - Formats : dates `dmy`, nombres séparateur de milliers « . », décimale « , », devise `suffix`
-- Champs imprimés : 40 / 40 (non imprimés : aucun)
+- Champs imprimés : 39 / 40 (non imprimés : buyer.siret)
 
 ### B11-freelance-rib.pdf
 
@@ -161,4 +161,4 @@ Fichiers (générés par `bun scripts/make-blind-fixtures.ts`, ne pas éditer à
 - Tags : buyer-first, delivery-address, negative-line, multi-rate, order-reference
 - Pages : 1
 - Formats : dates `dmy`, nombres séparateur de milliers «   », décimale « , », devise `suffix`
-- Champs imprimés : 54 / 54 (non imprimés : aucun)
+- Champs imprimés : 53 / 54 (non imprimés : buyer.siret)

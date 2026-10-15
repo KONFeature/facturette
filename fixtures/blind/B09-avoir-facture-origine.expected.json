@@ -64,7 +64,9 @@
     "termsText": "Avoir à déduire de votre prochain règlement"
   },
   "legalNotes": {
-    "recoveryFee": "Indemnité forfaitaire de recouvrement en cas de retard : 40 euros."
+    "latePaymentPenalty": "Pénalités de retard : 3 fois le taux d'intérêt légal en vigueur.",
+    "recoveryFee": "Indemnité forfaitaire de recouvrement en cas de retard : 40 euros.",
+    "earlyPaymentDiscount": "Escompte pour règlement anticipé : néant."
   },
   "notes": "Avoir sur facture F-2026-0231 du 02/09/2026"
 }
