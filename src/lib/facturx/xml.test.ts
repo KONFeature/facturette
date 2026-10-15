@@ -72,6 +72,24 @@ describe("document header", () => {
     expect(d["ram:IssueDateTime"]["udt:DateTimeString"]["@_format"]).toBe("102")
   })
 
+  it("references the corrected invoice on a credit note (BT-25 / BT-26)", () => {
+    const ref =
+      build("credit-note")["rsm:CrossIndustryInvoice"]["rsm:SupplyChainTradeTransaction"][
+        "ram:ApplicableHeaderTradeSettlement"
+      ]["ram:InvoiceReferencedDocument"]
+    expect(ref["ram:IssuerAssignedID"]).toBe("FA-2026-0001")
+    expect(ref["ram:FormattedIssueDateTime"]["qdt:DateTimeString"]["#text"]).toBe("20260915")
+    expect(ref["ram:FormattedIssueDateTime"]["qdt:DateTimeString"]["@_format"]).toBe("102")
+  })
+
+  it("emits no invoice reference on a regular invoice", () => {
+    const settlement =
+      build("standard-20")["rsm:CrossIndustryInvoice"]["rsm:SupplyChainTradeTransaction"][
+        "ram:ApplicableHeaderTradeSettlement"
+      ]
+    expect(settlement["ram:InvoiceReferencedDocument"]).toBeUndefined()
+  })
+
   it("maps the operation category to BT-23", () => {
     const ctx = (name: string) =>
       build(name)["rsm:CrossIndustryInvoice"]["rsm:ExchangedDocumentContext"][

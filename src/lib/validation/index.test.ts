@@ -494,6 +494,15 @@ const failing: Case[] = [
 
   // Number, currency
   {
+    name: "number with a space",
+    mutate: (d) => {
+      d.number = "FA 2026 001"
+    },
+    path: "number",
+    code: "number.chars",
+    severity: "warning",
+  },
+  {
     name: "number longer than 20",
     mutate: (d) => {
       d.number = "FACTURE-2026-10-000000001"
@@ -612,22 +621,12 @@ const failing: Case[] = [
 
   // Lines
   {
-    name: "negative unit price (BR-27)",
-    mutate: (d) => {
-      firstLine(d).unitPrice = -5
-    },
-    path: "lines.0.unitPrice",
-    code: "unitPrice.negative",
-    severity: "error",
-  },
-  {
-    name: "negative unit price on a credit note too",
+    name: "credit note without the original invoice reference",
     mutate: (d) => {
       d.typeCode = "381"
-      firstLine(d).unitPrice = -5
     },
-    path: "lines.0.unitPrice",
-    code: "unitPrice.negative",
+    path: "precedingInvoice.number",
+    code: "required",
     severity: "error",
   },
   {
@@ -907,6 +906,29 @@ const passing: { name: string; mutate: Mutator; absent: [string, string?] }[] = 
     absent: ["payment.iban"],
   },
 ]
+
+describe("validateInvoice: discount lines and credit notes", () => {
+  it("accepts a negative unit price: it is a discount line, not an error", () => {
+    const r = run((d) => {
+      firstLine(d).unitPrice = -5
+    })
+    expect(r.issues.filter((i) => i.path.endsWith("unitPrice"))).toEqual([])
+    expect(r.ready).toBe(true)
+  })
+
+  it("accepts a credit note that references its original invoice", () => {
+    const r = run((d) => {
+      d.typeCode = "381"
+      d.precedingInvoice = { number: "FA-2026-0001", issueDate: "2026-09-15" }
+    })
+    expect(r.issues.filter((i) => i.severity === "error")).toEqual([])
+    expect(r.ready).toBe(true)
+  })
+
+  it("does not require a preceding invoice on a regular invoice", () => {
+    expect(requiredPaths(run().draft)).not.toContain("precedingInvoice.number")
+  })
+})
 
 describe("validateInvoice: passing cases", () => {
   it.each(passing)("$name", ({ mutate, absent: [path, code] }) => {

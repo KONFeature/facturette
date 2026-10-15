@@ -57,5 +57,9 @@
     "recoveryFee": "Indemnité forfaitaire pour frais de recouvrement en cas de retard de paiement : 40 €.",
     "earlyPaymentDiscount": "Pas d'escompte pour paiement anticipé."
   },
+  "precedingInvoice": {
+    "number": "F-2026-0412",
+    "issueDate": "2026-09-12"
+  },
   "notes": "Avoir sur facture F-2026-0412 du 12/09/2026"
 }

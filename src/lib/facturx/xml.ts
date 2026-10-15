@@ -367,6 +367,19 @@ function settlementNode(invoice: Invoice, totals: InvoiceTotals, profile: Factur
       totals.prepaid !== 0 ? leaf("ram:TotalPrepaidAmount", amount(totals.prepaid)) : undefined,
       leaf("ram:DuePayableAmount", amount(totals.dueAmount)),
     ]),
+    // BT-25 / BT-26: the invoice a credit note corrects (comes after the monetary summation).
+    invoice.precedingInvoice?.number.trim()
+      ? node("ram:InvoiceReferencedDocument", [
+          leaf("ram:IssuerAssignedID", invoice.precedingInvoice.number.trim()),
+          invoice.precedingInvoice.issueDate
+            ? node("ram:FormattedIssueDateTime", [
+                leaf("qdt:DateTimeString", date102(invoice.precedingInvoice.issueDate), {
+                  format: "102",
+                }),
+              ])
+            : undefined,
+        ])
+      : undefined,
   ])
 }
 
@@ -446,6 +459,7 @@ export function buildFacturXXml(invoice: Invoice, options?: { profile?: FacturXP
       "xmlns:rsm": "urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100",
       "xmlns:ram":
         "urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100",
+      "xmlns:qdt": "urn:un:unece:uncefact:data:standard:QualifiedDataType:100",
       "xmlns:udt": "urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100",
       "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
     },

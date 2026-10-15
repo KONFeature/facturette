@@ -512,6 +512,7 @@ export const FIXTURES: FixtureDef[] = [
         termsText: "Montant à déduire de votre prochain règlement",
       },
       legalNotes: { ...LEGAL },
+      precedingInvoice: { number: "F-2026-0412", issueDate: "2026-09-12" },
       notes: "Avoir sur facture F-2026-0412 du 12/09/2026",
     },
     hidden: ["deliveryDate"],

@@ -183,6 +183,13 @@ export const invoiceSchema = z.object({
   buyerReference: z.string().optional(),
   /** BT-13 purchase order reference. */
   orderReference: z.string().optional(),
+  /**
+   * BT-25 / BT-26: the invoice a credit note (381) refers to. French practice and the BR-FR-CO-05
+   * rule expect it on every avoir.
+   */
+  precedingInvoice: z
+    .object({ number: z.string().min(1), issueDate: isoDateSchema.optional() })
+    .optional(),
   lines: z.array(invoiceLineSchema).min(1),
   /** BT-120 free text; required for categories E/AE/K/G/O. */
   vatExemptionReason: z.string().optional(),

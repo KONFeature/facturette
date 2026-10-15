@@ -242,6 +242,7 @@ export const scenarios: Scenario[] = [
       number: "AV-2026-0001",
       typeCode: "381",
       notes: "Avoir sur la facture FA-2026-0001",
+      precedingInvoice: { number: "FA-2026-0001", issueDate: "2026-09-15" },
       lines: [
         {
           name: "Prestation de conseil (remboursement)",

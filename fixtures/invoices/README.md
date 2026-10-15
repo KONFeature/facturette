@@ -58,7 +58,7 @@ elle détecte un avoir. Aucun `expected.json` ne contient de quantité ou de pri
 
 - Tags : credit-note, signed-amounts-printed, negative-amounts, reference-original-invoice, vat-20
 - Pages : 1
-- Champs imprimés : 32 / 33 (non imprimés : deliveryDate)
+- Champs imprimés : 34 / 35 (non imprimés : deliveryDate)
 
 ### 06-client-particulier.pdf
 

@@ -418,6 +418,8 @@
       "legalNotes.latePaymentPenalty",
       "legalNotes.recoveryFee",
       "legalNotes.earlyPaymentDiscount",
+      "precedingInvoice.number",
+      "precedingInvoice.issueDate",
       "notes"
     ],
     "tags": [

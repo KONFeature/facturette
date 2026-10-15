@@ -184,6 +184,12 @@ function collectRequirements(draft: InvoiceDraft): Requirement[] {
     "operationCategory",
     "Choisissez la catégorie d'opération (livraison de biens, prestation de services ou mixte)",
   )
+  // BT-25 / BR-FR-CO-05: a credit note must point at the invoice it corrects.
+  field(
+    "precedingInvoice.number",
+    "Indiquez le numéro de la facture d'origine de l'avoir",
+    draft.typeCode === "381",
+  )
 
   // BR-6 / BR-8..11 / BR-CO-26: seller identity; L441-9 + 242 nonies A.
   field("seller.name", "Renseignez le nom ou la raison sociale du vendeur")
@@ -361,6 +367,14 @@ export function validateInvoice(
       `Numéro de facture de plus de ${INVOICE_NUMBER_SOFT_LIMIT} caractères : certaines plateformes le refusent`,
     )
   }
+  // BR-FR-02: letters, digits and - + _ / only.
+  if (draft.number && !/^[A-Za-z0-9+_/-]+$/.test(draft.number)) {
+    warning(
+      "number",
+      "number.chars",
+      "Le numéro de facture ne doit contenir que des lettres, des chiffres et les signes - + _ / (ni espace, ni point)",
+    )
+  }
   if (!isBlank(draft.currency) && draft.currency !== "EUR") {
     error("currency", "currency.unsupported", "Seule la devise EUR est prise en charge")
   }
@@ -525,14 +539,9 @@ function checkParty(
 function checkLine(line: Line | undefined, i: number, error: Report, warning: Report): void {
   if (!line) return
   const p = `lines.${i}`
-  // BR-27: item net price shall not be negative (credit notes, 381, also carry positive amounts).
-  if (typeof line.unitPrice === "number" && Number.isFinite(line.unitPrice) && line.unitPrice < 0) {
-    error(
-      `${p}.unitPrice`,
-      "unitPrice.negative",
-      "Le prix unitaire ne peut pas être négatif : pour une remise, créez un avoir",
-    )
-  }
+  // A negative unit price is a legitimate discount line. BR-27 forbids it in the XML, so the
+  // Factur-X builder moves the sign onto the quantity (verified VALID with Mustang): nothing to
+  // report here.
   if (line.quantity === 0) {
     warning(`${p}.quantity`, "quantity.zero", "Quantité à zéro : la ligne vaut 0 €")
   }
