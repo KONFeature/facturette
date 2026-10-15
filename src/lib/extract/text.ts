@@ -201,7 +201,7 @@ const UNIT_WORDS: Array<[RegExp, string]> = [
   [/^(j|jrs?|jours?|journees?|jh|j\/h|days?)$/, "DAY"],
   [/^(mois|month)$/, "MON"],
   [/^(forfaits?|ft|fft|forf\.?)$/, "LS"],
-  [/^(u|un|unites?|pcs?|pieces?|ex|ea|units?|article?s?)$/, "C62"],
+  [/^(u|un|unites?|pcs?|pces?|pieces?|ex|ea|units?|article?s?)$/, "C62"],
   [/^(kg|kilos?|kilogrammes?)$/, "KGM"],
   [/^(m2|m²|metres? carres?)$/, "MTK"],
   [/^(ml|m|metres?|metres? lineaires?)$/, "MTR"],

@@ -605,6 +605,7 @@ function parseFooterSeller(lines: PartyLine[], collector: Collector): void {
     !STREET_RE.test(first.folded)
   ) {
     collector.add("seller.name", first.text, 0.66, [first.cell], "seller-footer-name")
+    collector.add("seller.kind", "company", 0.7, [first.cell], "seller-footer-name")
   }
   parseAddress("seller.address", lines, f, "seller-footer", collector)
 }

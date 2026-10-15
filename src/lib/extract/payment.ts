@@ -58,63 +58,70 @@ function extractBank(layout: Layout, collector: Collector): void {
 const MEANS: Array<[RegExp, string]> = [
   [/\bvirement (bancaire )?sepa\b|\bsepa credit transfer\b/, "58"],
   [/\bprelevement( sepa)?\b/, "59"],
-  [/\bvirement\b|\btransfer\b/, "30"],
+  [/\bvirement\b|\bbank transfer\b/, "30"],
   [/\bcheques?\b/, "20"],
   [/\bcarte (bancaire|bleue)\b|\bcb\b|\bcredit card\b/, "48"],
   [/\bespeces\b|\bnumeraire\b|\bcash\b/, "10"],
 ]
 
-function meansOf(folded: string): string | undefined {
-  for (const [re, code] of MEANS) if (re.test(folded)) return code
-  return undefined
+/** Distinct means named in a text; "virement SEPA" is not also counted as a plain "virement". */
+function meansIn(folded: string): string[] {
+  const codes = [...new Set(MEANS.filter(([re]) => re.test(folded)).map(([, c]) => c))]
+  return codes.filter((c) => !(c === "30" && codes.includes("58")))
+}
+
+/** Parts of a cell, further split into sentences ("Date des travaux : … . Paiement à 15 jours."). */
+function sentencesOf(cell: Cell): Array<{ text: string; folded: string }> {
+  return partsOf(cell).flatMap((p) =>
+    p.text.split(/(?<=[\p{Ll}\d)]\.)\s+(?=\p{Lu})/u).map((text) => ({ text, folded: fold(text) })),
+  )
 }
 
 function extractMeans(layout: Layout, collector: Collector): void {
   for (const cell of layout.cells) {
-    for (const part of partsOf(cell)) {
+    for (const part of sentencesOf(cell)) {
       const m =
         /^(mode|moyen|modalites?|methode|type) (de |du )?(reglement|paiement)\s*:?\s*(.*)$/.exec(
           part.folded,
         )
       if (m) {
-        const value = m[4] ?? ""
-        const codes = MEANS.filter(([re]) => re.test(value)).map(([, c]) => c)
         // "Virement ou chèque": several means, let the user choose.
-        const distinct = [...new Set(codes.filter((c) => !(c === "30" && codes.includes("58"))))]
-        const code = distinct[0]
-        if (code)
-          collector.add(
-            "payment.meansCode",
-            code,
-            distinct.length === 1 ? 0.86 : 0.45,
-            [cell],
-            "payment-means-label",
-          )
+        const codes = meansIn(m[4] ?? "")
+        const code = codes[0]
+        if (code) {
+          const confidence = codes.length === 1 ? 0.86 : 0.45
+          collector.add("payment.meansCode", code, confidence, [cell], "payment-means-label")
+        }
         continue
       }
-      const code = /\b(reglement|paiement|payable|payer|regler)\b/.test(part.folded)
-        ? meansOf(part.folded)
-        : undefined
-      if (code) collector.add("payment.meansCode", code, 0.55, [cell], "payment-means-word")
+      if (!/\b(reglement|paiement|payable|payer|regler|payment)\b/.test(part.folded)) continue
+      const codes = meansIn(part.folded)
+      const code = codes.length === 1 ? codes[0] : undefined
+      if (!code) continue
+      // "Règlement par chèque", "payable par virement": explicit; a bare mention is weak.
+      const explicit =
+        /\b(reglement|paiement|payable|a regler|a payer)\s+(uniquement\s+)?(par|en)\b/.test(
+          part.folded,
+        )
+      collector.add("payment.meansCode", code, explicit ? 0.74 : 0.55, [cell], "payment-means-word")
     }
   }
 }
 
 const TERMS_RE =
-  /(\b\d{1,3}\s*jours\b|\ba (la )?reception\b|\bcomptant\b|\bfin de mois\b|\ba l'echeance\b|\bimmediat|\bsous huitaine\b|\bdes reception\b|\bau plus tard\b|\bnet\s*\d+\b)/
+  /(\b\d{1,3}\s*jours\b|\b\d{1,3}\s*days\b|\ba (la )?reception\b|\bcomptant\b|\bfin de mois\b|\ba l'echeance\b|\bimmediat|\bsous huitaine\b|\bdes reception\b|\bau plus tard\b|\bnet\s*\d+\b)/
 const TERMS_START_RE =
   /^(paiement|payable|reglement|solde|a regler|a payer|delai de paiement|conditions de (paiement|reglement)|termes de paiement|echeance|net a \d+|montant a deduire|a deduire|cet avoir)/
+const TERMS_LABEL_RE =
+  /^(conditions de (paiement|reglement)|delais? de paiement|termes de paiement|modalites de paiement|payment terms)\s*:\s*(.+)$/
 const LEGAL_NOTE_RE = /penalite|indemnite|recouvrement|escompte|interet/
 
 function extractTerms(layout: Layout, collector: Collector, isCreditNote: boolean): void {
   for (const cell of layout.cells) {
-    for (const part of partsOf(cell)) {
+    for (const part of sentencesOf(cell)) {
       const f = part.folded
       if (LEGAL_NOTE_RE.test(f) || f.length > 140) continue
-      const labelled =
-        /^(conditions de (paiement|reglement)|delai de paiement|termes de paiement|modalites de paiement)\s*:\s*(.+)$/.exec(
-          f,
-        )
+      const labelled = TERMS_LABEL_RE.exec(f)
       if (labelled?.[3]) {
         const text = part.text.slice(part.text.length - labelled[3].length)
         collector.add("payment.termsText", text, 0.8, [cell], "payment-terms-label")
@@ -156,9 +163,11 @@ function extractLegalNotes(layout: Layout, collector: Collector): void {
     for (const c of cells) consumed.add(c.id)
     for (const sentence of text.split(/(?<=[.!])\s+(?=[\p{Lu}])/u)) {
       const ft = fold(sentence)
+      // One sentence may carry both the penalty and the 40 € fee: it then fills both mentions.
       if (/\b(indemnite forfaitaire|frais de recouvrement)\b/.test(ft) && /\b40\b/.test(ft)) {
         collector.add("legalNotes.recoveryFee", sentence, 0.85, cells, "legal-recovery-fee")
-      } else if (
+      }
+      if (
         /\bpenalites?\b|\binterets? de retard\b|\btaux d'interet legal\b|\btaux de refinancement\b/.test(
           ft,
         )

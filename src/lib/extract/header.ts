@@ -38,7 +38,7 @@ interface LabelRule {
 
 const NUMBER_LABELS: LabelRule[] = [
   {
-    re: /^(facture d'avoir|facture|avoir|note de credit|invoice|credit note)\s*(n°|n o|no\.?|n\.|nº|num(ero|\.)?|#|number)\s*:?/,
+    re: /^(facture d'avoir|facture|avoir|note de credit|invoice|credit note)\s*(number|numero|num\.|n°|nº|no\.?|n\.|#)(?![a-z])\s*:?/,
     confidence: 0.88,
     rule: "number-label",
   },
@@ -148,19 +148,25 @@ export function detectCreditNote(layout: Layout): boolean {
   return detectType(layout)?.code === "381"
 }
 
+/** "F A C T U R E" (letter-spaced title) → "facture". */
+function titleText(folded: string): string {
+  return /^(\p{L} ){3,}\p{L}$/u.test(folded) ? folded.replace(/ /g, "") : folded
+}
+
+const TITLE_TAIL = String.raw`(\s*$|\s*(n°|no\b|nº|numero|number|:|#)|\s+\S*\d|\s*/\s*\p{L}+$)`
+const CREDIT_TITLE_RE = new RegExp(
+  `^(facture d'avoir|avoir|note de credit|credit note)${TITLE_TAIL}`,
+  "u",
+)
+const INVOICE_TITLE_RE = new RegExp(`^(facture|invoice)${TITLE_TAIL}`, "u")
+
 function detectType(layout: Layout): { code: "380" | "381"; cells: Layout["cells"] } | undefined {
   const top = layout.cells.filter(
     (c) => c.page === 1 && c.y < 0.45 * (layout.pageHeights[0] ?? 842),
   )
-  const credit = top.filter((c) =>
-    /^(facture d'avoir|avoir|note de credit|credit note)(\s*$|\s*(n°|no\b|nº|numero|:|#)|\s+\S*\d)/.test(
-      c.folded,
-    ),
-  )
+  const credit = top.filter((c) => CREDIT_TITLE_RE.test(titleText(c.folded)))
   if (credit.length > 0) return { code: "381", cells: credit.slice(0, 1) }
-  const invoice = top.filter((c) =>
-    /^(facture|invoice)(\s*$|\s*(n°|no\b|nº|numero|:|#)|\s+\S*\d)/.test(c.folded),
-  )
+  const invoice = top.filter((c) => INVOICE_TITLE_RE.test(titleText(c.folded)))
   if (invoice.length > 0) return { code: "380", cells: invoice.slice(0, 1) }
   return undefined
 }

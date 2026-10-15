@@ -18,7 +18,16 @@ import {
   unitCodeFor,
 } from "./text"
 
-type ColumnKind = "desc" | "qty" | "unit" | "unitPrice" | "vat" | "total" | "discount" | "other"
+type ColumnKind =
+  | "desc"
+  | "ref"
+  | "qty"
+  | "unit"
+  | "unitPrice"
+  | "vat"
+  | "total"
+  | "discount"
+  | "other"
 
 interface Column {
   kind: ColumnKind
@@ -32,11 +41,15 @@ const HEADER_VOCAB: Array<[RegExp, ColumnKind]> = [
     /^(designation|description|libelle|articles?|prestations?|produits?|intitule|details?|objet|services?|items?|nature|missions?)\b/,
     "desc",
   ],
-  [/^(qte|qt\.|qtes?|quantites?|quant\.?|qty|nb|nombre|nbre|duree|temps|heures|jours)\b/, "qty"],
+  [/^(ref\.?|reference|code|sku|code article)$/, "ref"],
+  [
+    /^(qte|qt\.|qtes?|quantites?|quant\.?|qty|quantity|nb|nombre|nbre|duree|temps|heures|jours|hours|days|units)\b/,
+    "qty",
+  ],
   [/^(unite|unites|u\.?|unit)$/, "unit"],
   [/^(remise|rem\.|reduction|rabais|discount)/, "discount"],
   [
-    /^(p\.?\s?u\.?|prix unit|prix u\b|prix\b(?!\s*total)|tarif|taux horaire|unit price|cout unitaire|montant unitaire)/,
+    /^(p\.?\s?u\.?|prix unit|prix u\b|prix\b(?!\s*total)|tarif|taux horaire|taux journalier|tjm|unit price|price|rate|daily rate|hourly rate|cout unitaire|montant unitaire)/,
     "unitPrice",
   ],
   [/^(tva|taux tva|taux de tva|% tva|taux|vat)\b/, "vat"],
@@ -47,10 +60,11 @@ const TOTALS_RE =
   /^(total|sous-total|sous total|montant (h\.?t|ttc|tva|total|net|a payer|du)|net a payer|reste a payer|base ht|tva\b|acompte|deja|solde|a payer|remise globale|escompte)/
 
 const HT_RE =
-  /^(total|montant|sous-total|sous total|net)\s*(net\s*)?(h\.?\s?t\.?|hors tax\w*)\b|^base ht\b|^total ht\b/
+  /^(total|montant|sous-total|sous total|net)\s*(net\s*)?(h\.?\s?t\.?|hors tax\w*)\b|^base ht\b|^total ht\b|^(total|subtotal) (excl\.?|excluding|before|net of) (vat|tax)/
 const TVA_RE = /^(total|montant)\s*(de\s+(la\s+)?)?(tva|t\.v\.a)\b|^tva\s*:?$/
-const TVA_RATE_RE = /^(?:tva|t\.v\.a\.?)\s*(?:a\s+)?(\d{1,2}(?:[.,]\d{1,2})?)\s?%/
-const TTC_RE = /^(total|montant)\s*(t\.?\s?t\.?\s?c\.?|toutes taxes)\b|^ttc\b/
+const TVA_RATE_RE = /^(?:tva|t\.v\.a\.?|vat)\s*\(?(?:a\s+)?(\d{1,2}(?:[.,]\d{1,2})?)\s?%/
+const TTC_RE =
+  /^(total|montant)\s*(t\.?\s?t\.?\s?c\.?|toutes taxes)\b|^ttc\b|^total (incl\.?|including) (vat|tax)/
 const DUE_RE =
   /^(net a payer|total a payer|reste a payer|reste du|montant a payer|solde a (payer|regler)|montant du\b|a payer\b|solde du\b|montant a votre credit|total du\b|net a regler|amount due)/
 const PREPAID_RE =
@@ -133,8 +147,13 @@ function columnFor(item: PdfTextItem, cols: Column[], style: DecimalStyle): Colu
   const desc = cols.find((c) => c.kind === "desc")
   const center = item.x + item.width / 2
   if (!isNumeric && desc) {
-    const next = cols[cols.indexOf(desc) + 1]
-    if (item.x < (next ? (desc.x1 + next.x0) / 2 : Number.POSITIVE_INFINITY)) return desc
+    // Text starting in the description column belongs to it, even when it overflows rightwards.
+    const index = cols.indexOf(desc)
+    const prev = cols[index - 1]
+    const next = cols[index + 1]
+    const lo = prev ? (prev.x1 + desc.x0) / 2 : Number.NEGATIVE_INFINITY
+    const hi = next ? (desc.x1 + next.x0) / 2 : Number.POSITIVE_INFINITY
+    if (item.x >= lo && item.x < hi) return desc
   }
   for (let i = 0; i < cols.length; i++) {
     const col = cols[i]
@@ -237,7 +256,11 @@ function findTable(layout: Layout, style: DecimalStyle): ParsedLine[] {
     if (header) {
       cols = header
       const qtyLabel = fold(header.find((c) => c.kind === "qty")?.label ?? "")
-      qtyUnitHint = /heure/.test(qtyLabel) ? "HUR" : /jour/.test(qtyLabel) ? "DAY" : undefined
+      qtyUnitHint = /heure|hour/.test(qtyLabel)
+        ? "HUR"
+        : /jour|day/.test(qtyLabel)
+          ? "DAY"
+          : undefined
       open = true
       awaitingPage = 0
       last = undefined
@@ -283,6 +306,23 @@ function findTable(layout: Layout, style: DecimalStyle): ParsedLine[] {
 
 const AMOUNT_TAIL_RE = /^(.*?)[\s:]+(\(?[-\u2212]?\s?(?:€\s?)?\d[\d\s.,]*(?:\s?(?:€|EUR))?\)?)$/
 
+/**
+ * Amount printed at the right of a label but on a slightly different baseline (table cells
+ * vertically centred next to a wrapped label).
+ */
+function amountBeside(layout: Layout, row: Row, cell: Cell, style: DecimalStyle): Cell | undefined {
+  for (let r = row.index - 2; r <= row.index + 2; r++) {
+    const other = layout.rows[r]
+    if (!other || r === row.index || other.page !== row.page) continue
+    if (Math.abs(other.y - row.y) > 0.9 * cell.fontSize) continue
+    const candidate = other.cells.find(
+      (c) => c.x0 > cell.x1 && parseNumber(c.text, style) !== undefined,
+    )
+    if (candidate && other.cells.every((c) => c === candidate || c.x1 < cell.x0)) return candidate
+  }
+  return undefined
+}
+
 export function readPrintedTotals(layout: Layout, style: DecimalStyle): PrintedTotals {
   const totals: PrintedTotals = { vatRates: [], cells: {} }
   const set = (key: "ht" | "tva" | "ttc" | "due" | "prepaid", value: number, cells: Cell[]) => {
@@ -305,12 +345,13 @@ export function readPrintedTotals(layout: Layout, style: DecimalStyle): PrintedT
         label = fold(inline[1])
         amount = inlineAmount
       } else {
-        const next = row.cells[c + 1]
+        const next = row.cells[c + 1] ?? amountBeside(layout, row, cell, style)
         if (!next) continue
         amount = parseNumber(next.text, style)
         cells = [cell, next]
       }
       if (amount === undefined) continue
+      if (!/\p{L}/u.test(label)) continue
       const rate = TVA_RATE_RE.exec(label)
       if (rate?.[1]) {
         const r = parseNumber(rate[1], "comma")
