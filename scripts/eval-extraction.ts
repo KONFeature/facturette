@@ -168,6 +168,52 @@ export function groundTruthInvalid(path: string, value: unknown): boolean {
   return false
 }
 
+/**
+ * A line "-1 x 1440" and a line "1 x -1440" are the same invoice line: the XML builder
+ * normalises the sign (BR-27: a unit price is never negative, a negative unit price becomes its
+ * absolute value with a negated quantity). Both sides are compared in that canonical form so an
+ * equivalent spelling is never scored as an error. Only the sign moves: magnitudes must still
+ * match, so a wrong amount is still a defect.
+ */
+export function canonicalLineSigns(invoice: unknown): unknown {
+  if (typeof invoice !== "object" || invoice === null) return invoice
+  const lines = (invoice as { lines?: unknown }).lines
+  if (!Array.isArray(lines)) return invoice
+  return {
+    ...invoice,
+    lines: lines.map((line: unknown) => {
+      if (typeof line !== "object" || line === null) return line
+      const { quantity, unitPrice } = line as { quantity?: unknown; unitPrice?: unknown }
+      if (typeof unitPrice !== "number" || unitPrice >= 0) return line
+      return {
+        ...line,
+        unitPrice: -unitPrice,
+        ...(typeof quantity === "number" ? { quantity: -quantity } : {}),
+      }
+    }),
+  }
+}
+
+/**
+ * Suggestions are per path; a line's quantity and unit price suggestions are flipped together
+ * when the raw draft carries that line with a negative unit price (same rule as above).
+ */
+export function canonicalSuggestions(suggestions: Suggestion[], rawDraft: unknown): Suggestion[] {
+  const lines = (rawDraft as { lines?: unknown } | null)?.lines
+  if (!Array.isArray(lines)) return suggestions
+  const flipped = new Set<number>()
+  lines.forEach((line: unknown, i) => {
+    const unitPrice = (line as { unitPrice?: unknown } | null)?.unitPrice
+    if (typeof unitPrice === "number" && unitPrice < 0) flipped.add(i)
+  })
+  if (flipped.size === 0) return suggestions
+  return suggestions.map((s) => {
+    const m = /^lines\.(\d+)\.(quantity|unitPrice)$/.exec(s.path)
+    if (!m || !flipped.has(Number(m[1])) || typeof s.value !== "number") return s
+    return { ...s, value: -s.value }
+  })
+}
+
 function emptyGroups(): Record<FieldGroup, GroupScore> {
   return Object.fromEntries(
     FIELD_GROUPS.map((g) => [g, { printed: 0, hit: 0, draft: 0, wrong: 0 }]),
@@ -183,8 +229,9 @@ export function scoreFixture(
   textLayer: boolean,
   ms: number,
 ): FixtureScore {
-  const expected = flatten(expectedInvoice)
-  const draft = flatten(result.draft)
+  const expected = flatten(canonicalLineSigns(expectedInvoice))
+  const draft = flatten(canonicalLineSigns(result.draft))
+  const suggestions = canonicalSuggestions(result.suggestions, result.draft)
   const invalid = [...expected].filter(([p, v]) => groundTruthInvalid(p, v)).map(([p]) => p)
   const excluded = new Set(invalid)
   const groups = emptyGroups()
@@ -216,7 +263,7 @@ export function scoreFixture(
     }
   }
   const confidentErrors: PathError[] = []
-  for (const s of result.suggestions) {
+  for (const s of suggestions) {
     if (s.confidence < PREFILL_THRESHOLD || excluded.has(s.path)) continue
     if (!expected.has(s.path) || !sameValue(s.value, expected.get(s.path))) {
       confidentErrors.push({

@@ -56,6 +56,16 @@ const HEADER_VOCAB: Array<[RegExp, ColumnKind]> = [
   [/^(total|montant|mt\b|net|prix total|amount|sous-total)/, "total"],
 ]
 
+/**
+ * Rows that belong to the totals or VAT-summary area even when their first cell is not a totals
+ * label ("Taux | Base HT | Montant TVA" summary header, "20 % | 813,00 | 162,60" rows read as
+ * columns of the item table).
+ */
+const SUMMARY_ROW_RE =
+  /\b(base (h\.?t\.?|imposable|hors tax\w*)|montant (de (la )?)?tva|total (h\.?t\.?|ttc|tva)|net a payer)\b/
+/** Intermediate totals inside the table ("Sous-total LOT 1"): skipped, the table goes on. */
+const SUBTOTAL_RE = /^(sous-total|sous total|subtotal|total (du )?lot|total lot)\b/
+
 const TOTALS_RE =
   /^(total|sous-total|sous total|montant (h\.?t|ttc|tva|total|net|a payer|du)|net a payer|reste a payer|base ht|tva\b|acompte|deja|solde|a payer|remise globale|escompte)/
 
@@ -89,6 +99,8 @@ interface ParsedLine {
   vatRate?: number
   total?: number
   hasDiscount: boolean
+  /** Printed discount of the line: a percentage ("10 %") or an amount. */
+  discount?: { percent?: number; amount?: number }
   /** The unit price column is labelled TTC: gross prices, not the net price the invoice needs. */
   grossPrice: boolean
   cells: Record<string, Cell[]>
@@ -181,8 +193,15 @@ function rowColumns(
 ): Map<ColumnKind, { text: string; cells: Cell[] }> {
   const out = new Map<ColumnKind, { text: string; cells: Cell[]; items: PdfTextItem[] }>()
   for (const cell of row.cells) {
+    // A wrapped description sentence overflows the description column: a cell that starts in it
+    // and does not end with a number is text only, whatever columns its later words fall under.
+    const firstItem = cell.items[0]
+    const wholeDesc =
+      firstItem !== undefined &&
+      columnFor(firstItem, cols, style)?.kind === "desc" &&
+      !/\d\s*%?$/.test(cell.text)
     for (const item of cell.items) {
-      const col = columnFor(item, cols, style)
+      const col = wholeDesc ? cols.find((c) => c.kind === "desc") : columnFor(item, cols, style)
       if (!col) continue
       const entry = out.get(col.kind) ?? { text: "", cells: [], items: [] }
       entry.items.push(item)
@@ -211,9 +230,11 @@ function parseRow(
   cols: Column[],
   style: DecimalStyle,
   qtyUnitHint: string | undefined,
-): ParsedLine | "continuation" | "end" {
+): ParsedLine | "continuation" | "end" | "subtotal" {
   const first = row.cells[0]
+  if (row.cells.some((c) => SUBTOTAL_RE.test(c.folded))) return "subtotal"
   if (first && TOTALS_RE.test(first.folded) && row.cells.length <= 3) return "end"
+  if (SUMMARY_ROW_RE.test(fold(row.text))) return "end"
   const values = rowColumns(row, cols, style)
   const num = (kind: ColumnKind) => {
     const v = values.get(kind)
@@ -245,10 +266,24 @@ function parseRow(
       : undefined,
     total,
     hasDiscount: values.has("discount"),
+    discount: readDiscount(values.get("discount")?.text, style),
     grossPrice: false,
     cells,
     rowCells: row.cells,
   }
+}
+
+function readDiscount(
+  text: string | undefined,
+  style: DecimalStyle,
+): ParsedLine["discount"] | undefined {
+  if (!text) return undefined
+  if (text.includes("%")) {
+    const percent = parsePercent(text, style)
+    return percent !== undefined && percent > 0 && percent < 100 ? { percent } : undefined
+  }
+  const amount = parseNumber(text, style)
+  return amount !== undefined && amount !== 0 ? { amount: Math.abs(amount) } : undefined
 }
 
 function findTable(layout: Layout, style: DecimalStyle): ParsedLine[] {
@@ -291,7 +326,14 @@ function findTable(layout: Layout, style: DecimalStyle): ParsedLine[] {
         continue
       } else continue
     }
-    if (inFooter && typeof parsed !== "object") continue
+    if (parsed === "subtotal") continue
+    // Page footers are skipped, except a wrapped description row glued to the last item row.
+    const glued =
+      parsed === "continuation" &&
+      last !== undefined &&
+      last.row.page === row.page &&
+      row.y - last.row.y1 <= 1.0 * (row.cells[0]?.fontSize ?? 10)
+    if (inFooter && typeof parsed !== "object" && !glued) continue
     if (parsed === "end") {
       open = false
       continue
@@ -304,7 +346,15 @@ function findTable(layout: Layout, style: DecimalStyle): ParsedLine[] {
         last.line.cells.description = [...(last.line.cells.description ?? []), ...row.cells]
         last = { line: last.line, row }
       } else if (last && last.row.page === row.page && row.y - last.row.y1 > 2.5 * fontSize) {
-        open = false
+        // A section heading inside the table ("LOT 2 - Menuiseries") is followed by item rows;
+        // any other far text row ends the table.
+        const next = layout.rows[row.index + 1]
+        const nextParsed = next ? parseRow(next, cols, style, qtyUnitHint) : "end"
+        const sectionHeading =
+          typeof nextParsed === "object" &&
+          nextParsed.quantity !== undefined &&
+          nextParsed.total !== undefined
+        if (!sectionHeading) open = false
       }
       continue
     }
@@ -373,7 +423,13 @@ export function readPrintedTotals(layout: Layout, style: DecimalStyle): PrintedT
       else if (TVA_RE.test(label)) set("tva", amount, cells)
       else if (TTC_RE.test(label)) set("ttc", amount, cells)
       else if (DUE_RE.test(label)) set("due", amount, cells)
-      else if (PREPAID_RE.test(label)) set("prepaid", amount, cells)
+      else if (PREPAID_RE.test(label)) {
+        // "Acompte versé (30 %) | 1 | -1 440,00 | …" is an item row, not the prepaid total: the
+        // amount of a totals row is the last cell of its row.
+        const amountCell = cells[cells.length - 1]
+        if (amountCell === row.cells[row.cells.length - 1] || cells.length === 1)
+          set("prepaid", amount, cells)
+      }
     }
   }
   return totals
@@ -436,6 +492,20 @@ export function extractLines(
     ) {
       quantity = 1
     }
+    // No per-line discount in the invoice model: the net unit price after the printed discount
+    // is what it needs. Kept only when the printed line total confirms it.
+    let discountNet: "confirmed" | "unconfirmed" | undefined
+    const d = p.discount
+    if (d && unitPrice !== undefined && quantity !== undefined && quantity !== 0) {
+      const net =
+        d.percent !== undefined
+          ? Math.round(unitPrice * (100 - d.percent)) / 100
+          : Math.round((unitPrice - (d.amount ?? 0) / Math.abs(quantity)) * 100) / 100
+      const confirmed =
+        total !== undefined && Math.abs(lineNet({ quantity, unitPrice: net }) - total) < 0.015
+      discountNet = confirmed ? "confirmed" : "unconfirmed"
+      unitPrice = net
+    }
     let implicit = false
     if (quantity === undefined && unitPrice === undefined && total !== undefined && !p.cells.qty) {
       // Amount-only table: one unit at the line amount (a negative amount is a negative quantity).
@@ -452,7 +522,7 @@ export function extractLines(
       const derived = Math.round((total / quantity) * 100) / 100
       if (Math.abs(lineNet({ quantity, unitPrice: derived }) - total) < 0.005) unitPrice = derived
     }
-    return { p, quantity, unitPrice, total, implicit }
+    return { p, quantity, unitPrice, total, implicit, discountNet }
   })
 
   const singleRate =
@@ -491,7 +561,8 @@ export function extractLines(
       l.total !== undefined &&
       l.quantity !== undefined &&
       l.unitPrice !== undefined &&
-      Math.abs(lineNet({ quantity: l.quantity, unitPrice: l.unitPrice }) - l.total) < 0.005
+      Math.abs(lineNet({ quantity: l.quantity, unitPrice: l.unitPrice }) - l.total) <
+        (l.discountNet === "confirmed" ? 0.015 : 0.005)
     // Structure (header columns) gives 0.75; arithmetic on the line and on the whole table confirms.
     let base = p.grossPrice ? 0.5 : 0.75
     if (lineOk) base += 0.1
@@ -500,6 +571,7 @@ export function extractLines(
     if (printedHt !== undefined && !htMatches) base = Math.min(base, 0.62)
     if (p.grossPrice) base = Math.min(base, 0.5)
     if (l.implicit) base -= 0.12
+    const priceConfidence = l.discountNet === "unconfirmed" ? Math.min(base, 0.5) : base
     const at = (k: string) => [...(p.cells[k] ?? [])]
     const path = `lines.${i}`
     collector.add(`${path}.name`, p.name, base, at("desc"), "table-row")
@@ -515,9 +587,9 @@ export function extractLines(
     collector.add(
       `${path}.unitPrice`,
       l.unitPrice,
-      base,
+      priceConfidence,
       at("unitPrice").length ? at("unitPrice") : at("total"),
-      "table-row",
+      l.discountNet ? "table-row-net-of-discount" : "table-row",
     )
     if (p.unitCode) {
       const explicit =
@@ -530,7 +602,9 @@ export function extractLines(
         "table-unit",
       )
     } else if (l.quantity !== undefined) {
-      collector.add(`${path}.unitCode`, "C62", 0.6, at("qty"), "table-unit-default")
+      // No unit column: "unité" is only a guess, offered below the pre-fill threshold (the form
+      // already defaults to it).
+      collector.add(`${path}.unitCode`, "C62", 0.5, at("qty"), "table-unit-default")
     }
     if (context.exemptCategory) {
       collector.add(
