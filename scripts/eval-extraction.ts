@@ -1,7 +1,7 @@
 /**
  * Extraction quality scorecard over the fixture corpus.
  *
- *   bun scripts/eval-extraction.ts [--set dev|holdout|all] [--verbose] [--json]
+ *   bun scripts/eval-extraction.ts [--set dev|holdout|all] [--dir <fixtures dir>] [--verbose] [--json]
  *
  * For every fixture of fixtures/invoices/manifest.json: real PDF bytes → extractPdfText →
  * extractInvoice, compared with the `.expected.json` ground truth.
@@ -278,18 +278,21 @@ function aggregate(scores: FixtureScore[]): Aggregate {
   }
 }
 
-export async function evaluate(set: FixtureSet = "dev"): Promise<EvalReport> {
+export async function evaluate(
+  set: FixtureSet = "dev",
+  fixturesDir: string = FIXTURES_DIR,
+): Promise<EvalReport> {
   const manifest = JSON.parse(
-    readFileSync(resolve(FIXTURES_DIR, "manifest.json"), "utf8"),
+    readFileSync(resolve(fixturesDir, "manifest.json"), "utf8"),
   ) as ManifestEntry[]
   const fixtures: FixtureScore[] = []
   const failures: string[] = []
   for (const entry of manifest) {
     const fixtureSet = DEV_FIXTURES.includes(entry.file.slice(0, 2)) ? "dev" : "holdout"
     if (set !== "all" && set !== fixtureSet) continue
-    const bytes = new Uint8Array(readFileSync(resolve(FIXTURES_DIR, entry.file)))
+    const bytes = new Uint8Array(readFileSync(resolve(fixturesDir, entry.file)))
     const expectedInvoice: unknown = JSON.parse(
-      readFileSync(resolve(FIXTURES_DIR, entry.expected), "utf8"),
+      readFileSync(resolve(fixturesDir, entry.expected), "utf8"),
     )
     const doc = await extractPdfText(bytes)
     const start = performance.now()
@@ -401,7 +404,11 @@ if (import.meta.main) {
   const setIndex = args.indexOf("--set")
   const setArg = setIndex >= 0 ? args[setIndex + 1] : "dev"
   const set: FixtureSet = setArg === "holdout" || setArg === "all" ? setArg : "dev"
-  const report = await evaluate(set)
+  // --dir <path>: score another fixture directory (e.g. fixtures/blind). Entries outside the dev
+  // prefixes count as hold-out, so use it with --set holdout (or all).
+  const dirIndex = args.indexOf("--dir")
+  const dirArg = dirIndex >= 0 ? args[dirIndex + 1] : undefined
+  const report = await evaluate(set, dirArg ? resolve(process.cwd(), dirArg) : FIXTURES_DIR)
   if (args.includes("--json")) console.log(JSON.stringify(report, null, 2))
   else console.log(formatReport(report, args.includes("--verbose")))
   process.exit(report.passed ? 0 : 1)
