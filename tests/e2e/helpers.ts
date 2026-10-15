@@ -265,6 +265,8 @@ export async function fillMissingFromExpected(
     expect(same(kind, await readValue(page, path, kind), want), `typed ${path}`).toBe(true)
   }
 
+  // The review form renders after the route change: never read a control before it exists.
+  await expect(page.locator('form [name="number"]')).toBeVisible()
   const all = new Map(leaves(expected))
   const take = async (path: string) => {
     const raw = all.get(path)
