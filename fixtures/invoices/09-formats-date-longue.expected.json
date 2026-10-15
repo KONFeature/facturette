@@ -1,0 +1,69 @@
+{
+  "number": "2026-1010",
+  "typeCode": "380",
+  "issueDate": "2026-10-01",
+  "dueDate": "2026-10-31",
+  "deliveryDate": "2026-09-30",
+  "operationCategory": "services",
+  "currency": "EUR",
+  "seller": {
+    "name": "Orion Conseil SAS",
+    "kind": "company",
+    "siren": "917890121",
+    "siret": "917890121000695",
+    "vatNumber": "FR37917890121",
+    "address": {
+      "line1": "3 place de la Bourse",
+      "postalCode": "75002",
+      "city": "Paris",
+      "countryCode": "FR"
+    },
+    "legalForm": "SAS",
+    "shareCapital": "50 000 €",
+    "registration": "RCS Paris 917 890 121",
+    "email": "admin@orion-conseil.example",
+    "phone": "01 99 00 85 46"
+  },
+  "buyer": {
+    "name": "Cuisines Mutualisées du Vexin",
+    "kind": "company",
+    "siren": "872345673",
+    "siret": "872345673001198",
+    "vatNumber": "FR20872345673",
+    "address": {
+      "line1": "21 route de Gisors",
+      "postalCode": "27150",
+      "city": "Étrépagny",
+      "countryCode": "FR"
+    }
+  },
+  "lines": [
+    {
+      "name": "Accompagnement à la transition numérique, phase 1",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": 5600,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Formation des équipes (2 sessions)",
+      "quantity": 2,
+      "unitCode": "DAY",
+      "unitPrice": 1190,
+      "vatCategory": "S",
+      "vatRate": 20
+    }
+  ],
+  "payment": {
+    "meansCode": "58",
+    "iban": "FR7630006000990002345678969",
+    "bic": "FICTFRPPXXX",
+    "termsText": "Paiement à 30 jours"
+  },
+  "legalNotes": {
+    "latePaymentPenalty": "En cas de retard de paiement, une pénalité égale à 3 fois le taux d'intérêt légal sera appliquée.",
+    "recoveryFee": "Indemnité forfaitaire pour frais de recouvrement en cas de retard de paiement : 40 €.",
+    "earlyPaymentDiscount": "Pas d'escompte pour paiement anticipé."
+  }
+}

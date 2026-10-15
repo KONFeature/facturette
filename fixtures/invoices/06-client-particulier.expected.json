@@ -1,0 +1,68 @@
+{
+  "number": "2026-0933",
+  "typeCode": "380",
+  "issueDate": "2026-10-03",
+  "dueDate": "2026-10-18",
+  "deliveryDate": "2026-10-02",
+  "operationCategory": "mixed",
+  "currency": "EUR",
+  "seller": {
+    "name": "Plomberie Delacroix SARL",
+    "kind": "company",
+    "siren": "656789013",
+    "siret": "656789013000513",
+    "vatNumber": "FR37656789013",
+    "address": {
+      "line1": "8 impasse du Moulin",
+      "postalCode": "44000",
+      "city": "Nantes",
+      "countryCode": "FR"
+    },
+    "legalForm": "SARL",
+    "shareCapital": "7 500 €",
+    "registration": "RM 656 789 013 Nantes",
+    "email": "devis@plomberie-delacroix.example",
+    "phone": "01 99 00 74 22"
+  },
+  "buyer": {
+    "name": "Madame Élodie Martinet",
+    "kind": "individual",
+    "address": {
+      "line1": "9 rue des Lilas",
+      "postalCode": "35000",
+      "city": "Rennes",
+      "countryCode": "FR"
+    },
+    "email": "elodie.martinet@exemple-mail.example",
+    "phone": "06 39 98 77 31"
+  },
+  "lines": [
+    {
+      "name": "Chauffe-eau électrique 200 L (fourniture)",
+      "quantity": 1,
+      "unitCode": "C62",
+      "unitPrice": 489,
+      "vatCategory": "S",
+      "vatRate": 10
+    },
+    {
+      "name": "Dépose, pose et mise en service",
+      "quantity": 3.5,
+      "unitCode": "HUR",
+      "unitPrice": 58,
+      "vatCategory": "S",
+      "vatRate": 10
+    }
+  ],
+  "payment": {
+    "meansCode": "30",
+    "iban": "FR7630006000111234567890136",
+    "bic": "FICTFRPPXXX",
+    "termsText": "Paiement sous 15 jours"
+  },
+  "legalNotes": {
+    "latePaymentPenalty": "En cas de retard de paiement, une pénalité égale à 3 fois le taux d'intérêt légal sera appliquée.",
+    "recoveryFee": "Indemnité forfaitaire pour frais de recouvrement en cas de retard de paiement : 40 €.",
+    "earlyPaymentDiscount": "Pas d'escompte pour paiement anticipé."
+  }
+}

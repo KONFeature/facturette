@@ -1,0 +1,87 @@
+{
+  "number": "FA-26-1187",
+  "typeCode": "380",
+  "issueDate": "2026-09-28",
+  "dueDate": "2026-10-28",
+  "deliveryDate": "2026-09-27",
+  "operationCategory": "mixed",
+  "currency": "EUR",
+  "seller": {
+    "name": "Les Saveurs de Marguerite SAS",
+    "kind": "company",
+    "siren": "834567893",
+    "siret": "834567893000356",
+    "vatNumber": "FR25834567893",
+    "address": {
+      "line1": "5 chemin des Vignes",
+      "line2": "Zone artisanale Les Chartrons",
+      "postalCode": "33000",
+      "city": "Bordeaux",
+      "countryCode": "FR"
+    },
+    "legalForm": "SAS",
+    "shareCapital": "25 000 €",
+    "registration": "RCS Bordeaux 834 567 893",
+    "email": "contact@saveurs-marguerite.example",
+    "phone": "01 99 00 52 31"
+  },
+  "buyer": {
+    "name": "Horizon Immobilier SA",
+    "kind": "company",
+    "siren": "750123457",
+    "siret": "750123457000935",
+    "vatNumber": "FR65750123457",
+    "address": {
+      "line1": "40 boulevard Haussmann",
+      "postalCode": "75009",
+      "city": "Paris",
+      "countryCode": "FR"
+    }
+  },
+  "buyerReference": "Séminaire direction",
+  "lines": [
+    {
+      "name": "Plateaux repas chauds (menu du chef)",
+      "quantity": 48,
+      "unitCode": "C62",
+      "unitPrice": 14.5,
+      "vatCategory": "S",
+      "vatRate": 10
+    },
+    {
+      "name": "Eaux et jus de fruits (bouteille 1 L)",
+      "quantity": 60,
+      "unitCode": "C62",
+      "unitPrice": 2.1,
+      "vatCategory": "S",
+      "vatRate": 5.5
+    },
+    {
+      "name": "Location vaisselle et nappage",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": 220,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Service et mise en place sur site",
+      "quantity": 6,
+      "unitCode": "HUR",
+      "unitPrice": 38,
+      "vatCategory": "S",
+      "vatRate": 20
+    }
+  ],
+  "payment": {
+    "meansCode": "58",
+    "iban": "FR7630003005550009876543264",
+    "bic": "FICTFRPPXXX",
+    "termsText": "Paiement à 30 jours fin de mois"
+  },
+  "legalNotes": {
+    "latePaymentPenalty": "En cas de retard de paiement, une pénalité égale à 3 fois le taux d'intérêt légal sera appliquée.",
+    "recoveryFee": "Indemnité forfaitaire pour frais de recouvrement en cas de retard de paiement : 40 €.",
+    "earlyPaymentDiscount": "Pas d'escompte pour paiement anticipé."
+  }
+}

@@ -1,0 +1,392 @@
+{
+  "number": "BT-2026-3305",
+  "typeCode": "380",
+  "issueDate": "2026-10-05",
+  "dueDate": "2026-11-04",
+  "deliveryDate": "2026-10-02",
+  "operationCategory": "goods",
+  "currency": "EUR",
+  "seller": {
+    "name": "Bureautech Distribution SAS",
+    "kind": "company",
+    "siren": "745678904",
+    "siret": "745678904000430",
+    "vatNumber": "FR26745678904",
+    "address": {
+      "line1": "112 avenue de la République",
+      "postalCode": "59800",
+      "city": "Lille",
+      "countryCode": "FR"
+    },
+    "legalForm": "SAS",
+    "shareCapital": "120 000 €",
+    "registration": "RCS Lille Métropole 745 678 904",
+    "email": "facturation@bureautech.example",
+    "phone": "01 99 00 63 08"
+  },
+  "buyer": {
+    "name": "NordTech Solutions SAS",
+    "kind": "company",
+    "siren": "683456784",
+    "siret": "683456784001271",
+    "vatNumber": "FR78683456784",
+    "address": {
+      "line1": "77 rue Nationale",
+      "line2": "Bâtiment B, 3e étage",
+      "postalCode": "59000",
+      "city": "Lille",
+      "countryCode": "FR"
+    }
+  },
+  "orderReference": "CMD-77120",
+  "lines": [
+    {
+      "name": "Ordinateur portable 15 pouces (REF-1000)",
+      "quantity": 1,
+      "unitCode": "C62",
+      "unitPrice": 7.9,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Écran 24 pouces Full HD (REF-1007)",
+      "quantity": 4,
+      "unitCode": "C62",
+      "unitPrice": 45.25,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Clavier sans fil AZERTY (REF-1014)",
+      "quantity": 7,
+      "unitCode": "C62",
+      "unitPrice": 82.6,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Souris ergonomique (REF-1021)",
+      "quantity": 3,
+      "unitCode": "C62",
+      "unitPrice": 119.95,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Station d'accueil USB-C (REF-1028)",
+      "quantity": 6,
+      "unitCode": "C62",
+      "unitPrice": 155.9,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Casque audio avec micro (REF-1035)",
+      "quantity": 2,
+      "unitCode": "C62",
+      "unitPrice": 193.25,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Webcam HD (REF-1042)",
+      "quantity": 5,
+      "unitCode": "C62",
+      "unitPrice": 230.6,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Disque SSD externe 1 To (REF-1049)",
+      "quantity": 1,
+      "unitCode": "C62",
+      "unitPrice": 267.95,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Câble HDMI 2 m (REF-1056)",
+      "quantity": 4,
+      "unitCode": "C62",
+      "unitPrice": 13.9,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Multiprise parafoudre 6 prises (REF-1063)",
+      "quantity": 7,
+      "unitCode": "C62",
+      "unitPrice": 51.25,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Imprimante laser monochrome (REF-1070)",
+      "quantity": 3,
+      "unitCode": "C62",
+      "unitPrice": 88.6,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Cartouche de toner noir (REF-1077)",
+      "quantity": 6,
+      "unitCode": "C62",
+      "unitPrice": 125.95,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Ramette papier A4 (500 feuilles) (REF-1084)",
+      "quantity": 2,
+      "unitCode": "C62",
+      "unitPrice": 161.9,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Support écran réglable (REF-1091)",
+      "quantity": 5,
+      "unitCode": "C62",
+      "unitPrice": 199.25,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Onduleur 650 VA (REF-1098)",
+      "quantity": 1,
+      "unitCode": "C62",
+      "unitPrice": 236.6,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Ordinateur portable 15 pouces (REF-1105)",
+      "quantity": 4,
+      "unitCode": "C62",
+      "unitPrice": 273.95,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Écran 24 pouces Full HD (REF-1112)",
+      "quantity": 7,
+      "unitCode": "C62",
+      "unitPrice": 19.9,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Clavier sans fil AZERTY (REF-1119)",
+      "quantity": 3,
+      "unitCode": "C62",
+      "unitPrice": 57.25,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Souris ergonomique (REF-1126)",
+      "quantity": 6,
+      "unitCode": "C62",
+      "unitPrice": 94.6,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Station d'accueil USB-C (REF-1133)",
+      "quantity": 2,
+      "unitCode": "C62",
+      "unitPrice": 131.95,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Casque audio avec micro (REF-1140)",
+      "quantity": 5,
+      "unitCode": "C62",
+      "unitPrice": 167.9,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Webcam HD (REF-1147)",
+      "quantity": 1,
+      "unitCode": "C62",
+      "unitPrice": 205.25,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Disque SSD externe 1 To (REF-1154)",
+      "quantity": 4,
+      "unitCode": "C62",
+      "unitPrice": 242.6,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Câble HDMI 2 m (REF-1161)",
+      "quantity": 7,
+      "unitCode": "C62",
+      "unitPrice": 279.95,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Multiprise parafoudre 6 prises (REF-1168)",
+      "quantity": 3,
+      "unitCode": "C62",
+      "unitPrice": 25.9,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Imprimante laser monochrome (REF-1175)",
+      "quantity": 6,
+      "unitCode": "C62",
+      "unitPrice": 63.25,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Cartouche de toner noir (REF-1182)",
+      "quantity": 2,
+      "unitCode": "C62",
+      "unitPrice": 100.6,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Ramette papier A4 (500 feuilles) (REF-1189)",
+      "quantity": 5,
+      "unitCode": "C62",
+      "unitPrice": 137.95,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Support écran réglable (REF-1196)",
+      "quantity": 1,
+      "unitCode": "C62",
+      "unitPrice": 173.9,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Onduleur 650 VA (REF-1203)",
+      "quantity": 4,
+      "unitCode": "C62",
+      "unitPrice": 211.25,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Ordinateur portable 15 pouces (REF-1210)",
+      "quantity": 7,
+      "unitCode": "C62",
+      "unitPrice": 248.6,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Écran 24 pouces Full HD (REF-1217)",
+      "quantity": 3,
+      "unitCode": "C62",
+      "unitPrice": 285.95,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Clavier sans fil AZERTY (REF-1224)",
+      "quantity": 6,
+      "unitCode": "C62",
+      "unitPrice": 31.9,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Souris ergonomique (REF-1231)",
+      "quantity": 2,
+      "unitCode": "C62",
+      "unitPrice": 69.25,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Station d'accueil USB-C (REF-1238)",
+      "quantity": 5,
+      "unitCode": "C62",
+      "unitPrice": 106.6,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Casque audio avec micro (REF-1245)",
+      "quantity": 1,
+      "unitCode": "C62",
+      "unitPrice": 143.95,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Webcam HD (REF-1252)",
+      "quantity": 4,
+      "unitCode": "C62",
+      "unitPrice": 179.9,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Disque SSD externe 1 To (REF-1259)",
+      "quantity": 7,
+      "unitCode": "C62",
+      "unitPrice": 217.25,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Câble HDMI 2 m (REF-1266)",
+      "quantity": 3,
+      "unitCode": "C62",
+      "unitPrice": 254.6,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Multiprise parafoudre 6 prises (REF-1273)",
+      "quantity": 6,
+      "unitCode": "C62",
+      "unitPrice": 291.95,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Imprimante laser monochrome (REF-1280)",
+      "quantity": 2,
+      "unitCode": "C62",
+      "unitPrice": 37.9,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Cartouche de toner noir (REF-1287)",
+      "quantity": 5,
+      "unitCode": "C62",
+      "unitPrice": 75.25,
+      "vatCategory": "S",
+      "vatRate": 20
+    }
+  ],
+  "payment": {
+    "meansCode": "58",
+    "iban": "FR7630002008110004567891212",
+    "bic": "FICTFRPPXXX",
+    "reference": "BT-2026-3305",
+    "termsText": "Paiement à 30 jours date de facture"
+  },
+  "legalNotes": {
+    "latePaymentPenalty": "En cas de retard de paiement, une pénalité égale à 3 fois le taux d'intérêt légal sera appliquée.",
+    "recoveryFee": "Indemnité forfaitaire pour frais de recouvrement en cas de retard de paiement : 40 €.",
+    "earlyPaymentDiscount": "Pas d'escompte pour paiement anticipé."
+  }
+}

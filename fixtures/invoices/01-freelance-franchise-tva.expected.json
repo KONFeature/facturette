@@ -1,0 +1,61 @@
+{
+  "number": "2026-014",
+  "typeCode": "380",
+  "issueDate": "2026-10-01",
+  "dueDate": "2026-10-31",
+  "deliveryDate": "2026-09-26",
+  "operationCategory": "services",
+  "currency": "EUR",
+  "seller": {
+    "name": "Camille Fabre – Design graphique",
+    "kind": "company",
+    "siren": "812345676",
+    "siret": "812345676000190",
+    "address": {
+      "line1": "14 rue des Tisserands",
+      "postalCode": "69001",
+      "city": "Lyon",
+      "countryCode": "FR"
+    },
+    "legalForm": "Micro-entrepreneur",
+    "registration": "Dispensée d'immatriculation au RCS",
+    "email": "camille@fabre-design.example",
+    "phone": "06 39 98 12 04"
+  },
+  "buyer": {
+    "name": "Brasserie du Port SAS",
+    "kind": "company",
+    "siren": "849012349",
+    "siret": "849012349000851",
+    "vatNumber": "FR01849012349",
+    "address": {
+      "line1": "2 quai de la Fosse",
+      "postalCode": "44000",
+      "city": "Nantes",
+      "countryCode": "FR"
+    },
+    "email": "compta@brasserie-du-port.example"
+  },
+  "lines": [
+    {
+      "name": "Création de logo et charte graphique",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": 850,
+      "vatCategory": "E",
+      "vatRate": 0
+    }
+  ],
+  "vatExemptionReason": "TVA non applicable, art. 293 B du CGI",
+  "payment": {
+    "meansCode": "58",
+    "iban": "FR7630006000011234567890189",
+    "bic": "FICTFRPPXXX",
+    "termsText": "Paiement à 30 jours par virement"
+  },
+  "legalNotes": {
+    "latePaymentPenalty": "En cas de retard de paiement, une pénalité égale à 3 fois le taux d'intérêt légal sera appliquée.",
+    "recoveryFee": "Indemnité forfaitaire pour frais de recouvrement en cas de retard de paiement : 40 €.",
+    "earlyPaymentDiscount": "Pas d'escompte pour paiement anticipé."
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "number": "2026/10/0058",
+  "typeCode": "380",
+  "issueDate": "2026-10-09",
+  "dueDate": "2026-11-08",
+  "deliveryDate": "2026-10-07",
+  "operationCategory": "goods",
+  "currency": "EUR",
+  "seller": {
+    "name": "Studio Mistral SARL",
+    "kind": "company",
+    "siren": "708901236",
+    "siret": "708901236000778",
+    "vatNumber": "FR60708901236",
+    "address": {
+      "line1": "19 rue Sainte-Catherine",
+      "postalCode": "13001",
+      "city": "Marseille",
+      "countryCode": "FR"
+    },
+    "legalForm": "SARL",
+    "shareCapital": "5 000 €",
+    "registration": "RCS Marseille 708 901 236",
+    "email": "hello@studio-mistral.example",
+    "phone": "01 99 00 96 53"
+  },
+  "buyer": {
+    "name": "NordTech Solutions SAS",
+    "kind": "company",
+    "siren": "683456784",
+    "siret": "683456784001271",
+    "vatNumber": "FR78683456784",
+    "address": {
+      "line1": "77 rue Nationale",
+      "line2": "Bâtiment B, 3e étage",
+      "postalCode": "59000",
+      "city": "Lille",
+      "countryCode": "FR"
+    }
+  },
+  "deliveryAddress": {
+    "line1": "Zone industrielle Est, quai 4",
+    "postalCode": "59160",
+    "city": "Lomme",
+    "countryCode": "FR"
+  },
+  "orderReference": "PO-4471",
+  "buyerReference": "Service achats",
+  "lines": [
+    {
+      "name": "Mobilier d'accueil sur mesure",
+      "quantity": 1,
+      "unitCode": "C62",
+      "unitPrice": 1850,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Livraison et installation",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": 240,
+      "vatCategory": "S",
+      "vatRate": 20
+    }
+  ],
+  "payment": {
+    "meansCode": "58",
+    "iban": "FR7630007001230007654321971",
+    "bic": "FICTFRPPXXX",
+    "reference": "2026/10/0058",
+    "termsText": "Règlement à 30 jours"
+  },
+  "legalNotes": {
+    "latePaymentPenalty": "En cas de retard de paiement, une pénalité égale à 3 fois le taux d'intérêt légal sera appliquée.",
+    "recoveryFee": "Indemnité forfaitaire pour frais de recouvrement en cas de retard de paiement : 40 €.",
+    "earlyPaymentDiscount": "Pas d'escompte pour paiement anticipé."
+  }
+}
