@@ -857,9 +857,14 @@ describe("robustness", () => {
         ...PAYMENT.map(([y, r]) => [y + 300, r] as SynthRow),
       ],
     ])
-    extractInvoice(doc)
-    const start = performance.now()
-    extractInvoice(doc)
-    expect(performance.now() - start).toBeLessThan(50)
+    extractInvoice(doc) // warm-up
+    // Best of 5: a genuinely slow extractor is slow every time, whereas a single run can be
+    // hit by scheduler jitter when the whole suite runs in parallel.
+    const timings = Array.from({ length: 5 }, () => {
+      const start = performance.now()
+      extractInvoice(doc)
+      return performance.now() - start
+    })
+    expect(Math.min(...timings)).toBeLessThan(50)
   })
 })

@@ -27,6 +27,7 @@ const INVOICE_PATHS = new Set([
   "operationCategory",
   "vatOnDebits",
   "currency",
+  "precedingInvoice",
 ])
 const VAT_PATHS = new Set(["vatExemptionReason", "notes"])
 const PAYMENT_PATHS = new Set(["prepaidAmount"])

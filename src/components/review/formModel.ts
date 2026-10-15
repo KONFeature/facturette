@@ -75,6 +75,8 @@ export interface FormValues {
   deliveryAddress: AddressValues
   buyerReference: string
   orderReference: string
+  /** BT-25 / BT-26: only meaningful for a credit note (typeCode 381). */
+  precedingInvoice: { number: string; issueDate: string }
   lines: LineValues[]
   vatExemptionReason: string
   prepaidAmount: string
@@ -148,6 +150,10 @@ export function draftToForm(draft: InvoiceDraft): FormValues {
     deliveryAddress: addressToForm(delivery),
     buyerReference: str(draft.buyerReference),
     orderReference: str(draft.orderReference),
+    precedingInvoice: {
+      number: str(draft.precedingInvoice?.number),
+      issueDate: str(draft.precedingInvoice?.issueDate),
+    },
     lines: lines.map((l) => ({
       name: str(l?.name),
       description: str(l?.description),
@@ -228,6 +234,13 @@ export function formToDraft(values: FormValues): InvoiceDraft {
     deliveryAddress: values.hasDeliveryAddress ? addressToDraft(values.deliveryAddress) : undefined,
     buyerReference: clean(values.buyerReference),
     orderReference: clean(values.orderReference),
+    // A reference without a number is meaningless: drop it rather than send half a record.
+    precedingInvoice: values.precedingInvoice.number.trim()
+      ? {
+          number: values.precedingInvoice.number.trim(),
+          issueDate: clean(values.precedingInvoice.issueDate),
+        }
+      : undefined,
     lines: values.lines.map((l) => {
       const category = isVatCategory(l.vatCategory) ? l.vatCategory : undefined
       return {
