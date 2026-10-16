@@ -672,7 +672,7 @@ describe("totals wordings and arithmetic cross-check", () => {
     expect(draft.lines?.[0]).toMatchObject({ quantity: 1, unitCode: "LS", unitPrice: 200 })
   })
 
-  it("reads an amount-only table as one unit per line", () => {
+  it("offers an amount-only table as one unit per line, below the pre-fill threshold", () => {
     const table: SynthRow[] = [
       [
         300,
@@ -709,11 +709,15 @@ describe("totals wordings and arithmetic cross-check", () => {
       syntheticDoc([[...meta([["Facture n\u00b0", "A-1"]]), ...table, ...totals]]),
     )
     expect(res.draft.lines).toHaveLength(2)
-    expect(res.draft.lines?.[0]).toMatchObject({
-      name: "Refonte du site",
-      quantity: 1,
-      unitPrice: 2400,
-    })
+    expect(res.draft.lines?.[0]).toMatchObject({ name: "Refonte du site" })
+    // No quantity column: "1 \u00d7 total" is a guess, offered but never pre-filled.
+    expect(res.draft.lines?.[0]?.quantity).toBeUndefined()
+    const qty = res.suggestions.find((s) => s.path === "lines.0.quantity")
+    const price = res.suggestions.find((s) => s.path === "lines.0.unitPrice")
+    expect(qty?.value).toBe(1)
+    expect(price?.value).toBe(2400)
+    expect(qty?.confidence).toBeLessThanOrEqual(0.5)
+    expect(price?.confidence).toBeLessThanOrEqual(0.5)
   })
 
   it("parses wrapped descriptions and a table continued on the next page", () => {

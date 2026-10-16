@@ -19,6 +19,7 @@ import {
 } from "./text"
 
 type ColumnKind =
+  | "index"
   | "desc"
   | "ref"
   | "qty"
@@ -37,6 +38,8 @@ interface Column {
 }
 
 const HEADER_VOCAB: Array<[RegExp, ColumnKind]> = [
+  // Row-number column ("N° | Désignation | Qté…"): never a quantity.
+  [/^(n°|n o|no\.?|num\.?|numero|pos\.?|position|poste|#|ligne|lig\.?|item no\.?)$/, "index"],
   [
     /^(designation|description|libelle|articles?|prestations?|produits?|intitule|details?|objet|services?|items?|nature|missions?)\b/,
     "desc",
@@ -160,9 +163,37 @@ function headerColumns(row: Row): Column[] | undefined {
   return cols
 }
 
+/**
+ * Column of a numeric item from the header geometry. Numbers are usually right-aligned under a
+ * left-aligned, centred or right-aligned header: whatever the alignment, the number's RIGHT edge
+ * lies between its header's left edge and the next header's left edge. A number ending before the
+ * first header starts is a row number printed without a header: no column.
+ */
+function numericColumnFor(item: PdfTextItem, cols: Column[]): Column | undefined {
+  const right = item.x + item.width
+  const tolerance = 0.3 * item.fontSize
+  let found: Column | undefined
+  for (const col of cols) if (col.x0 <= right + tolerance) found = col
+  if (!found) return undefined
+  // A long left-aligned number overflowing into the next header: its left edge decides.
+  const index = cols.indexOf(found)
+  const prev = cols[index - 1]
+  if (
+    prev &&
+    prev.kind !== "desc" &&
+    prev.kind !== "index" &&
+    item.x < prev.x1 &&
+    item.x < found.x0 - item.width / 2
+  )
+    return prev
+  return found
+}
+
 function columnFor(item: PdfTextItem, cols: Column[], style: DecimalStyle): Column | undefined {
   const isNumeric =
-    /\d/.test(item.text) && parseNumber(item.text.replace(/%/, ""), style) !== undefined
+    /\d/.test(item.text) &&
+    (parseNumber(item.text.replace(/%/, ""), style) !== undefined ||
+      parseQuantity(item.text, style) !== undefined)
   const desc = cols.find((c) => c.kind === "desc")
   const center = item.x + item.width / 2
   if (!isNumeric && desc) {
@@ -174,6 +205,7 @@ function columnFor(item: PdfTextItem, cols: Column[], style: DecimalStyle): Colu
     const hi = next ? (desc.x1 + next.x0) / 2 : Number.POSITIVE_INFINITY
     if (item.x >= lo && item.x < hi) return desc
   }
+  if (isNumeric) return numericColumnFor(item, cols)
   for (let i = 0; i < cols.length; i++) {
     const col = cols[i]
     if (!col) continue
@@ -478,6 +510,7 @@ export function extractLines(
   const draftLines = parsed.map((p) => {
     let quantity = sign(p.quantity)
     let unitPrice = sign(p.unitPrice)
+    let qtyGuessed = false
     const total = sign(p.total)
     if (!context.isCreditNote && unitPrice !== undefined && unitPrice < 0) {
       // BR-27: a unit price is never negative; carry the sign on the quantity.
@@ -490,7 +523,9 @@ export function extractLines(
       total !== undefined &&
       Math.abs(unitPrice - total) < 0.005
     ) {
+      // Guess: nothing on the row says how many units were sold.
       quantity = 1
+      qtyGuessed = true
     }
     // No per-line discount in the invoice model: the net unit price after the printed discount
     // is what it needs. Kept only when the printed line total confirms it.
@@ -512,6 +547,7 @@ export function extractLines(
       quantity = total < 0 ? -1 : 1
       unitPrice = Math.abs(total)
       implicit = true
+      qtyGuessed = true
     }
     if (
       unitPrice === undefined &&
@@ -522,7 +558,7 @@ export function extractLines(
       const derived = Math.round((total / quantity) * 100) / 100
       if (Math.abs(lineNet({ quantity, unitPrice: derived }) - total) < 0.005) unitPrice = derived
     }
-    return { p, quantity, unitPrice, total, implicit, discountNet }
+    return { p, quantity, unitPrice, total, implicit, qtyGuessed, discountNet }
   })
 
   const singleRate =
@@ -571,7 +607,10 @@ export function extractLines(
     if (printedHt !== undefined && !htMatches) base = Math.min(base, 0.62)
     if (p.grossPrice) base = Math.min(base, 0.5)
     if (l.implicit) base -= 0.12
-    const priceConfidence = l.discountNet === "unconfirmed" ? Math.min(base, 0.5) : base
+    // Quantity 1 and price = line total is a guess when no quantity was read: never pre-filled.
+    const qtyConfidence = l.qtyGuessed ? Math.min(base, 0.5) : base
+    const priceConfidence =
+      l.discountNet === "unconfirmed" || l.qtyGuessed ? Math.min(base, 0.5) : base
     const at = (k: string) => [...(p.cells[k] ?? [])]
     const path = `lines.${i}`
     collector.add(`${path}.name`, p.name, base, at("desc"), "table-row")
@@ -583,7 +622,13 @@ export function extractLines(
         at("description"),
         "table-row-second-line",
       )
-    collector.add(`${path}.quantity`, l.quantity, base, at("qty"), "table-row")
+    collector.add(
+      `${path}.quantity`,
+      l.quantity,
+      qtyConfidence,
+      at("qty"),
+      l.qtyGuessed ? "table-row-quantity-assumed" : "table-row",
+    )
     collector.add(
       `${path}.unitPrice`,
       l.unitPrice,
