@@ -4,7 +4,9 @@ import { createRoot } from "react-dom/client"
 import { routeTree } from "./routeTree.gen"
 import "./styles.css"
 
-const router = createRouter({ routeTree, defaultPreload: "intent" })
+// Vite exposes the build's base ("/" or "/facturette/"); the router must be mounted at the same path.
+const basepath = import.meta.env.BASE_URL.replace(/\/+$/, "") || "/"
+const router = createRouter({ routeTree, defaultPreload: "intent", basepath })
 
 declare module "@tanstack/react-router" {
   interface Register {

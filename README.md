@@ -87,12 +87,28 @@ map and the contracts between modules; `fixtures/` holds the sample invoices and
 
 ## Deploy
 
-`bun run build` produces a static site in `dist/`. Serve it from any static host with an
-`index.html` fallback for unknown paths. The production `index.html` embeds the CSP as a `<meta>`
-tag; `public/_headers` carries the same policy plus the other security headers for hosts that
-support it (Cloudflare Pages, Netlify).
+It is a **static site**: no server, no backend, no API. `bun run build` writes plain files to
+`dist/` and everything (PDF reading, XML, PDF assembly) runs in the visitor's browser.
+
+**GitHub Pages** is the default. Every push to `main` that passes unit tests, Mustang conformance and
+the browser suite is deployed by the `deploy` job of `.github/workflows/ci.yml`, at
+<https://konfeature.github.io/facturette/>. Two details come from serving a project site under
+`/facturette/`:
+
+- the build takes its base path from `BASE_PATH` (the job passes the one GitHub reports; locally it
+  defaults to `/`), and the router is mounted at the same path;
+- GitHub Pages answers unknown paths with `404.html`, so the job copies the app shell there and
+  deep links still load.
+
+Any other static host works too: serve `dist/` with an `index.html` fallback. `public/_headers`
+holds the same Content-Security-Policy plus extra response headers (`frame-ancestors`, `nosniff`,
+HSTS, ...) for hosts that read that file (Cloudflare Pages, Netlify). GitHub Pages ignores it, which
+is fine: the policy that enforces "nothing leaves your browser" also ships as a `<meta>` tag inside
+the page. What GitHub Pages cannot do is send `frame-ancestors`, so the page can be embedded in a
+frame on another site.
 
 ## Licence
 
-Not chosen yet. Vendored assets: Arimo / Tinos / Cousine fonts (Apache-2.0), an sRGB ICC profile
-(CC0), the Adobe Glyph List (BSD-3-Clause). Their licences are next to the files.
+[MIT](LICENSE). Vendored assets keep their own licences, next to the files: Arimo / Tinos / Cousine
+fonts (Apache-2.0), the Adobe Glyph List (BSD-3-Clause) and an sRGB ICC profile (CC0), under
+`src/lib/facturx/fonts/` and `src/lib/facturx/assets/`.

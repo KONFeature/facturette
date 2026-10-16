@@ -30,6 +30,8 @@ function contentSecurityPolicy(): Plugin {
 
 // https://vite.dev/config/
 export default defineConfig({
+  // "/" by default. A GitHub Pages project site lives under /<repo>/, so CI passes BASE_PATH.
+  base: process.env.BASE_PATH || "/",
   plugins: [
     // tanstackRouter must come before @vitejs/plugin-react.
     tanstackRouter({ target: "react", autoCodeSplitting: true }),

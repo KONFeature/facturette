@@ -72,3 +72,44 @@ jobs:
             test-results/
             playwright-report/
           if-no-files-found: ignore
+
+  # Static site on GitHub Pages (https://<owner>.github.io/<repo>/). Only from main, and only once
+  # unit tests, Mustang conformance and the browser suite have all passed on the same commit.
+  deploy:
+    name: Deploy to GitHub Pages
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [verify, conformance, e2e]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.3
+      - run: bun install --frozen-lockfile
+      - id: pages
+        uses: actions/configure-pages@v6
+      # A project site lives under /<repo>/, so the build needs that base path.
+      - run: bun run build
+        env:
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}/
+      - name: Check the build is mounted under the Pages base path
+        env:
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}/
+        run: grep -q "src=\"${BASE_PATH}assets/" dist/index.html
+      # GitHub Pages serves 404.html for unknown paths: reuse the app shell so deep links load.
+      - run: cp dist/index.html dist/404.html
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+      - id: deployment
+        uses: actions/deploy-pages@v5

@@ -1,7 +1,8 @@
 {
   "name": "facturette",
   "version": "0.0.0",
-  "description": "Générateur de factures Factur-X conformes pour la France, 100 % dans le navigateur.",
+  "description": "Transforme une facture PDF en facture Factur-X (EN 16931), 100 % dans le navigateur.",
+  "license": "MIT",
   "private": true,
   "type": "module",
   "scripts": {
