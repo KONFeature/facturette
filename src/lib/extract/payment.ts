@@ -5,7 +5,7 @@
 import { isValidIban, normalizeIban } from "../validation/identifiers"
 import type { Collector } from "./collect"
 import { findLabeled, type ValueReader } from "./labels"
-import { type Cell, cellToTheRight, type Layout, partsOf } from "./layout"
+import { blockOfCell, type Cell, cellToTheRight, type Layout, partsOf } from "./layout"
 import { fold, splitSentences } from "./text"
 
 const IBAN_START_RE = /\b([A-Z]{2}\d{2}(?:\s?[A-Z0-9]){10,32})/
@@ -144,16 +144,27 @@ const readMeans: ValueReader<string[]> = (s) => {
   return codes.length > 0 ? { value: codes, text: s } : undefined
 }
 
+/** "Mode de paiement" over the bank details ("IBAN : …"): the means is a credit transfer. */
+const readBankDetails: ValueReader<string[]> = (s) =>
+  /^(iban|rib|coordonnees bancaires|releve d'identite bancaire)\b/.test(fold(s)) &&
+  meansIn(fold(s)).length === 0
+    ? { value: ["30"], text: s }
+    : undefined
+
+/** Read from the bank details, not from a printed means: below the explicit wording. */
+const BANK_DETAILS_MEANS_CONFIDENCE = 0.74
+
 function addLabelledMeans(
   collector: Collector,
   codes: string[],
   payeeIbanCountry: string | undefined,
   cells: Cell[],
+  max = 1,
 ): void {
   // "Virement ou chèque": several means, let the user choose.
   const code = codes[0] && sepaAware(codes[0], payeeIbanCountry)
   if (!code) return
-  let confidence = codes.length === 1 ? 0.86 : 0.45
+  let confidence = Math.min(codes.length === 1 ? 0.86 : 0.45, max)
   if (code !== codes[0]) confidence = Math.min(confidence, INFERRED_SEPA_CONFIDENCE)
   collector.add("payment.meansCode", code, confidence, cells, "payment-means-label")
 }
@@ -167,6 +178,10 @@ function extractMeans(
   for (const m of findLabeled(layout, MEANS_LABEL_RE, readMeans)) {
     if (m.placement !== "inline")
       addLabelledMeans(collector, m.value, payeeIbanCountry, [m.labelCell, m.valueCell])
+  }
+  for (const m of findLabeled(layout, MEANS_LABEL_RE, readBankDetails)) {
+    const cells = m.labelCell === m.valueCell ? [m.labelCell] : [m.labelCell, m.valueCell]
+    addLabelledMeans(collector, m.value, payeeIbanCountry, cells, BANK_DETAILS_MEANS_CONFIDENCE)
   }
   for (const cell of layout.cells) {
     for (const part of sentencesOf(cell)) {
@@ -220,7 +235,26 @@ function wrappedSentencesOf(layout: Layout, cell: Cell): Array<{ text: string; f
 }
 
 const TERMS_LABEL_APART_RE =
-  /^(conditions de (paiement|reglement)|delais? de (paiement|reglement)|termes de paiement|modalites de (paiement|reglement)|payment terms)\b/
+  /^(conditions de (paiement|reglement)|delais? de (paiement|reglement)|termes de paiement|modalites de (paiement|reglement)|echeance de (paiement|reglement)|payment terms)\b/
+
+/**
+ * A value wrapped onto the next rows of its block ("60 jours à compter de la date d'émission de" /
+ * "la facture."). A row that has something printed left of it is the next row of a key/value
+ * table ("Pénalité de retard | 3 fois le taux légal"), not a continuation.
+ */
+function wrappedValue(layout: Layout, cell: Cell): { text: string; cells: Cell[] } {
+  const block = blockOfCell(layout, cell)
+  const cells = [cell]
+  let text = cell.text
+  for (let i = block.indexOf(cell) + 1; i < block.length && cells.length < 4; i++) {
+    const next = block[i]
+    if (!next || /[.!]$/.test(text) || !/^[\p{Ll}\d(]/u.test(next.text)) break
+    if (layout.rows[next.line]?.cells.some((c) => c !== next && c.x1 <= next.x0)) break
+    text = `${text} ${next.text}`
+    cells.push(next)
+  }
+  return { text, cells }
+}
 
 /** Terms printed apart from their label ("Délai de paiement | 60 jours"). */
 const readTermsValue: ValueReader<string> = (s) => {
@@ -233,8 +267,11 @@ function extractTerms(layout: Layout, collector: Collector, isCreditNote: boolea
   for (const m of findLabeled(layout, TERMS_LABEL_APART_RE, readTermsValue)) {
     if (m.placement === "inline") continue
     const confidence = m.placement === "right" ? 0.78 : 0.72
-    const cells = [m.labelCell, m.valueCell]
-    collector.add("payment.termsText", m.value, confidence, cells, "payment-terms-label-apart")
+    const wrapped = wrappedValue(layout, m.valueCell)
+    const whole = wrapped.cells.length > 1 && !LEGAL_NOTE_RE.test(fold(wrapped.text))
+    const value = whole ? termsValue(wrapped.text) : m.value
+    const cells = [m.labelCell, ...(whole ? wrapped.cells : [m.valueCell])]
+    collector.add("payment.termsText", value, confidence, cells, "payment-terms-label-apart")
   }
   for (const cell of layout.cells) {
     for (const part of wrappedSentencesOf(layout, cell)) {
@@ -309,7 +346,7 @@ function sentenceFrom(layout: Layout, cell: Cell): { text: string; cells: Cell[]
 const RECOVERY_FEE_RE =
   /\b(indemnite (forfaitaire|de recouvrement)|frais (forfaitaires? )?de recouvrement)\b/
 const LATE_PENALTY_RE =
-  /\bpenalites?\b|\binterets? de retard\b|\btaux d'interet legal\b|\btaux de refinancement\b/
+  /\bpenalites?\b|\binterets? de retard\b|\btaux (d'|de l')interet legal\b|\btaux de refinancement\b/
 
 /**
  * A legal mention printed as a key/value row ("Pénalité de retard | 3 fois le taux légal",

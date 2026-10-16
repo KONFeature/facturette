@@ -49,8 +49,10 @@ const STREET_RE =
   /^(\d+[\s,]*(bis|ter|quater|[a-d])?\b|bp\s*\d|cs\s*\d|(rue|avenue|av\.|bd|boulevard|chemin|impasse|quai|place|allee|route|cours|square|passage|voie|lieu-dit|hameau|zone|za|zi|zac|parc|residence|batiment|bat\.|immeuble|chez)\b)/
 const STREET_WORD_RE =
   /\b(rue|avenue|av\.|bd|boulevard|chemin|impasse|quai|place|allee|route|cours|square|passage|voie|faubourg|chaussee|promenade|esplanade|parvis|lotissement)\b/
+// "75009 Paris", "12 rue X, 75009 Paris, France", "…, 75009 Paris, FR" (invoicing apps print
+// the ISO country code).
 const POSTAL_RE =
-  /^(?:(.*?)[,\s]+)?(?:f-|fr-)?(\d{5})\s+([\p{L}][\p{L}'’ -]*?(?:\s+cedex(?:\s+\d{1,2})?)?)\s*(?:,?\s*(france))?$/iu
+  /^(?:(.*?)[,\s]+)?(?:f-|fr-)?(\d{5})\s+([\p{L}][\p{L}'’ -]*?(?:\s+cedex(?:\s+\d{1,2})?)?)\s*(?:,?\s*(france|fr))?$/iu
 const COUNTRY_RE = /^(france|belgique|suisse|luxembourg|allemagne|espagne|italie|monaco)$/
 const COUNTRY_CODES: Record<string, string> = {
   france: "FR",
@@ -107,17 +109,49 @@ function linesOfCells(cells: Cell[]): PartyLine[] {
   })
 }
 
+/**
+ * Rows of a party block may be spaced wider than the layout's block chaining allows ("Name" then
+ * the address line 1.1 font sizes lower): a party block goes on into the next aligned block
+ * within this many font sizes.
+ */
+const LOOSE_BLOCK_GAP_RATIO = 1.6
+
+/** The first cell of the next block aligned with `last`, a little lower in the same column. */
+function looseContinuation(layout: Layout, last: Cell): Cell | undefined {
+  for (let r = last.line + 1; r < layout.rows.length; r++) {
+    const row = layout.rows[r]
+    if (!row || row.page !== last.page) return undefined
+    for (const cell of row.cells) {
+      const aligned = Math.abs(cell.x0 - last.x0) <= 4 || Math.abs(cell.x1 - last.x1) <= 4
+      const gap = cell.y - last.y1
+      if (!aligned) continue
+      if (gap < 0 || gap > LOOSE_BLOCK_GAP_RATIO * Math.max(last.fontSize, cell.fontSize))
+        return undefined
+      return blockOfCell(layout, cell)[0] === cell ? cell : undefined
+    }
+    // Anything else printed in the column in between ends the block.
+    if (row.cells.some((c) => c.x0 < last.x1 && c.x1 > last.x0)) return undefined
+  }
+  return undefined
+}
+
 /** Cells of the block that starts at `start` (inclusive), until a stop line. */
 function blockFrom(layout: Layout, start: Cell): Cell[] {
-  const block = blockOfCell(layout, start)
-  const from = Math.max(0, block.indexOf(start))
   const out: Cell[] = []
-  for (const cell of block.slice(from)) {
-    if (out.length > 0 && (STOP_RE.test(cell.folded) || isPartyLabel(cell.folded))) break
-    out.push(cell)
-    if (out.length >= 14) break
+  let block = blockOfCell(layout, start)
+  let from = Math.max(0, block.indexOf(start))
+  for (;;) {
+    for (const cell of block.slice(from)) {
+      if (out.length > 0 && (STOP_RE.test(cell.folded) || isPartyLabel(cell.folded))) return out
+      out.push(cell)
+      if (out.length >= 14) return out
+    }
+    const last = out[out.length - 1]
+    const next = last && looseContinuation(layout, last)
+    if (!next) return out
+    block = blockOfCell(layout, next)
+    from = 0
   }
-  return out
 }
 
 function isPartyLabel(folded: string): boolean {
@@ -258,6 +292,48 @@ function footerLines(layout: Layout, used: Set<number>): PartyLine[] {
   return out
 }
 
+interface Candidate {
+  lines: PartyLine[]
+  score: number
+  x0: number
+  y: number
+  hinted: boolean
+}
+
+/** A name line (not an identifier, street or postcode line) and a postcode line. */
+function looksLikeParty(lines: PartyLine[]): boolean {
+  const first = lines[0]
+  return (
+    first !== undefined &&
+    lines.length >= 2 &&
+    !LEGAL_LINE_RE.test(first.folded) &&
+    !POSTAL_RE.test(first.text) &&
+    !STREET_RE.test(first.folded) &&
+    lines.some((l) => POSTAL_RE.test(l.text) && !LEGAL_LINE_RE.test(l.folded))
+  )
+}
+
+/** Two party-like blocks starting on the same row, one left of the other without overlapping. */
+function sideBySide(
+  candidates: Candidate[],
+  pageWidth: number,
+): { left: Candidate; right: Candidate } | undefined {
+  const extent = (c: Candidate) => ({
+    x0: Math.min(...c.lines.map((l) => l.cell.x0)),
+    x1: Math.max(...c.lines.map((l) => l.cell.x1)),
+  })
+  const parties = candidates.filter((c) => looksLikeParty(c.lines)).sort((a, b) => a.y - b.y)
+  for (const left of parties) {
+    if (left.x0 >= pageWidth / 2) continue
+    const fontSize = left.lines[0]?.cell.fontSize ?? 10
+    const right = parties.find(
+      (c) => c !== left && Math.abs(c.y - left.y) <= fontSize && extent(c).x0 > extent(left).x1,
+    )
+    if (right) return { left, right }
+  }
+  return undefined
+}
+
 /** Returns the ids of the cells read as the buyer's block (its IBAN is not the payee's). */
 export function extractParties(
   layout: Layout,
@@ -274,19 +350,16 @@ export function extractParties(
   const firstPageWidth = layout.pageWidths[0] ?? 595
 
   // Unlabelled blocks on the top of page 1, scored as party candidates.
-  const candidates: Array<{
-    lines: PartyLine[]
-    score: number
-    x0: number
-    y: number
-    hinted: boolean
-  }> = []
+  const candidates: Candidate[] = []
+  // A block already read as the continuation of an earlier candidate is not a candidate itself.
+  const absorbed = new Set<number>()
   for (const block of layout.blocks) {
     const cell = block.find(
       (c) => !used.has(c.id) && !STOP_RE.test(c.folded) && !isPartyLabel(c.folded),
     )
-    if (cell?.page !== 1 || cell.y > 0.5 * firstPageHeight) continue
+    if (cell?.page !== 1 || cell.y > 0.5 * firstPageHeight || absorbed.has(cell.id)) continue
     const cells = blockFrom(layout, cell).filter((c) => !used.has(c.id))
+    for (const c of cells) absorbed.add(c.id)
     const lines = linesOfCells(cells)
     if (lines.length === 0) continue
     candidates.push({
@@ -298,9 +371,23 @@ export function extractParties(
     })
   }
 
-  const hasSeller = parties.some((p) => p.role === "seller")
-  const hasBuyer = parties.some((p) => p.role === "buyer")
+  let hasSeller = parties.some((p) => p.role === "seller")
+  let hasBuyer = parties.some((p) => p.role === "buyer")
   const remaining = [...candidates]
+  // No label at all, two party blocks side by side on the same rows: the French layout puts the
+  // issuer on the left and the customer on the right.
+  if (!hasSeller && !hasBuyer && !remaining.some((c) => c.hinted)) {
+    const pair = sideBySide(remaining, firstPageWidth)
+    if (pair) {
+      const rule = "party-side-by-side"
+      parties.push({ role: "seller", factor: 0.85, rule, lines: pair.left.lines, hasName: true })
+      parties.push({ role: "buyer", factor: 0.85, rule, lines: pair.right.lines, hasName: true })
+      remaining.splice(remaining.indexOf(pair.left), 1)
+      remaining.splice(remaining.indexOf(pair.right), 1)
+      hasSeller = true
+      hasBuyer = true
+    }
+  }
   // "Émetteur" block holding only legal identifiers (capital, RCS, SIRET) while the name and
   // address sit in an unlabelled letterhead: that letterhead is the seller's.
   const namelessSeller = parties.find(
@@ -538,7 +625,21 @@ function parseIdentity(
   collector: Collector,
 ): void {
   const who = prefix === "seller" ? "du vendeur" : "du client"
+  // "SIRET et n° de TVA intra." on one line, the bare numbers on the next ones.
+  let siretLabel = false
   for (const l of lines) {
+    if (/\bsiret\b/.test(l.folded) && !/\d/.test(l.folded)) siretLabel = true
+    const bare = /^[\d\s.]+$/.test(l.text) ? compact(l.text).replace(/\./g, "") : ""
+    if (siretLabel && bare.length === 14 && isValidSiret(bare)) {
+      collector.add(`${prefix}.siret`, bare, 0.9 * f, [l.cell], `${rule}-siret-under-label`)
+      collector.add(
+        `${prefix}.siren`,
+        bare.slice(0, 9),
+        0.85 * f,
+        [l.cell],
+        `${rule}-siren-from-siret`,
+      )
+    }
     const siren = SIREN_RE.exec(l.folded)?.[1]
     if (siren) {
       const v = compact(siren).replace(/\./g, "")

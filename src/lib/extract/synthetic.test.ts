@@ -1008,6 +1008,159 @@ describe("payment conditions and bank details printed as key/value tables", () =
   })
 })
 
+describe("unlabelled parties side by side, loose spacing (invoicing-app layout)", () => {
+  // Seller top-left and buyer flush right on the same rows, without any "\u00c9metteur" / "Client"
+  // label, one-line addresses ending in ", FR", rows a little more than a font size apart, the
+  // buyer's identifiers under a combined label, the seller's identifiers only in the footer.
+  const s = (x: number, text: string, size = 10) => ({ x, text, size })
+  /** Right-aligned at `x1` (synthetic widths are 0.5 em per character). */
+  const r = (x1: number, text: string, size = 10) => s(x1 - text.length * size * 0.5, text, size)
+  const doc = () =>
+    syntheticDoc([
+      [
+        [45, [s(44, "Atelier Lumi\u00e8re EI", 11.9), r(551, "HORIZON SA", 11.9)]],
+        [
+          70,
+          [
+            s(44, "12 rue des Lilas, 69001 Lyon, FR"),
+            r(551, "40 boulevard Haussmann, 75009 Paris, FR"),
+          ],
+        ],
+        [94, [r(551, "SIRET et n\u00b0 de TVA intra.")]],
+        [110, [r(551, "75012345700012")]],
+        [126, [r(551, "FR65750123457")]],
+        [153, [s(44, "Facture 2026-0042", 15.9)]],
+        [186, [s(44, "\u00c9mise le 12/09/2026")]],
+        [
+          222,
+          [
+            s(52, "Libell\u00e9"),
+            s(257, "Quantit\u00e9"),
+            s(321, "Prix unitaire HT"),
+            s(434, "TVA"),
+            s(505, "Total HT"),
+          ],
+        ],
+        [
+          246,
+          [
+            s(52, "D\u00e9veloppement du site vitrine de la"),
+            r(298, "1"),
+            r(392, "700,00 \u20ac"),
+            r(449, "0,00 %"),
+            r(544, "700,00 \u20ac"),
+          ],
+        ],
+        [261, [s(52, "boutique en ligne")]],
+        // "1 400,00 \u20ac" drawn as two runs: the thousands separator is a 1.5 pt positioning gap.
+        [
+          286,
+          [
+            s(52, "Maintenance annuelle"),
+            r(298, "2"),
+            r(392, "700,00 \u20ac"),
+            r(449, "0,00 %"),
+            s(495.5, "1"),
+            r(544, "400,00 \u20ac"),
+          ],
+        ],
+        [
+          327,
+          [s(65, "\u00c9ch\u00e9ance de paiement"), s(414, "Total HT"), r(543, "2 100,00 \u20ac")],
+        ],
+        [351, [s(414, "TVA"), r(543, "0,00 \u20ac")]],
+        [357, [s(44.5, "60 jours \u00e0 compter de la date d'\u00e9mission de")]],
+        [373, [s(44.5, "la facture.")]],
+        [384, [s(414, "Total TTC"), r(543, "2 100,00 \u20ac")]],
+        [443, [s(44, "Termes et conditions", 8)]],
+        [455, [s(44, "Cette facture concerne uniquement de la prestation de service.", 8)]],
+        [467, [s(44, "TVA non applicable, art. 293 B du CGI.", 8)]],
+        [
+          479,
+          [
+            s(
+              44,
+              "En cas de retard de paiement, seront exigibles, conform\u00e9ment au code de commerce, une indemnit\u00e9 calcul\u00e9e sur la base de trois fois le",
+              8,
+            ),
+          ],
+        ],
+        [
+          491,
+          [
+            s(
+              44,
+              "taux de l'int\u00e9r\u00eat l\u00e9gal en vigueur ainsi qu'une indemnit\u00e9 forfaitaire pour frais de recouvrement de 40\u20ac.",
+              8,
+            ),
+          ],
+        ],
+        [503, [s(44, "Pas d'escompte en cas de paiement anticip\u00e9.", 8)]],
+        [772, [s(44, "Atelier Lumi\u00e8re EI", 8), s(196, "Mode de paiement", 8)]],
+        [
+          784,
+          [s(44, "SIRET : 523 456 788 00026", 8), s(196, "IBAN : DE89 3704 0044 0532 0130 00", 8)],
+        ],
+        [
+          796,
+          [s(44, "N\u00b0 TVA Intracom. : FR31523456788", 8), s(196, "BIC : FICT DE FF XXX", 8)],
+        ],
+        [815, [r(553, "Facture 2026-0042 \u2022 1/1", 7)]],
+      ],
+    ])
+
+  it("reads the left block as the seller and the right block as the buyer", () => {
+    const res = extractInvoice(doc())
+    expect(res.draft.seller).toMatchObject({
+      name: "Atelier Lumi\u00e8re EI",
+      legalForm: "EI",
+      siret: "52345678800026",
+      siren: "523456788",
+      vatNumber: "FR31523456788",
+      address: { line1: "12 rue des Lilas", postalCode: "69001", city: "Lyon", countryCode: "FR" },
+    })
+    expect(res.draft.buyer).toMatchObject({
+      name: "HORIZON SA",
+      kind: "company",
+      siret: "75012345700012",
+      siren: "750123457",
+      vatNumber: "FR65750123457",
+      address: {
+        line1: "40 boulevard Haussmann",
+        postalCode: "75009",
+        city: "Paris",
+        countryCode: "FR",
+      },
+    })
+    expect(res.warnings.join(" ")).not.toMatch(/SIREN/)
+  })
+
+  it("joins an item name wrapped over two rows, and reads a total split by its thousands gap", () => {
+    const res = extractInvoice(doc())
+    expect(res.draft.lines?.[0]?.name).toBe(
+      "D\u00e9veloppement du site vitrine de la boutique en ligne",
+    )
+    expect(res.draft.lines?.[0]?.description).toBeUndefined()
+    expect(res.draft.lines?.[1]).toMatchObject({ quantity: 2, unitPrice: 700 })
+    // The line total (1 400) confirms quantity x price: full confidence.
+    const price = res.suggestions.find((x) => x.path === "lines.1.unitPrice")
+    expect(price?.confidence).toBeGreaterThanOrEqual(0.9)
+  })
+
+  it("reads the terms under their heading, the means from the bank details, the penalty and the category", () => {
+    const draft = extractInvoice(doc()).draft
+    expect(draft.payment?.termsText).toBe(
+      "60 jours \u00e0 compter de la date d'\u00e9mission de la facture",
+    )
+    expect(draft.payment?.meansCode).toBe("30")
+    expect(draft.legalNotes?.latePaymentPenalty).toMatch(
+      /trois fois le taux de l'int\u00e9r\u00eat l\u00e9gal/,
+    )
+    expect(draft.legalNotes?.recoveryFee).toMatch(/40\u20ac/)
+    expect(draft.operationCategory).toBe("services")
+  })
+})
+
 describe("robustness", () => {
   it("returns an empty result with a warning for a scanned PDF", () => {
     const doc = { ...syntheticDoc([[]]), hasTextLayer: false }

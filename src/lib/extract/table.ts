@@ -218,6 +218,33 @@ function columnFor(item: PdfTextItem, cols: Column[], style: DecimalStyle): Colu
   return undefined
 }
 
+/**
+ * "1 400,00 €" drawn as two runs ("1" | "400,00 €") with the thousands separator as a thin
+ * positioning gap: one number. Columns are assigned item by item, so the leading group would
+ * otherwise fall under the previous column.
+ */
+function joinNumberRuns(items: PdfTextItem[]): PdfTextItem[] {
+  const out: PdfTextItem[] = []
+  for (const item of items) {
+    const prev = out[out.length - 1]
+    const gap = prev ? item.x - (prev.x + prev.width) : Number.POSITIVE_INFINITY
+    if (
+      prev &&
+      gap > -0.5 &&
+      gap <= 0.35 * Math.min(prev.fontSize, item.fontSize) &&
+      /(^|[\s\u00a0\u202f])[-\u2212(]?\d{1,3}$/.test(prev.text) &&
+      /^\d{3}(?![\d])/.test(item.text)
+    ) {
+      out[out.length - 1] = {
+        ...prev,
+        text: `${prev.text} ${item.text}`,
+        width: item.x + item.width - prev.x,
+      }
+    } else out.push(item)
+  }
+  return out
+}
+
 function rowColumns(
   row: Row,
   cols: Column[],
@@ -232,7 +259,7 @@ function rowColumns(
       firstItem !== undefined &&
       columnFor(firstItem, cols, style)?.kind === "desc" &&
       !/\d\s*%?$/.test(cell.text)
-    for (const item of cell.items) {
+    for (const item of joinNumberRuns(cell.items)) {
       const col = wholeDesc ? cols.find((c) => c.kind === "desc") : columnFor(item, cols, style)
       if (!col) continue
       const entry = out.get(col.kind) ?? { text: "", cells: [], items: [] }
@@ -374,8 +401,13 @@ function findTable(layout: Layout, style: DecimalStyle): ParsedLine[] {
       const fontSize = row.cells[0]?.fontSize ?? 10
       if (last && last.row.page === row.page && row.y - last.row.y1 <= 1.0 * fontSize) {
         const text = row.cells.map((c) => c.text).join(" ")
-        last.line.description = last.line.description ? `${last.line.description} ${text}` : text
-        last.line.cells.description = [...(last.line.cells.description ?? []), ...row.cells]
+        if (continuesName(last.line, row)) {
+          last.line.name = `${last.line.name} ${text}`
+          last.line.cells.desc = [...(last.line.cells.desc ?? []), ...row.cells]
+        } else {
+          last.line.description = last.line.description ? `${last.line.description} ${text}` : text
+          last.line.cells.description = [...(last.line.cells.description ?? []), ...row.cells]
+        }
         last = { line: last.line, row }
       } else if (last && last.row.page === row.page && row.y - last.row.y1 > 2.5 * fontSize) {
         // A section heading inside the table ("LOT 2 - Menuiseries") is followed by item rows;
@@ -395,6 +427,27 @@ function findTable(layout: Layout, style: DecimalStyle): ParsedLine[] {
     last = { line: parsed, row }
   }
   return lines
+}
+
+/** The name ends on a word that cannot end it ("… Radio France du", "… site vitrine de la"). */
+const DANGLING_WORD_RE =
+  /\b(du|de|des|d'|la|le|les|l'|un|une|et|ou|a|au|aux|en|pour|sur|avec|par|dans|chez)$/
+
+/**
+ * A row under an item's name, in the name's own font, that carries on its phrase (it starts in
+ * lowercase or the name ends on a dangling word): the name wrapped, it is not a description. A
+ * description is set apart by its style (smaller, italic) or starts its own sentence.
+ */
+function continuesName(line: ParsedLine, row: Row): boolean {
+  const name = line.name
+  const nameItem = line.cells.desc?.[0]?.items[0]
+  const first = row.cells[0]
+  const firstItem = first?.items[0]
+  if (!name || line.description || !nameItem || !first || !firstItem) return false
+  if (Math.abs(nameItem.fontSize - firstItem.fontSize) > 0.5) return false
+  if (nameItem.fontName !== firstItem.fontName) return false
+  if (/[.:;!?)]$/.test(name)) return false
+  return /^\p{Ll}/u.test(first.text) || DANGLING_WORD_RE.test(fold(name))
 }
 
 const AMOUNT_TAIL_RE = /^(.*?)[\s:]+(\(?[-\u2212]?\s?(?:€\s?)?\d[\d\s.,]*(?:\s?(?:€|EUR))?\)?)$/

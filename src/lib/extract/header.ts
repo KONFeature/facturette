@@ -249,6 +249,9 @@ function extractCurrency(layout: Layout, collector: Collector): void {
     collector.warn("Une devise autre que l'euro semble utilisée : seul l'euro est pris en charge.")
 }
 
+const DECLARED_CATEGORY_RE =
+  /\b(cette facture|la presente facture|operations?)\s+(concerne|porte sur|portant sur|relative a|relatives a)\s+(.{0,80})$/
+
 const SERVICE_WORDS =
   /\b(prestations?|forfaits?|jours?|heures?|tjm|honoraires|missions?|conseils?|formations?|interventions?|main d'oeuvre|heures?|journees?|developpement|maintenance|abonnement|reportage|retouches?|creation|design|audit|accompagnement|assistance|consulting|redaction|pose|mise en service|service)\b/
 const GOODS_WORDS =
@@ -268,6 +271,17 @@ function extractOperationCategory(layout: Layout, collector: Collector): void {
           ? "goods"
           : undefined
     if (value) collector.add("operationCategory", value, 0.85, [cell], "operation-category-label")
+  }
+  // The same mention as a sentence: "Cette facture concerne uniquement de la prestation de
+  // service.", "Opérations portant sur des livraisons de biens".
+  for (const cell of layout.cells) {
+    const m = DECLARED_CATEGORY_RE.exec(cell.folded)
+    if (!m) continue
+    const v = m[3] ?? ""
+    const services = /\bprestations? de services?\b/.test(v)
+    const goods = /\b(livraisons? de biens|ventes? de (biens|marchandises))\b/.test(v)
+    const value = services && goods ? "mixed" : services ? "services" : goods ? "goods" : undefined
+    if (value) collector.add("operationCategory", value, 0.8, [cell], "operation-category-sentence")
   }
   let services = 0
   let goods = 0
