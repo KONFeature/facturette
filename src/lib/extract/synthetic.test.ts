@@ -1161,6 +1161,48 @@ describe("unlabelled parties side by side, loose spacing (invoicing-app layout)"
   })
 })
 
+describe("electronic address (BT-34 / BT-49)", () => {
+  it("offers each party's SIREN as its address, pre-filled but not reliable", () => {
+    const res = extractInvoice(baseInvoice())
+    expect(res.draft.seller?.electronicAddress?.value).toBe("523456788")
+    expect(res.draft.buyer?.electronicAddress?.value).toBe("750123457")
+    const s = res.suggestions.find((x) => x.path === "buyer.electronicAddress.value")
+    expect(s?.confidence).toBeGreaterThanOrEqual(PREFILL_THRESHOLD)
+    expect(s?.confidence).toBeLessThan(0.85)
+    expect(s?.evidence.text).toMatch(/annuaire/)
+  })
+
+  it("reads a printed directory address and gives it to the party whose SIREN it starts with", () => {
+    const extra = stackedRows(40, 600, [
+      "Adresse \u00e9lectronique du client : 750123457_STANDARD",
+      "Adresse \u00e9lectronique : 0225:523456788_52345678800026",
+    ])
+    const res = extractInvoice(baseInvoice({ extra }))
+    expect(res.draft.buyer?.electronicAddress?.value).toBe("750123457_STANDARD")
+    expect(res.draft.seller?.electronicAddress?.value).toBe("523456788_52345678800026")
+    const s = res.suggestions.find((x) => x.path === "buyer.electronicAddress.value")
+    expect(s?.confidence).toBeGreaterThanOrEqual(0.85)
+  })
+
+  it("does not take an e-mail address, nor an address of another company", () => {
+    const extra = stackedRows(40, 600, [
+      "Adresse \u00e9lectronique : compta@horizon.example",
+      "Adresse \u00e9lectronique : 111111118_STANDARD",
+    ])
+    const draft = extractInvoice(baseInvoice({ extra })).draft
+    expect(draft.buyer?.electronicAddress?.value).toBe("750123457")
+  })
+
+  it("offers nothing for a private customer", () => {
+    const parties: SynthRow[] = [
+      ...stackedRows(40, 40, SELLER),
+      [170, [[320, "Client"]]],
+      ...stackedRows(320, 184, ["Madame \u00c9lodie Martinet", "9 rue des Lilas", "35000 Rennes"]),
+    ]
+    expect(extractInvoice(baseInvoice({ parties })).draft.buyer?.electronicAddress).toBeUndefined()
+  })
+})
+
 describe("robustness", () => {
   it("returns an empty result with a warning for a scanned PDF", () => {
     const doc = { ...syntheticDoc([[]]), hasTextLayer: false }

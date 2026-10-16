@@ -1,6 +1,7 @@
 import { formatSiren, formatSiret } from "../../lib/validation/identifiers"
 import { Section } from "../ui"
 import { AddressFields } from "./AddressFields"
+import { ElectronicAddressFields } from "./ElectronicAddressFields"
 import { TextField } from "./ReviewField"
 
 const vatUpper = (v: string) => v.replace(/\s+/g, "").toUpperCase()
@@ -58,6 +59,7 @@ export function SellerSection() {
           />
         </div>
         <AddressFields prefix="seller.address" who="du vendeur" />
+        <ElectronicAddressFields party="seller" />
         <div className="grid gap-4 sm:grid-cols-2">
           <TextField path="seller.email" label="E-mail" type="email" inputMode="email" />
           <TextField path="seller.phone" label="Téléphone" type="tel" inputMode="tel" />

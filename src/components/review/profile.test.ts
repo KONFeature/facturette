@@ -89,6 +89,15 @@ describe("sellerProfileFromDraft", () => {
     expect(saveSellerProfile(p, storage)).toBe(true)
     expect(loadSellerProfile(storage)?.seller.siren).toBe("732829320")
   })
+
+  it("remembers the seller's electronic address", () => {
+    const storage = new MemoryStorage()
+    const electronicAddress = { scheme: "0225", value: "732829320_73282932000074" }
+    const p = sellerProfileFromDraft({ ...draft, seller: { ...draft.seller, electronicAddress } })
+    if (!p) throw new Error("no profile")
+    saveSellerProfile(p, storage)
+    expect(loadSellerProfile(storage)?.seller.electronicAddress).toEqual(electronicAddress)
+  })
 })
 
 describe("canMemorize*", () => {
@@ -120,6 +129,15 @@ describe("customerFromDraft", () => {
     if (!party) return
     expect(saveCustomerChecked(party, storage).persisted).toBe(true)
     expect(listCustomers(storage)[0]?.party.name).toBe("Client SA")
+  })
+
+  it("remembers the customer's electronic address", () => {
+    const storage = new MemoryStorage()
+    const electronicAddress = { scheme: "0225", value: "849012349_STANDARD" }
+    const party = customerFromDraft({ buyer: { ...draft.buyer, electronicAddress } })
+    if (!party) throw new Error("no customer")
+    saveCustomerChecked(party, storage)
+    expect(listCustomers(storage)[0]?.party.electronicAddress).toEqual(electronicAddress)
   })
 })
 

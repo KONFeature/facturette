@@ -2,6 +2,7 @@ import Decimal from "decimal.js"
 import {
   type Address,
   deriveSiren,
+  electronicAddressOf,
   type Invoice,
   type Party,
   VAT_FRANCHISE_REASON,
@@ -254,6 +255,7 @@ interface PartyOptions {
 
 function partyNode(name: string, party: Party, options: PartyOptions): XmlNode {
   const siren = deriveSiren(party)
+  const endpoint = electronicAddressOf(party)
   const siret = compact(party.siret)
   const vat = compact(party.vatNumber)?.toUpperCase()
   const email = party.email?.trim()
@@ -286,9 +288,11 @@ function partyNode(name: string, party: Party, options: PartyOptions): XmlNode {
         ])
       : undefined,
     addressNode(party.address),
-    // BT-34 / BT-49: French e-invoicing routing identifier, scheme 0225 = SIREN-based address.
-    siren
-      ? node("ram:URIUniversalCommunication", [leaf("ram:URIID", siren, { schemeID: "0225" })])
+    // BT-34 / BT-49: the e-invoicing address (French directory scheme 0225 by default).
+    endpoint
+      ? node("ram:URIUniversalCommunication", [
+          leaf("ram:URIID", endpoint.value, { schemeID: endpoint.scheme }),
+        ])
       : undefined,
     ...registrations,
   ])

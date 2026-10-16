@@ -60,6 +60,13 @@ service-public.fr) and are encoded in tests.
   recovery indemnity is always « non applicable » (it is owed by professionals only). The French
   schematron's BR-FR-12 warning (buyer electronic address) cannot be satisfied without a SIREN; it is
   a warning, not an error.
+- **Electronic addresses** (BT-34 seller, BT-49 buyer, scheme `0225`) are where the platforms
+  deliver the invoice: the address each company registered in the annuaire through its platform,
+  often `SIREN_SIRET` or `SIREN_STANDARD`. The app cannot look it up (it makes no network request),
+  so it pre-fills the bare SIREN marked "à vérifier" and reads the address when the PDF prints one.
+  Your corrected value is remembered with your company profile or the saved customer. Characters
+  (BR-FR-23) and length (BR-FR-25) block; an address that does not start with the party's SIREN
+  (BR-FR-21) is a warning.
 - **Credit notes** carry positive amounts and reference the original invoice with its number **and**
   date. A negative line (discount) is expressed as a negative quantity with a positive unit price.
 - **Exemption reasons**: when several exemption regimes share an invoice, the text you type goes to

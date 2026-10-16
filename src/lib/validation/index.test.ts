@@ -22,12 +22,14 @@ function validDraft(): InvoiceDraft {
       shareCapital: "10 000 €",
       registration: "RCS Paris 732 829 320",
       address: { line1: "1 rue de la Paix", postalCode: "75002", city: "Paris", countryCode: "FR" },
+      electronicAddress: { scheme: "0225", value: "732829320_73282932000074" },
     },
     buyer: {
       name: "Client SARL",
       kind: "company",
       siren: "552032534",
       address: { line1: "2 avenue Foch", postalCode: "69006", city: "Lyon", countryCode: "FR" },
+      electronicAddress: { scheme: "0225", value: "552032534_STANDARD" },
     },
     lines: [
       {
@@ -789,6 +791,63 @@ describe("validateInvoice: failing cases", () => {
     expect(issues.filter((i) => i.severity === "warning").length).toBe(3)
     expect(issues.filter((i) => i.severity === "error")).toEqual([])
     expect(ready).toBe(true)
+  })
+})
+
+describe("validateInvoice: electronic address (BT-34 / BT-49)", () => {
+  const path = "buyer.electronicAddress.value"
+
+  it("warns, without blocking, that the SIREN will be used when none is entered", () => {
+    const { issues, ready } = run((d) => {
+      if (d.buyer) d.buyer.electronicAddress = undefined
+    })
+    const issue = find(issues, path, "electronicAddress.missing")
+    expect(issue?.severity).toBe("warning")
+    expect(issue?.message).toMatch(/SIREN 552032534 sera utilisé/)
+    expect(ready).toBe(true)
+  })
+
+  it("blocks characters the directory refuses (BR-FR-23) and an address over 125 characters (BR-FR-25)", () => {
+    const chars = run((d) => {
+      if (d.buyer) d.buyer.electronicAddress = { scheme: "0225", value: "552032534 STANDARD" }
+    })
+    expect(find(chars.issues, path, "electronicAddress.chars")?.severity).toBe("error")
+    expect(chars.ready).toBe(false)
+    const long = run((d) => {
+      if (d.buyer)
+        d.buyer.electronicAddress = { scheme: "0225", value: `552032534_${"A".repeat(120)}` }
+    })
+    expect(find(long.issues, path, "electronicAddress.long")?.severity).toBe("error")
+  })
+
+  it("warns when a directory address does not start with the party's SIREN (BR-FR-21)", () => {
+    const { issues } = run((d) => {
+      if (d.buyer) d.buyer.electronicAddress = { scheme: "0225", value: "732829320_STANDARD" }
+    })
+    expect(find(issues, path, "electronicAddress.siren")?.message).toMatch(/552032534/)
+  })
+
+  it("does not apply the SIREN rule to another scheme", () => {
+    const { issues } = run((d) => {
+      if (d.buyer) d.buyer.electronicAddress = { scheme: "EM", value: "factures.client.example" }
+    })
+    expect(issues.filter((i) => i.path === path)).toEqual([])
+  })
+
+  it("expects none from a private customer", () => {
+    const { issues } = run((d) => {
+      d.buyer = {
+        name: "Camille Durand",
+        kind: "individual",
+        address: {
+          line1: "9 rue des Lilas",
+          postalCode: "35000",
+          city: "Rennes",
+          countryCode: "FR",
+        },
+      }
+    })
+    expect(issues.filter((i) => i.path === path)).toEqual([])
   })
 })
 

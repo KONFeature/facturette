@@ -112,6 +112,21 @@ export const addressSchema = z.object({
 })
 export type Address = z.infer<typeof addressSchema>
 
+/** EAS scheme of a French directory (annuaire) address: it starts with the company's SIREN. */
+export const FR_DIRECTORY_SCHEME = "0225"
+
+/**
+ * BT-34 / BT-49: where the e-invoicing platforms deliver the invoice. A French company's address
+ * is the one its platform registered in the annuaire: the SIREN alone, `SIREN_SIRET` or
+ * `SIREN_suffix` (e.g. "822698916_82269891600035", "324286319_STANDARD").
+ */
+export const electronicAddressSchema = z.object({
+  /** EAS code, `0225` for the French directory. */
+  scheme: z.string().min(1),
+  value: z.string().min(1),
+})
+export type ElectronicAddress = z.infer<typeof electronicAddressSchema>
+
 export const partySchema = z.object({
   name: z.string().min(1),
   /** `individual` = private customer (no SIREN expected). Sellers are always `company`. */
@@ -125,6 +140,7 @@ export const partySchema = z.object({
   address: addressSchema,
   email: z.string().optional(),
   phone: z.string().optional(),
+  electronicAddress: electronicAddressSchema.optional(),
 })
 export type Party = z.infer<typeof partySchema>
 
@@ -248,6 +264,26 @@ export function emptyInvoiceDraft(): InvoiceDraft {
 // ---------------------------------------------------------------------------------------------
 // Small pure helpers
 // ---------------------------------------------------------------------------------------------
+
+/**
+ * The address written as BT-34 / BT-49: the one entered, otherwise the bare SIREN in the French
+ * directory scheme (a guess: the review form says so). None for a private customer.
+ */
+export function electronicAddressOf(party: {
+  kind?: string
+  siren?: string
+  siret?: string
+  vatNumber?: string
+  electronicAddress?: { scheme?: string; value?: string }
+}): ElectronicAddress | undefined {
+  const value = party.electronicAddress?.value?.trim()
+  if (value) {
+    return { scheme: party.electronicAddress?.scheme?.trim() || FR_DIRECTORY_SCHEME, value }
+  }
+  if (party.kind === "individual") return undefined
+  const siren = deriveSiren(party)
+  return siren ? { scheme: FR_DIRECTORY_SCHEME, value: siren } : undefined
+}
 
 /** SIREN = first 9 digits of a SIRET, or the last 9 digits of a French VAT number. */
 export function deriveSiren(party: {

@@ -214,6 +214,8 @@ export function canonicalSuggestions(suggestions: Suggestion[], rawDraft: unknow
   })
 }
 
+const ELECTRONIC_ADDRESS_RE = /^(seller|buyer)\.electronicAddress\./
+
 function emptyGroups(): Record<FieldGroup, GroupScore> {
   return Object.fromEntries(
     FIELD_GROUPS.map((g) => [g, { printed: 0, hit: 0, draft: 0, wrong: 0 }]),
@@ -230,8 +232,13 @@ export function scoreFixture(
   ms: number,
 ): FixtureScore {
   const expected = flatten(canonicalLineSigns(expectedInvoice))
-  const draft = flatten(canonicalLineSigns(result.draft))
-  const suggestions = canonicalSuggestions(result.suggestions, result.draft)
+  // The electronic address is pre-filled from the SIREN (a default the form marks « à vérifier »),
+  // not read from the PDF: only scored where the ground truth records one.
+  const scored = (path: string) => !ELECTRONIC_ADDRESS_RE.test(path) || expected.has(path)
+  const draft = new Map([...flatten(canonicalLineSigns(result.draft))].filter(([p]) => scored(p)))
+  const suggestions = canonicalSuggestions(result.suggestions, result.draft).filter((s) =>
+    scored(s.path),
+  )
   const invalid = [...expected].filter(([p, v]) => groundTruthInvalid(p, v)).map(([p]) => p)
   const excluded = new Set(invalid)
   const groups = emptyGroups()

@@ -89,6 +89,10 @@ invoiceSchema.parse → Invoice ──buildFacturXXml──▶ XML ──embedFa
   colours are used. **Verify every detail against the validator, not against memory.**
 - French identifiers in CII: SIREN as legal registration id (BT-30/BT-47, scheme `0002`), SIRET as
   seller/buyer identifier (scheme `0009`), VAT number with scheme `VA`.
+- Electronic addresses BT-34 / BT-49 (`URIUniversalCommunication/URIID`): `party.electronicAddress`
+  (scheme `0225` = French annuaire, value `SIREN`, `SIREN_SIRET` or `SIREN_suffix`). When it is
+  blank the builder writes the bare SIREN; extraction pre-fills that SIREN at 0.62 ("à vérifier")
+  and validation warns, so the guess is never silent. None for a private customer.
 - Free-text French legal mentions travel as `IncludedNote` with Factur-X subject codes (e.g. `PMD`
   late-payment penalties, `PMT` recovery fee, `AAB` early-payment discount, `REG`/`ABL` legal
   identity). Confirm codes against the Factur-X spec / validator.

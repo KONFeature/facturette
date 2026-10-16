@@ -37,6 +37,9 @@ describe.skipIf(!enabled)("Mustang conformance", () => {
         const result = await validateFacturX(file)
         expect(result.errors).toEqual([])
         expect(result.valid).toBe(true)
+        // French electronic-address rules are warnings in the schematron: hold them to zero.
+        // BR-FR-21 (B2B buyer address starts with its SIREN), 23 (characters), 25 (length).
+        expect(result.warnings.filter((w) => /BR-FR-2[135]\b/.test(w))).toEqual([])
       })
     }
   }

@@ -20,6 +20,7 @@
 
 import {
   deriveSiren,
+  FR_DIRECTORY_SCHEME,
   type InvoiceDraft,
   VAT_FRANCHISE_REASON,
   type VatCategory,
@@ -576,12 +577,74 @@ function checkParty(
       )
     }
   }
+  checkElectronicAddress(party, prefix, whose, error, warning)
   const country = party.address?.countryCode
   if (!isBlank(country) && typeof country === "string" && !/^[A-Za-z]{2}$/.test(country.trim())) {
     error(
       `${prefix}.address.countryCode`,
       "country.invalid",
       "Pays invalide : code ISO sur 2 lettres (ex. FR)",
+    )
+  }
+}
+
+/** BR-FR-25: an electronic address is at most 125 characters. */
+export const ELECTRONIC_ADDRESS_MAX_LENGTH = 125
+
+/**
+ * BT-34 / BT-49. The French schematron (XP Z12-012) wants both addresses (BR-FR-12/13), made of
+ * letters, digits, "-", "_" and "." (BR-FR-23), at most 125 characters (BR-FR-25), and in the
+ * directory scheme 0225 starting with the party's SIREN (BR-FR-21). A malformed address can never
+ * be delivered: error. A missing one falls back to the SIREN in the file: warning, so the guess
+ * is never silent. Private customers have none (B2C is e-reported, not e-invoiced).
+ */
+function checkElectronicAddress(
+  party: Party,
+  prefix: "seller" | "buyer",
+  whose: string,
+  error: Report,
+  warning: Report,
+): void {
+  if (party.kind === "individual") return
+  const path = `${prefix}.electronicAddress.value`
+  const value = party.electronicAddress?.value?.trim()
+  const siren = deriveSiren(party)
+  if (!value) {
+    warning(
+      path,
+      "electronicAddress.missing",
+      siren
+        ? `Adresse électronique ${whose} non renseignée : le SIREN ${siren} sera utilisé. Vérifiez l'adresse inscrite à l'annuaire de la facturation électronique (souvent SIREN_SIRET ou SIREN_suffixe).`
+        : `Adresse électronique ${whose} non renseignée : elle est attendue pour la facturation électronique (règles BR-FR-12 et BR-FR-13).`,
+    )
+    return
+  }
+  if (!/^[A-Za-z0-9._-]+$/.test(value)) {
+    error(
+      path,
+      "electronicAddress.chars",
+      "Adresse électronique invalide : lettres, chiffres et signes - _ . uniquement, sans espace (règle BR-FR-23)",
+    )
+  } else if (value.length > ELECTRONIC_ADDRESS_MAX_LENGTH) {
+    error(
+      path,
+      "electronicAddress.long",
+      `Adresse électronique trop longue : ${ELECTRONIC_ADDRESS_MAX_LENGTH} caractères au maximum (règle BR-FR-25)`,
+    )
+  }
+  const scheme = party.electronicAddress?.scheme?.trim() || FR_DIRECTORY_SCHEME
+  if (scheme !== FR_DIRECTORY_SCHEME) return
+  if (siren && !value.startsWith(siren)) {
+    warning(
+      path,
+      "electronicAddress.siren",
+      `L'adresse électronique ${whose} doit commencer par son SIREN (${siren}) : vérifiez-la (règle BR-FR-21)`,
+    )
+  } else if (!siren && !/^\d{9}(_|$)/.test(value)) {
+    warning(
+      path,
+      "electronicAddress.format",
+      "Une adresse de l'annuaire (schéma 0225) commence par le SIREN : 9 chiffres, puis éventuellement _ et un suffixe",
     )
   }
 }

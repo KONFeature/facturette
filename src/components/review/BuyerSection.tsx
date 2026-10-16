@@ -3,6 +3,7 @@ import { formatSiren, formatSiret } from "../../lib/validation/identifiers"
 import { Section } from "../ui"
 import { AddressFields } from "./AddressFields"
 import { CustomerPicker } from "./CustomerPicker"
+import { ElectronicAddressFields } from "./ElectronicAddressFields"
 import type { FormValues } from "./formModel"
 import { CheckboxField, SelectField, TextField } from "./ReviewField"
 
@@ -66,6 +67,7 @@ export function BuyerSection() {
           />
         </div>
         <AddressFields prefix="buyer.address" who="du client" />
+        {!individual && <ElectronicAddressFields party="buyer" />}
         <div className="grid gap-4 sm:grid-cols-2">
           <TextField path="buyer.email" label="E-mail" type="email" inputMode="email" />
           <TextField path="buyer.phone" label="Téléphone" type="tel" inputMode="tel" />

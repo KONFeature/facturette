@@ -222,6 +222,26 @@ describe("parties", () => {
     expect(tax[0]["ram:CalculatedAmount"]).toBe("0.00")
   })
 
+  it("electronic address: the one entered, with its scheme (BT-34 / BT-49)", () => {
+    const ag = agreement(build("directory-addresses"))
+    expect(ag["ram:SellerTradeParty"]["ram:URIUniversalCommunication"]["ram:URIID"]).toEqual({
+      "#text": "732829320_73282932000074",
+      "@_schemeID": "0225",
+    })
+    expect(ag["ram:BuyerTradeParty"]["ram:URIUniversalCommunication"]["ram:URIID"]).toEqual({
+      "#text": "552081317_STANDARD",
+      "@_schemeID": "0225",
+    })
+  })
+
+  it("electronic address: the bare SIREN in scheme 0225 when none was entered", () => {
+    const ag = agreement(build("standard-20"))
+    expect(ag["ram:BuyerTradeParty"]["ram:URIUniversalCommunication"]["ram:URIID"]).toEqual({
+      "#text": "552081317",
+      "@_schemeID": "0225",
+    })
+  })
+
   it("private customer: no SIREN, no legal organization, no endpoint", () => {
     const buyer = agreement(build("private-customer"))["ram:BuyerTradeParty"]
     expect(buyer["ram:SpecifiedLegalOrganization"]).toBeUndefined()

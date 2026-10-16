@@ -85,6 +85,19 @@ const microSeller: Invoice["seller"] = {
 export const scenarios: Scenario[] = [
   { name: "standard-20", invoice: base, profiles: ["EN16931", "BASIC"] },
   {
+    // Addresses registered in the annuaire: SIREN_SIRET for the seller, SIREN_suffix for the buyer.
+    name: "directory-addresses",
+    invoice: make({
+      number: "FA-2026-0020",
+      seller: {
+        ...seller,
+        electronicAddress: { scheme: "0225", value: "732829320_73282932000074" },
+      },
+      buyer: { ...buyer, electronicAddress: { scheme: "0225", value: "552081317_STANDARD" } },
+    }),
+    profiles: ["EN16931", "BASIC"],
+  },
+  {
     name: "multi-rate",
     invoice: make({
       number: "FA-2026-0002",

@@ -1,5 +1,6 @@
 import type { PdfTextDocument } from "../pdf/types"
 import { buildDraft, Collector, resolveConflicts } from "./collect"
+import { addSirenDefaultAddresses, extractElectronicAddresses } from "./electronic"
 import { extractHeader } from "./header"
 import { buildLayout } from "./layout"
 import { extractParties } from "./parties"
@@ -49,8 +50,10 @@ function run(doc: PdfTextDocument, options?: ExtractionOptions): ExtractionResul
     exemptReason: exemption?.reason,
   })
   extractPayment(layout, collector, isCreditNote, buyerCells)
+  extractElectronicAddresses(layout, collector)
 
   resolveConflicts(collector)
+  addSirenDefaultAddresses(collector)
   const suggestions = [...collector.suggestions].sort(
     (a, b) => b.confidence - a.confidence || a.path.localeCompare(b.path),
   )

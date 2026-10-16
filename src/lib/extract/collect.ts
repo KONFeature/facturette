@@ -41,6 +41,28 @@ export class Collector {
     })
   }
 
+  /**
+   * A value derived from another suggestion, not read on its own (e.g. a default built from the
+   * SIREN): it points at the same place in the PDF.
+   */
+  derive(
+    path: string,
+    value: string,
+    confidence: number,
+    from: Suggestion,
+    rule: string,
+    evidenceText: string,
+  ): void {
+    if (this.suggestions.some((s) => s.path === path && sameValue(s.value, value))) return
+    this.suggestions.push({
+      path,
+      value,
+      confidence: Math.round(confidence * 100) / 100,
+      evidence: { text: evidenceText, bbox: from.evidence.bbox },
+      rule,
+    })
+  }
+
   warn(message: string): void {
     if (!this.warnings.includes(message)) this.warnings.push(message)
   }

@@ -9,6 +9,7 @@
  */
 import {
   type Address,
+  FR_DIRECTORY_SCHEME,
   type InvoiceDraft,
   OPERATION_CATEGORIES,
   UNIT_CODES,
@@ -41,6 +42,8 @@ export interface PartyValues {
   email: string
   phone: string
   address: AddressValues
+  /** BT-34 / BT-49. A blank value leaves it out of the draft (the file falls back to the SIREN). */
+  electronicAddress: { scheme: string; value: string }
 }
 
 export interface SellerValues extends PartyValues {
@@ -122,6 +125,10 @@ function partyToForm(p: NonNullable<InvoiceDraft["buyer"]> | undefined): PartyVa
     email: str(p?.email),
     phone: str(p?.phone),
     address: addressToForm(p?.address),
+    electronicAddress: {
+      scheme: str(p?.electronicAddress?.scheme) || FR_DIRECTORY_SCHEME,
+      value: str(p?.electronicAddress?.value),
+    },
   }
 }
 
@@ -202,7 +209,17 @@ function partyToDraft(p: PartyValues): NonNullable<InvoiceDraft["buyer"]> {
     email: clean(p.email),
     phone: clean(p.phone),
     address: addressToDraft(p.address),
+    electronicAddress: electronicAddressToDraft(p),
   }
+}
+
+/** Private customers have none; spaces are typing noise (BR-FR-23 forbids them anyway). */
+function electronicAddressToDraft(
+  p: PartyValues,
+): NonNullable<InvoiceDraft["buyer"]>["electronicAddress"] {
+  const value = stripSpaces(p.electronicAddress.value)
+  if (p.kind === "individual" || !value) return undefined
+  return { scheme: clean(p.electronicAddress.scheme) ?? FR_DIRECTORY_SCHEME, value }
 }
 
 /** Number text → number. Blank and unparseable text both give `undefined` (see `numberIssues`). */

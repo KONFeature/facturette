@@ -108,6 +108,25 @@ describe("draftToForm / formToDraft", () => {
     expect(formToDraft(form).buyer?.siren).toBe("732829320")
   })
 
+  it("round-trips an electronic address, defaults its scheme to 0225 and drops a blank one", () => {
+    const draft: InvoiceDraft = {
+      seller: { electronicAddress: { scheme: "0225", value: "822698916_82269891600035" } },
+      buyer: { kind: "company", electronicAddress: { value: "324286319_STANDARD" } },
+    }
+    const form = draftToForm(draft)
+    expect(form.buyer.electronicAddress).toEqual({ scheme: "0225", value: "324286319_STANDARD" })
+    const back = formToDraft(form)
+    expect(back.seller?.electronicAddress).toEqual(draft.seller?.electronicAddress)
+    expect(back.buyer?.electronicAddress).toEqual({ scheme: "0225", value: "324286319_STANDARD" })
+
+    form.buyer.electronicAddress.value = "  "
+    expect(formToDraft(form).buyer?.electronicAddress).toBeUndefined()
+    form.buyer.electronicAddress.value = "324286319 _STANDARD"
+    expect(formToDraft(form).buyer?.electronicAddress?.value).toBe("324286319_STANDARD")
+    form.buyer.kind = "individual"
+    expect(formToDraft(form).buyer?.electronicAddress).toBeUndefined()
+  })
+
   it("only includes the delivery address when it is switched on", () => {
     const form = draftToForm({
       deliveryAddress: { line1: "5 rue X", postalCode: "75001", city: "Paris", countryCode: "FR" },
