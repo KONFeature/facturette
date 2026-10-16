@@ -16,6 +16,7 @@ import { SRGB_ICC_BASE64 } from "./assets/srgb-icc"
 import type { FontUse } from "./fonts/repair"
 import type { FontRepairReport, ReplacedFont, UnrepairableFont } from "./fonts/types"
 import { DEFAULT_PROFILE, type FacturXProfile } from "./types"
+import { stripIllegalXmlChars } from "./xml"
 
 export type { ReplacedFont, UnrepairableFont }
 
@@ -219,7 +220,9 @@ function deleteIfRef(doc: PDFDocument, obj: PDFObject | undefined) {
 const utf8 = new TextEncoder()
 
 function xmlEscape(s: string): string {
-  return s
+  // Control characters are illegal in XML 1.0: one stray U+0000 from a PDF text layer would make
+  // the whole XMP packet malformed (and the file non-PDF/A).
+  return stripIllegalXmlChars(s)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")

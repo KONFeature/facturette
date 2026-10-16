@@ -1,6 +1,9 @@
 import { openDocument, toPdfReadError } from "./pdfjs"
 import type { PdfPage, PdfTextDocument, PdfTextItem, PdfTextLine } from "./types"
 
+/** An invoice is a handful of pages; refusing huge documents bounds the work a hostile PDF can cause. */
+export const MAX_PDF_PAGES = 150
+
 /**
  * Read the text layer of a PDF with pdf.js, in the browser AND in Node (unit tests).
  * Never touches the network. Throws a typed error for unreadable or password-protected files.
@@ -11,6 +14,12 @@ export async function extractPdfText(data: ArrayBuffer | Uint8Array): Promise<Pd
   const bytes = data instanceof Uint8Array ? data : new Uint8Array(data)
   const { pdf, destroy } = await openDocument(bytes)
   try {
+    if (pdf.numPages > MAX_PDF_PAGES) {
+      throw new PdfReadError(
+        "unsupported",
+        `Ce PDF compte ${pdf.numPages} pages : au-del\u00e0 de ${MAX_PDF_PAGES} pages, ce n\u2019est pas une facture que nous pouvons traiter.`,
+      )
+    }
     const pages: PdfPage[] = []
     for (let number = 1; number <= pdf.numPages; number++) {
       const page = await pdf.getPage(number)

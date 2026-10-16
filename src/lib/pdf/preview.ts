@@ -28,6 +28,9 @@ interface RenderHandle {
   cancel(): void
 }
 
+/** Upper bound of a canvas backing store (about 64 MB of RGBA): protects against hostile page sizes. */
+const MAX_CANVAS_PIXELS = 16_000_000
+
 export async function openPdfPreview(data: Uint8Array): Promise<PdfPreview> {
   const { pdf, destroy } = await openDocument(data)
   return createPreview(pdf, destroy)
@@ -54,7 +57,13 @@ function createPreview(pdf: PdfDocumentProxy, destroyDocument: () => Promise<voi
       const base = page.getViewport({ scale: 1 })
       const scale = options.width / base.width
       const ratio = Math.max(1, globalThis.devicePixelRatio || 1)
-      const viewport = page.getViewport({ scale: scale * ratio })
+      // A hostile MediaBox (e.g. 1 x 14400 pt) must not allocate a gigantic canvas: cap the backing
+      // store, at the cost of resolution (the CSS size, hence the layout, is unchanged).
+      const pixelScale = Math.min(
+        scale * ratio,
+        Math.sqrt(MAX_CANVAS_PIXELS / Math.max(1, base.width * base.height)),
+      )
+      const viewport = page.getViewport({ scale: pixelScale })
       const size = { width: base.width * scale, height: base.height * scale, scale }
 
       // A newer call on this canvas started while we awaited the page: it wins.

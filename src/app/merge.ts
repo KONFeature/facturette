@@ -5,6 +5,8 @@ type Plain = Record<string, unknown>
 
 const isPlain = (v: unknown): v is Plain => typeof v === "object" && v !== null && !Array.isArray(v)
 
+const UNSAFE_KEYS: ReadonlySet<string> = new Set(["__proto__", "constructor", "prototype"])
+
 const isBlank = (v: unknown): boolean =>
   v === undefined || v === null || (typeof v === "string" && v.trim() === "")
 
@@ -15,6 +17,9 @@ const isBlank = (v: unknown): boolean =>
 export function mergeDeep<T extends Plain>(low: T, high: Plain, ignoreBlank: boolean): T {
   const out: Plain = { ...low }
   for (const [key, value] of Object.entries(high)) {
+    // An own "__proto__" key (JSON.parse creates one) would re-parent `out` through the assignment
+    // below; "constructor" / "prototype" are the other classic pollution vectors.
+    if (UNSAFE_KEYS.has(key)) continue
     if (value === undefined) continue
     if (ignoreBlank && (isBlank(value) || (Array.isArray(value) && value.length === 0))) continue
     const current = out[key]

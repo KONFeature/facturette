@@ -24,7 +24,7 @@ interface XmlNode {
 type Child = XmlNode | undefined | false
 
 /** Remove characters that are illegal in XML 1.0 (control chars, lone surrogates, U+FFFE/FFFF). */
-function stripIllegalXmlChars(value: string): string {
+export function stripIllegalXmlChars(value: string): string {
   let out = ""
   for (const ch of value) {
     const cp = ch.codePointAt(0) ?? 0
