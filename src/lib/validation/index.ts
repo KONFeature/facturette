@@ -18,7 +18,12 @@
  * OWNER: lane `validation`.
  */
 
-import { type InvoiceDraft, VAT_FRANCHISE_REASON, type VatCategory } from "../../domain/invoice"
+import {
+  deriveSiren,
+  type InvoiceDraft,
+  VAT_FRANCHISE_REASON,
+  type VatCategory,
+} from "../../domain/invoice"
 import { computeTotals } from "../../domain/totals"
 import { isValidIban, isValidSiren, isValidSiret, vatNumberStatus } from "./identifiers"
 
@@ -161,8 +166,11 @@ interface Requirement {
   satisfied: boolean
 }
 
-function hasIdentity(p: { siren?: string; siret?: string } | undefined): boolean {
-  return !isBlank(p?.siren) || !isBlank(p?.siret)
+function hasIdentity(
+  p: { siren?: string; siret?: string; vatNumber?: string } | undefined,
+): boolean {
+  // A French VAT number embeds the SIREN, so it identifies the party too.
+  return !isBlank(p?.siren) || !isBlank(p?.siret) || (!!p && deriveSiren(p) !== undefined)
 }
 
 function collectRequirements(draft: InvoiceDraft): Requirement[] {
@@ -184,11 +192,23 @@ function collectRequirements(draft: InvoiceDraft): Requirement[] {
     "operationCategory",
     "Choisissez la catégorie d'opération (livraison de biens, prestation de services ou mixte)",
   )
-  // BT-25 / BR-FR-CO-05: a credit note must point at the invoice it corrects.
+  // BT-25 + BT-26 / BR-FR-CO-05: a credit note must point at the invoice it corrects, with its
+  // number AND its date (the French schematron checks both).
   field(
     "precedingInvoice.number",
     "Indiquez le numéro de la facture d'origine de l'avoir",
     draft.typeCode === "381",
+  )
+  field(
+    "precedingInvoice.issueDate",
+    "Indiquez la date de la facture d'origine de l'avoir",
+    draft.typeCode === "381",
+  )
+  // BR-FR-CO-09: an invoice that is already fully paid carries its payment date in BT-9.
+  field(
+    "dueDate",
+    "Facture déjà réglée : indiquez la date de paiement (date d'échéance)",
+    totals.prepaid > 0 && totals.dueAmount === 0,
   )
 
   // BR-6 / BR-8..11 / BR-CO-26: seller identity; L441-9 + 242 nonies A.
@@ -416,6 +436,14 @@ export function validateInvoice(
       "registration.missing",
       "Indiquez l'immatriculation du vendeur (RM, RCS ou « Micro-entrepreneur dispensé d'immatriculation »)",
     )
+  } else if (!isBlank(draft.seller?.legalForm) && isBlank(draft.seller?.registration)) {
+    // Companies registered at the RCS must show "RCS" followed by the registry town (art. R123-237
+    // Code de commerce). A warning, not an error: the mention may already be printed on the PDF.
+    warning(
+      "seller.registration",
+      "registration.missing",
+      "Indiquez le numéro RCS et la ville du greffe, par exemple « RCS Paris 123 456 789 » (art. R123-237 du Code de commerce)",
+    )
   }
 
   const sellerVat = draft.seller?.vatNumber?.replace(/[\s.-]+/g, "").toUpperCase()
@@ -451,21 +479,43 @@ export function validateInvoice(
     )
   }
   if (categories.has("O")) {
-    // BR-O-02: no VAT identifier of seller or buyer on an out-of-scope invoice.
+    // BR-O-02 bans the seller, representative and BUYER VAT identifiers from the XML of an
+    // out-of-scope invoice. That constrains the file, not the user's data: the Factur-X builder
+    // omits them, so the form must not force the user to delete a number saved in their profile.
     if (!isBlank(draft.seller?.vatNumber)) {
-      error(
+      warning(
         "seller.vatNumber",
         "vat.outOfScopeVatId",
-        "Retirez le numéro de TVA : il est interdit avec la catégorie « Hors champ de la TVA »",
+        "Avec la catégorie « Hors champ de la TVA », votre numéro de TVA ne sera pas repris dans le fichier Factur-X (règle BR-O-02)",
       )
     }
     if (!isBlank(draft.buyer?.vatNumber)) {
-      error(
+      warning(
         "buyer.vatNumber",
         "vat.outOfScopeVatId",
-        "Retirez le numéro de TVA du client : il est interdit avec la catégorie « Hors champ de la TVA »",
+        "Avec la catégorie « Hors champ de la TVA », le numéro de TVA du client ne sera pas repris dans le fichier Factur-X (règle BR-O-02)",
       )
     }
+  }
+  // The invoice has ONE exemption-reason field: it can only describe one regime.
+  const exemptRegimes = [...categories].filter(
+    (c) => c === "E" || c === "AE" || c === "K" || c === "G",
+  )
+  if (exemptRegimes.length > 1) {
+    warning(
+      "vatExemptionReason",
+      "vat.multipleExemptions",
+      "Plusieurs régimes d'exonération apparaissent sur cette facture : la mention saisie n'est reprise que pour le premier d'entre eux, les autres reçoivent un libellé standard. Vérifiez-les.",
+    )
+  }
+  // Consumers (art. L111-1 / L217-4 Code de la consommation; service-public F31808): the invoice
+  // must mention the legal conformity guarantee of at least 2 years.
+  if (draft.buyer?.kind === "individual" && !/garantie/i.test(draft.notes ?? "")) {
+    warning(
+      "notes",
+      "consumer.guarantee",
+      "Facture à un particulier : mentionnez l'existence et la durée de la garantie légale de conformité (2 ans au minimum)",
+    )
   }
 
   // --- Payment -----------------------------------------------------------------------------

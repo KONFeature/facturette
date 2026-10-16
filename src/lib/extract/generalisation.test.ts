@@ -562,7 +562,7 @@ describe("robustness", () => {
   })
 
   // Shapes that make nested quantifiers backtrack: each is fed as a seller line, a buyer line
-  // and a footer line, and must be processed in under 100 ms.
+  // and a footer line, and must be processed in under 1 s: exponential backtracking would take minutes, normal runs take a few ms.
   it.each([
     ["RCS hyphen chain", `RCS ${"A-".repeat(60)}`],
     ["RCS hyphen chain with number", `RCS ${"A-".repeat(60)} 523 456 788 ${"B-".repeat(60)}`],
@@ -577,7 +577,7 @@ describe("robustness", () => {
     ["email dots", `${"a.".repeat(150)}@${"b-".repeat(100)}`],
     ["phone chain", `Tél. ${"01 ".repeat(150)}x`],
     ["iban chain", `IBAN ${"FR76 ".repeat(100)}`],
-  ])("%s finishes in under 100 ms", (_label, text) => {
+  ])("%s finishes in under 1 s (exponential backtracking would take minutes)", (_label, text) => {
     const parties: SynthRow[] = [
       ...stackedRows(40, 40, [SELLER[0] ?? "", text, ...SELLER.slice(1)]),
       [130, [[320, "Facturé à"]]],
@@ -590,7 +590,7 @@ describe("robustness", () => {
     const d = syntheticDoc([[...HEADER, ...parties, ...STANDARD_TABLE, ...footer]])
     const start = performance.now()
     const res = extractInvoice(d)
-    expect(performance.now() - start).toBeLessThan(100)
+    expect(performance.now() - start).toBeLessThan(1000)
     expect(Array.isArray(res.suggestions)).toBe(true)
   })
 

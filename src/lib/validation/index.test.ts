@@ -249,9 +249,12 @@ const failing: Case[] = [
 
   // Seller identity
   {
-    name: "seller SIREN and SIRET missing",
+    name: "seller SIREN, SIRET and VAT number (which embeds the SIREN) all missing",
     mutate: (d) => {
-      if (d.seller) d.seller.siret = undefined
+      if (d.seller) {
+        d.seller.siret = undefined
+        d.seller.vatNumber = undefined
+      }
     },
     path: "seller.siret",
     code: "required",
@@ -599,7 +602,60 @@ const failing: Case[] = [
     },
     path: "seller.vatNumber",
     code: "vat.outOfScopeVatId",
+    // BR-O-02 constrains the XML, which omits the number: the user is only informed.
+    severity: "warning",
+  },
+  {
+    name: "credit note with the original invoice number but no date (BR-FR-CO-05)",
+    mutate: (d) => {
+      d.typeCode = "381"
+      d.precedingInvoice = { number: "FA-2026-0001" }
+    },
+    path: "precedingInvoice.issueDate",
+    code: "required",
     severity: "error",
+  },
+  {
+    name: "invoice already fully paid without a payment date (BR-FR-CO-09)",
+    mutate: (d) => {
+      d.dueDate = undefined
+      d.prepaidAmount = 1200
+    },
+    path: "dueDate",
+    code: "required",
+    severity: "error",
+  },
+  {
+    name: "company without its RCS registration",
+    mutate: (d) => {
+      if (d.seller) d.seller.registration = undefined
+    },
+    path: "seller.registration",
+    code: "registration.missing",
+    severity: "warning",
+  },
+  {
+    name: "two exemption regimes on one invoice",
+    mutate: (d) => {
+      d.vatExemptionReason = "Exon\u00e9ration de TVA"
+      if (d.buyer) d.buyer.vatNumber = "DE123456789"
+      d.lines = [
+        { name: "a", quantity: 1, unitCode: "C62", unitPrice: 1, vatCategory: "E", vatRate: 0 },
+        { name: "b", quantity: 1, unitCode: "C62", unitPrice: 1, vatCategory: "AE", vatRate: 0 },
+      ]
+    },
+    path: "vatExemptionReason",
+    code: "vat.multipleExemptions",
+    severity: "warning",
+  },
+  {
+    name: "invoice to a consumer without the legal guarantee mention",
+    mutate: (d) => {
+      if (d.buyer) d.buyer.kind = "individual"
+    },
+    path: "notes",
+    code: "consumer.guarantee",
+    severity: "warning",
   },
   {
     name: "category O mixed with S",
@@ -794,10 +850,12 @@ const passing: { name: string; mutate: Mutator; absent: [string, string?] }[] = 
     absent: ["dueDate"],
   },
   {
-    name: "nothing due: no due date needed",
+    // A zero-total invoice has nothing to pay. (A FULLY PAID invoice is different: BR-FR-CO-09
+    // wants the payment date in BT-9, see the failing case above.)
+    name: "zero total: no due date needed",
     mutate: (d) => {
       d.dueDate = undefined
-      d.prepaidAmount = 1200
+      firstLine(d).unitPrice = 0
     },
     absent: ["dueDate"],
   },
@@ -906,6 +964,23 @@ const passing: { name: string; mutate: Mutator; absent: [string, string?] }[] = 
     absent: ["payment.iban"],
   },
 ]
+
+describe("validateInvoice: identity and consumers", () => {
+  it("accepts a seller identified only by a French VAT number (it embeds the SIREN)", () => {
+    const r = run((d) => {
+      if (d.seller) d.seller.siret = undefined
+    })
+    expect(r.issues.some((i) => i.path === "seller.siret" && i.code === "required")).toBe(false)
+  })
+
+  it("does not ask for the guarantee mention once it is written", () => {
+    const r = run((d) => {
+      if (d.buyer) d.buyer.kind = "individual"
+      d.notes = "Garantie l\u00e9gale de conformit\u00e9 de 2 ans."
+    })
+    expect(r.issues.some((i) => i.code === "consumer.guarantee")).toBe(false)
+  })
+})
 
 describe("validateInvoice: discount lines and credit notes", () => {
   it("accepts a negative unit price: it is a discount line, not an error", () => {
