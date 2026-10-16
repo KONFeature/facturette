@@ -26,6 +26,13 @@ export interface LabeledValue<T> {
 
 const LEADING_PUNCT_RE = /^[\s:.\-–—=]+/
 
+/**
+ * What may follow a matched label and still belong to it ("Date d'exigibilité du paiement",
+ * "Date d'émission de la facture : 15/10/2026"), never part of the value.
+ */
+const LABEL_COMPLEMENT_RE =
+  /^(du|de la|de l'|de|des)\s*(paiement|reglement|facture|document|avoir|piece)\b[\s:.\-–—=]*/
+
 /** Same offset in `text` as `foldedLength` characters of its folded form (fold keeps length). */
 function sliceAfter(part: Part, foldedLength: number): string {
   return part.text.length === part.folded.length
@@ -77,11 +84,17 @@ export function findLabeled<T>(
         if (!variant || m?.index !== 0) continue
         part = variant
       }
-      const labelText = part.text.slice(0, m[0].length)
-      const rest = stripLabelGloss(sliceAfter(part, m[0].length).replace(/^\s+/, "")).replace(
+      let labelText = part.text.slice(0, m[0].length)
+      let rest = stripLabelGloss(sliceAfter(part, m[0].length).replace(/^\s+/, "")).replace(
         LEADING_PUNCT_RE,
         "",
       )
+      const restFolded = fold(rest)
+      const complement = LABEL_COMPLEMENT_RE.exec(restFolded)?.[0]
+      if (complement && restFolded.length === rest.length) {
+        labelText = `${labelText} ${rest.slice(0, complement.length)}`.trim()
+        rest = rest.slice(complement.length)
+      }
       if (rest !== "") {
         const v = read(rest)
         if (v) {

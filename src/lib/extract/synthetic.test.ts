@@ -187,6 +187,40 @@ describe("date wordings", () => {
     expect(draft.issueDate).toBe("2026-10-15")
   })
 
+  // "du paiement", "de la facture" complete the label; they must not be read as its value.
+  describe.each([
+    ["Date d'\u00e9mission de la facture", "issueDate"],
+    ["\u00c9ch\u00e9ance du paiement :", "dueDate"],
+    ["Date d'exigibilit\u00e9 du paiement", "dueDate"],
+  ] as const)("label with a complement: %s", (label, path) => {
+    const read = (rows: SynthRow[]) =>
+      extractInvoice(baseInvoice({ header: [...meta([["Facture n\u00b0", "A-1"]]), ...rows] }))
+        .draft[path]
+    it("inline", () => {
+      expect(read([[60, [[300, `${label} 30/11/2026`]]]])).toBe("2026-11-30")
+    })
+    it("value in the next cell", () => {
+      const rows: SynthRow[] = [
+        [
+          60,
+          [
+            [300, label],
+            [490, "30/11/2026"],
+          ],
+        ],
+      ]
+      expect(read(rows)).toBe("2026-11-30")
+    })
+    it("value under the label", () => {
+      expect(
+        read([
+          [60, [[400, label]]],
+          [72, [[400, "30/11/2026"]]],
+        ]),
+      ).toBe("2026-11-30")
+    })
+  })
+
   it("reads a letter-style date", () => {
     const header: SynthRow[] = [
       ...meta([["Facture n°", "A-1"]]),
@@ -893,6 +927,84 @@ describe("legal mentions and VAT exemption", () => {
       quantity: 1,
       unitPrice: 850,
     })
+  })
+})
+
+describe("payment conditions and bank details printed as key/value tables", () => {
+  // Header dates stacked label-over-value, a two-column conditions table in a small font (labels
+  // at x=26, values at x=137) whose longest label ends one font size before the value column, and
+  // a bank-details table with labels on one row and values on the next.
+  const s = (x: number, text: string, size = 6) => ({ x, text, size })
+  const doc = () =>
+    syntheticDoc([
+      [
+        [21, [s(26, "Facture", 24)]],
+        [55, [s(26, "N° F-2026-0042", 9)]],
+        [93, [s(40, "ÉMETTEUR"), s(248, "DESTINATAIRE"), s(458, "DATE D'ÉMISSION")]],
+        [105, [s(40, "Atelier Lumière", 9), s(248, "Horizon Immobilier SA", 9)]],
+        [106, [s(458, "12/09/2026", 7.5)]],
+        [119, [s(40, "12 rue des Lilas"), s(248, "40 boulevard Haussmann")]],
+        [120, [s(458, "DATE D'EXIGIBILITÉ DU PAIEMENT")]],
+        [130, [s(40, "69001 Lyon"), s(248, "75009 Paris")]],
+        [132, [s(458, "11/11/2026", 7.5)]],
+        [141, [s(40, "contact@atelier.example"), s(248, "N° SIRET : 750 123 457 00011")]],
+        ...TABLE,
+        [380, [s(26, "CONDITIONS DE PAIEMENT", 7.5)]],
+        [395, [s(26, "Délai de paiement"), s(137, "60 jours")]],
+        [407, [s(26, "Pénalité de retard"), s(137, "3 fois le taux légal")]],
+        [419, [s(26, "Indemnité forfaitaire pour frais de"), s(137, "40 €")]],
+        [428, [s(26, "recouvrement")]],
+        [440, [s(26, "Escompte"), s(137, "Pas d'escompte en cas de paiement anticipé")]],
+        [452, [s(26, "Moyens de paiement"), s(137, "Virement")]],
+        ...TOTALS,
+        [480, [s(26, "RELEVÉ D'IDENTITÉ BANCAIRE", 7.5)]],
+        [496, [s(26, "Bénéficiaire"), s(122, "Banque"), s(219, "BIC")]],
+        [506, [s(26, "ATELIER LUMIERE"), s(122, "Banque Fictive"), s(219, "FICTDEFFXXX")]],
+        [521, [s(26, "IBAN")]],
+        [531, [s(26, "DE89370400440532013000")]],
+        [818, [s(26, "N° SIRET : 523 456 788 00026")]],
+      ],
+    ])
+
+  it("reads a due date stacked under a label that ends with « du paiement »", () => {
+    const draft = extractInvoice(doc()).draft
+    expect(draft.issueDate).toBe("2026-09-12")
+    expect(draft.dueDate).toBe("2026-11-11")
+  })
+
+  it("reads terms and means from the value column", () => {
+    const draft = extractInvoice(doc()).draft
+    expect(draft.payment?.termsText).toBe("60 jours")
+    expect(draft.payment?.meansCode).toBe("30")
+  })
+
+  it("joins a legal mention's label with its value, even when the label wraps", () => {
+    const draft = extractInvoice(doc()).draft
+    expect(draft.legalNotes).toEqual({
+      latePaymentPenalty: "Pénalité de retard : 3 fois le taux légal",
+      recoveryFee: "Indemnité forfaitaire pour frais de recouvrement : 40 €",
+      earlyPaymentDiscount: "Pas d'escompte en cas de paiement anticipé",
+    })
+  })
+
+  it("reads a BIC printed under its label", () => {
+    const draft = extractInvoice(doc()).draft
+    expect(draft.payment?.iban).toBe("DE89370400440532013000")
+    expect(draft.payment?.bic).toBe("FICTDEFFXXX")
+  })
+
+  it("offers a label-less BIC-shaped word under a BIC label without pre-filling it", () => {
+    const res = extractInvoice(
+      syntheticDoc([
+        [
+          ...meta([["Facture n°", "A-1"]]),
+          ...TABLE,
+          [496, [s(26, "Banque"), s(122, "BIC")]],
+          [506, [s(26, "Banque Fictive"), s(122, "ATELIERS")]],
+        ],
+      ]),
+    )
+    expect(res.draft.payment?.bic).toBeUndefined()
   })
 })
 

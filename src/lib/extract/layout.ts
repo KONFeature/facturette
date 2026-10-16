@@ -48,6 +48,16 @@ export interface Layout {
 
 /** Two items on a row belong to different cells beyond this gap, in font sizes. */
 const CELL_GAP_RATIO = 1.1
+/**
+ * A narrower gap still separates two cells when the right item starts on a column edge: the
+ * left edge of a cell on at least `COLUMN_EDGE_SUPPORT` other rows close by. A long label in a
+ * small-font key/value table ("Indemnité forfaitaire pour frais de | 40 €") ends closer to the
+ * value column than the plain gap rule allows. Above half a font size, so word spaces never count.
+ */
+const COLUMN_SPLIT_GAP_RATIO = 0.5
+const COLUMN_EDGE_TOLERANCE = 1
+const COLUMN_EDGE_SUPPORT = 2
+const COLUMN_EDGE_WINDOW = 6
 /** Two vertically consecutive cells chain into one block within this many font sizes. */
 const BLOCK_GAP_RATIO = 1.0
 /** Left (or right) edges of cells in one block may differ by this many points. */
@@ -96,32 +106,75 @@ function makeCell(id: number, page: number, line: number, items: PdfTextItem[]):
   }
 }
 
+const gapBetween = (prev: PdfTextItem, item: PdfTextItem) => item.x - (prev.x + prev.width)
+const gapRef = (prev: PdfTextItem, item: PdfTextItem) =>
+  Math.max(1, Math.min(prev.fontSize || 1, item.fontSize || 1))
+
+/** Items of one line cut into runs wherever the gap is wider than the cell gap. */
+function splitOnGaps(items: PdfTextItem[]): PdfTextItem[][] {
+  const runs: PdfTextItem[][] = []
+  let current: PdfTextItem[] = []
+  for (const item of items) {
+    const prev = current[current.length - 1]
+    if (prev && gapBetween(prev, item) > CELL_GAP_RATIO * gapRef(prev, item)) {
+      runs.push(current)
+      current = []
+    }
+    current.push(item)
+  }
+  if (current.length > 0) runs.push(current)
+  return runs
+}
+
+/** Runs further cut where an item starts on a column edge shared by nearby rows. */
+function splitAtColumnEdges(lines: PdfTextItem[][][]): PdfTextItem[][][] {
+  const starts = lines.map((runs) => runs.map((run) => run[0]?.x ?? Number.NaN))
+  const onEdge = (lineIndex: number, x: number) => {
+    let support = 0
+    const from = Math.max(0, lineIndex - COLUMN_EDGE_WINDOW)
+    const to = Math.min(lines.length - 1, lineIndex + COLUMN_EDGE_WINDOW)
+    for (let l = from; l <= to; l++) {
+      if (l === lineIndex) continue
+      if (starts[l]?.some((s) => Math.abs(s - x) <= COLUMN_EDGE_TOLERANCE)) support++
+      if (support >= COLUMN_EDGE_SUPPORT) return true
+    }
+    return false
+  }
+  return lines.map((runs, lineIndex) =>
+    runs.flatMap((run) => {
+      const out: PdfTextItem[][] = []
+      let current: PdfTextItem[] = []
+      for (const item of run) {
+        const prev = current[current.length - 1]
+        if (
+          prev &&
+          gapBetween(prev, item) > COLUMN_SPLIT_GAP_RATIO * gapRef(prev, item) &&
+          onEdge(lineIndex, item.x)
+        ) {
+          out.push(current)
+          current = []
+        }
+        current.push(item)
+      }
+      if (current.length > 0) out.push(current)
+      return out
+    }),
+  )
+}
+
 export function buildLayout(doc: PdfTextDocument): Layout {
   const rows: Row[] = []
   const cells: Cell[] = []
   for (const page of doc.pages) {
-    for (const line of page.lines) {
-      const items = [...line.items].filter((i) => i.text.trim() !== "").sort((a, b) => a.x - b.x)
-      if (items.length === 0) continue
+    const lines = page.lines.map((line) =>
+      splitOnGaps([...line.items].filter((i) => i.text.trim() !== "").sort((a, b) => a.x - b.x)),
+    )
+    for (const runs of splitAtColumnEdges(lines)) {
+      if (runs.length === 0) continue
       const rowIndex = rows.length
       const rowCells: Cell[] = []
-      let current: PdfTextItem[] = []
-      for (const item of items) {
-        const prev = current[current.length - 1]
-        if (prev) {
-          const gap = item.x - (prev.x + prev.width)
-          const ref = Math.max(1, Math.min(prev.fontSize || 1, item.fontSize || 1))
-          if (gap > CELL_GAP_RATIO * ref) {
-            const cell = makeCell(cells.length, page.number, rowIndex, current)
-            cells.push(cell)
-            rowCells.push(cell)
-            current = []
-          }
-        }
-        current.push(item)
-      }
-      if (current.length > 0) {
-        const cell = makeCell(cells.length, page.number, rowIndex, current)
+      for (const run of runs) {
+        const cell = makeCell(cells.length, page.number, rowIndex, run)
         cells.push(cell)
         rowCells.push(cell)
       }

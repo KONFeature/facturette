@@ -4,7 +4,8 @@
  */
 import { isValidIban, normalizeIban } from "../validation/identifiers"
 import type { Collector } from "./collect"
-import { type Cell, type Layout, partsOf } from "./layout"
+import { findLabeled, type ValueReader } from "./labels"
+import { type Cell, cellToTheRight, type Layout, partsOf } from "./layout"
 import { fold, splitSentences } from "./text"
 
 const IBAN_START_RE = /\b([A-Z]{2}\d{2}(?:\s?[A-Z0-9]){10,32})/
@@ -75,7 +76,29 @@ function extractBank(
       }
     }
   }
+  // Bank-details table: "Banque | BIC" on one row, the values on the next. Any 8 or 11
+  // capitals fit the BIC shape, so a value apart from its label is only trusted when its
+  // country matches the IBAN's.
+  for (const m of findLabeled(layout, BIC_LABEL_RE, readBic)) {
+    if (m.placement === "inline") continue
+    const cells = [m.labelCell, m.valueCell]
+    if (buyerCells.has(m.valueCell.id) || directDebit) {
+      collector.add("payment.bic", m.value, 0.45, cells, "bic-buyer-or-debit")
+    } else {
+      const matchesIban = ibanCountry !== undefined && m.value.slice(4, 6) === ibanCountry
+      collector.add("payment.bic", m.value, matchesIban ? 0.9 : 0.55, cells, "bic-label-apart")
+    }
+  }
   return payeeIbanCountry
+}
+
+const BIC_LABEL_RE = /^(code\s+)?(bic|swift)(\s*\/\s*(swift|bic))?\b/
+
+const readBic: ValueReader<string> = (s) => {
+  const m = /^([A-Z]{4}\s?[A-Z]{2}\s?[A-Z0-9]{2}(?:\s?[A-Z0-9]{3})?)(?=$|\s)/.exec(s.trim())
+  if (!m?.[1]) return undefined
+  const bic = m[1].replace(/\s/g, "")
+  return /^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/.test(bic) ? { value: bic, text: m[1] } : undefined
 }
 
 const MEANS: Array<[RegExp, string]> = [
@@ -112,26 +135,44 @@ function sepaAware(code: string, payeeIbanCountry: string | undefined): string {
   return code === "30" && payeeIbanCountry === "FR" ? "58" : code
 }
 
+const MEANS_LABEL = "(modes?|moyens?|modalites?|methodes?|types?) (de |du )?(reglement|paiement)s?"
+const MEANS_INLINE_RE = new RegExp(String.raw`^${MEANS_LABEL}\s*:?\s*(.*)$`)
+const MEANS_LABEL_RE = new RegExp(String.raw`^${MEANS_LABEL}\b`)
+
+const readMeans: ValueReader<string[]> = (s) => {
+  const codes = meansIn(fold(s))
+  return codes.length > 0 ? { value: codes, text: s } : undefined
+}
+
+function addLabelledMeans(
+  collector: Collector,
+  codes: string[],
+  payeeIbanCountry: string | undefined,
+  cells: Cell[],
+): void {
+  // "Virement ou chèque": several means, let the user choose.
+  const code = codes[0] && sepaAware(codes[0], payeeIbanCountry)
+  if (!code) return
+  let confidence = codes.length === 1 ? 0.86 : 0.45
+  if (code !== codes[0]) confidence = Math.min(confidence, INFERRED_SEPA_CONFIDENCE)
+  collector.add("payment.meansCode", code, confidence, cells, "payment-means-label")
+}
+
 function extractMeans(
   layout: Layout,
   collector: Collector,
   payeeIbanCountry: string | undefined,
 ): void {
+  // "Moyens de paiement | Virement": the value in the next cell or under the label.
+  for (const m of findLabeled(layout, MEANS_LABEL_RE, readMeans)) {
+    if (m.placement !== "inline")
+      addLabelledMeans(collector, m.value, payeeIbanCountry, [m.labelCell, m.valueCell])
+  }
   for (const cell of layout.cells) {
     for (const part of sentencesOf(cell)) {
-      const m =
-        /^(mode|moyen|modalites?|methode|type) (de |du )?(reglement|paiement)\s*:?\s*(.*)$/.exec(
-          part.folded,
-        )
+      const m = MEANS_INLINE_RE.exec(part.folded)
       if (m) {
-        // "Virement ou chèque": several means, let the user choose.
-        const codes = meansIn(m[4] ?? "")
-        const code = codes[0] && sepaAware(codes[0], payeeIbanCountry)
-        if (code) {
-          let confidence = codes.length === 1 ? 0.86 : 0.45
-          if (code !== codes[0]) confidence = Math.min(confidence, INFERRED_SEPA_CONFIDENCE)
-          collector.add("payment.meansCode", code, confidence, [cell], "payment-means-label")
-        }
+        addLabelledMeans(collector, meansIn(m[4] ?? ""), payeeIbanCountry, [cell])
         continue
       }
       if (!/\b(reglement|paiement|payable|payer|regler|payment)\b/.test(part.folded)) continue
@@ -178,7 +219,23 @@ function wrappedSentencesOf(layout: Layout, cell: Cell): Array<{ text: string; f
   return [...sentences.slice(0, -1), { text: completed, folded: fold(completed) }]
 }
 
+const TERMS_LABEL_APART_RE =
+  /^(conditions de (paiement|reglement)|delais? de (paiement|reglement)|termes de paiement|modalites de (paiement|reglement)|payment terms)\b/
+
+/** Terms printed apart from their label ("Délai de paiement | 60 jours"). */
+const readTermsValue: ValueReader<string> = (s) => {
+  const f = fold(s)
+  if (f.length > 140 || LEGAL_NOTE_RE.test(f) || !TERMS_RE.test(f)) return undefined
+  return { value: termsValue(s), text: s }
+}
+
 function extractTerms(layout: Layout, collector: Collector, isCreditNote: boolean): void {
+  for (const m of findLabeled(layout, TERMS_LABEL_APART_RE, readTermsValue)) {
+    if (m.placement === "inline") continue
+    const confidence = m.placement === "right" ? 0.78 : 0.72
+    const cells = [m.labelCell, m.valueCell]
+    collector.add("payment.termsText", m.value, confidence, cells, "payment-terms-label-apart")
+  }
   for (const cell of layout.cells) {
     for (const part of wrappedSentencesOf(layout, cell)) {
       const f = part.folded
@@ -249,29 +306,50 @@ function sentenceFrom(layout: Layout, cell: Cell): { text: string; cells: Cell[]
   return { text, cells }
 }
 
+const RECOVERY_FEE_RE =
+  /\b(indemnite (forfaitaire|de recouvrement)|frais (forfaitaires? )?de recouvrement)\b/
+const LATE_PENALTY_RE =
+  /\bpenalites?\b|\binterets? de retard\b|\btaux d'interet legal\b|\btaux de refinancement\b/
+
+/**
+ * A legal mention printed as a key/value row ("Pénalité de retard | 3 fois le taux légal",
+ * "Indemnité forfaitaire pour frais de / recouvrement | 40 €"): the label alone says nothing,
+ * so it is joined with the value printed to its right. A value that is a full mention on its own
+ * ("Escompte | Pas d'escompte…") is read as its own cell instead.
+ */
+function keyValueNote(layout: Layout, label: Cell, labelText: string): Cell | undefined {
+  const f = fold(labelText)
+  if (f.length > 60 || /\d|[.:;]$/.test(f) || !/(retard|recouvrement|escompte)/.test(f))
+    return undefined
+  const value = cellToTheRight(layout, label)
+  if (!value || value.x0 - label.x1 > 0.35 * (layout.pageWidths[label.page - 1] ?? 600))
+    return undefined
+  const v = value.folded
+  if (v.length > 120 || /^(total|tva|net a payer|montant|sous-total|acompte|reste)\b/.test(v))
+    return undefined
+  if (RECOVERY_FEE_RE.test(v) || LATE_PENALTY_RE.test(v) || /\bescompte\b/.test(v)) return undefined
+  return value
+}
+
 function extractLegalNotes(layout: Layout, collector: Collector): void {
   const consumed = new Set<number>()
   for (const cell of layout.cells) {
     const f = cell.folded
     if (f.length < 15 || consumed.has(cell.id)) continue
-    const { text, cells } = sentenceFrom(layout, cell)
+    let { text, cells } = sentenceFrom(layout, cell)
     for (const c of cells) consumed.add(c.id)
+    const value = keyValueNote(layout, cell, text)
+    if (value) {
+      text = `${text} : ${value.text}`
+      cells = [...cells, value]
+    }
     for (const sentence of splitSentences(text)) {
       const ft = fold(sentence)
       // One sentence may carry both the penalty and the 40 € fee: it then fills both mentions.
-      if (
-        /\b(indemnite (forfaitaire|de recouvrement)|frais (forfaitaires? )?de recouvrement)\b/.test(
-          ft,
-        ) &&
-        /\b40\b/.test(ft)
-      ) {
+      if (RECOVERY_FEE_RE.test(ft) && /\b40\b/.test(ft)) {
         collector.add("legalNotes.recoveryFee", sentence, 0.85, cells, "legal-recovery-fee")
       }
-      if (
-        /\bpenalites?\b|\binterets? de retard\b|\btaux d'interet legal\b|\btaux de refinancement\b/.test(
-          ft,
-        )
-      ) {
+      if (LATE_PENALTY_RE.test(ft)) {
         collector.add("legalNotes.latePaymentPenalty", sentence, 0.85, cells, "legal-late-penalty")
       } else if (/\bescompte\b/.test(ft)) {
         collector.add(
