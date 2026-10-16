@@ -210,7 +210,8 @@ export interface Part {
   folded: string
 }
 
-const PART_SEPARATOR_RE = /\s+[–—|•·]\s+|\s+-\s+(?=[\p{Lu}])/u
+// " - " before a capital, or before a street number ("Name - 8 rue des Tanneurs, 69007 Lyon").
+const PART_SEPARATOR_RE = /\s+[–—|•·]\s+|\s+-\s+(?=\p{Lu}|\d{1,4}(?:\s?(?:bis|ter))?,?\s+\p{Ll})/u
 
 const partsCache = new WeakMap<Cell, Part[]>()
 

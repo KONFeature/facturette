@@ -111,12 +111,6 @@ const BUYER_REF_LABELS: LabelRule[] = [
     rule: "buyer-ref-label",
   },
   {
-    // "Service : DAF-SERVICE-07": the buyer's service code (Chorus Pro), a coded value only.
-    re: /^service\s*:\s*(?=\S*[\d-])/,
-    confidence: 0.62,
-    rule: "buyer-ref-service",
-  },
-  {
     re: /^(reference client|ref\.? client|reference acheteur)\s*:?/,
     confidence: 0.68,
     rule: "buyer-ref-label",
@@ -127,6 +121,15 @@ const BUYER_REF_LABELS: LabelRule[] = [
     rule: "buyer-ref-client-code",
   },
 ]
+
+const SERVICE_LABELS: LabelRule[] = [
+  { re: /^service\s*:?/, confidence: 0.62, rule: "buyer-ref-service" },
+]
+
+const readServiceCode: ValueReader<string> = (s) => {
+  const v = readReference(s)
+  return v && /\d/.test(v.value) && /^[\p{Lu}\d][\p{Lu}\d\-_/.]*$/u.test(v.value) ? v : undefined
+}
 
 const PAYMENT_REF_LABELS: LabelRule[] = [
   {
@@ -213,6 +216,8 @@ export function extractHeader(layout: Layout, collector: Collector): { isCreditN
   extractBareNumber(layout, collector, type?.cells[0])
   applyLabels(layout, collector, "orderReference", ORDER_LABELS, readReference)
   applyLabels(layout, collector, "buyerReference", BUYER_REF_LABELS, readFreeText, orderLikeValue)
+  // "Service : DAF-SERVICE-07": the buyer's service code (Chorus Pro), a coded value only.
+  applyLabels(layout, collector, "buyerReference", SERVICE_LABELS, readServiceCode)
   applyLabels(layout, collector, "payment.reference", PAYMENT_REF_LABELS, readPaymentReference)
   extractPeriod(layout, collector)
   extractCurrency(layout, collector)
@@ -245,9 +250,9 @@ function extractCurrency(layout: Layout, collector: Collector): void {
 }
 
 const SERVICE_WORDS =
-  /\b(prestations?|honoraires|missions?|conseils?|formations?|interventions?|main d'oeuvre|heures?|journees?|developpement|maintenance|abonnement|reportage|retouches?|creation|design|audit|accompagnement|assistance|consulting|redaction|pose|mise en service|service)\b/
+  /\b(prestations?|forfaits?|jours?|heures?|tjm|honoraires|missions?|conseils?|formations?|interventions?|main d'oeuvre|heures?|journees?|developpement|maintenance|abonnement|reportage|retouches?|creation|design|audit|accompagnement|assistance|consulting|redaction|pose|mise en service|service)\b/
 const GOODS_WORDS =
-  /\b(livraison de biens|vente de|marchandises?|fournitures?|articles?|produits?|materiels?|equipements?|tirages?|plateaux?|bouteilles?|cartouches?|ramettes?)\b/
+  /\b(livraison de biens|livraisons?|ventes?|kg|pieces?|colis|palettes?|vente de|marchandises?|fournitures?|articles?|produits?|materiels?|equipements?|tirages?|plateaux?|bouteilles?|cartouches?|ramettes?)\b/
 
 function extractOperationCategory(layout: Layout, collector: Collector): void {
   // Explicit mention required by the 2026 reform.
@@ -272,11 +277,14 @@ function extractOperationCategory(layout: Layout, collector: Collector): void {
   }
   if (services === 0 && goods === 0) return
   const value = services > 0 && goods > 0 ? "mixed" : services > 0 ? "services" : "goods"
+  // Vocabulary is only a hint: always a suggestion, never pre-filled (cap 0.55). One-sided
+  // vocabulary with several hits is a slightly better hint than a single word.
+  const confidence = value !== "mixed" && Math.max(services, goods) >= 3 ? 0.5 : 0.4
   const first = layout.cells.find((c) => SERVICE_WORDS.test(c.folded) || GOODS_WORDS.test(c.folded))
   collector.add(
     "operationCategory",
     value,
-    0.4,
+    Math.min(confidence, 0.55),
     first ? [first] : [],
     "operation-category-vocabulary",
     `${services} terme(s) de prestation, ${goods} terme(s) de vente de biens`,
