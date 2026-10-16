@@ -163,12 +163,15 @@ function findLabelledBlocks(layout: Layout): PartyBlock[] {
     ] as const) {
       const m = re.exec(cell.folded)
       if (m?.index !== 0) continue
+      // Bilingual label "Client / Customer": the translation is part of the label.
+      const gloss = /^\/\s*[a-z' ]{2,30}?\s*:?\s*$/.exec(cell.folded.slice(m[0].length))
+      const labelLength = m[0].length + (gloss?.[0].length ?? 0)
       // "Client : Brasserie…" or a bare label; refuse long sentences starting with "Client".
-      const rest = cell.folded.slice(m[0].length)
+      const rest = cell.folded.slice(labelLength)
       if (rest.length > 60 || /^(s |e |ele|eles)/.test(rest)) continue
-      if (role === "buyer") buyerLabels.push({ cell, folded: cell.folded, length: m[0].length })
+      if (role === "buyer") buyerLabels.push({ cell, folded: cell.folded, length: labelLength })
       else {
-        const lines = labelledBlock(layout, cell, m[0].length)
+        const lines = labelledBlock(layout, cell, labelLength)
         if (lines.length > 0) {
           blocks.push({
             role,
@@ -232,18 +235,24 @@ function hintMatches(lines: PartyLine[], hints: ExtractionOptions["hints"]): boo
 }
 
 /** Rows in the bottom band of a page that carry legal identity: the seller's footer. */
+const FOOTER_LEGAL_RE =
+  /\b(siren|siret|rcs|r\.c\.s|capital|tva intra|n° tva|immatricul)\b|\bfr\s?[0-9a-z]{2}\s?\d{3}/
+
 function footerLines(layout: Layout, used: Set<number>): PartyLine[] {
+  const inBand = (cell: Cell) => cell.y >= 0.8 * (layout.pageHeights[cell.page - 1] ?? 842)
+  const legal = layout.cells.filter(
+    (c) => !used.has(c.id) && inBand(c) && FOOTER_LEGAL_RE.test(c.folded),
+  )
   const out: PartyLine[] = []
   for (const cell of layout.cells) {
-    if (used.has(cell.id)) continue
-    const height = layout.pageHeights[cell.page - 1] ?? 842
-    if (cell.y < 0.8 * height) continue
-    if (
-      !/\b(siren|siret|rcs|r\.c\.s|capital|tva intra|n° tva|immatricul)\b|\bfr\s?[0-9a-z]{2}\s?\d{3}/.test(
-        cell.folded,
-      )
+    if (used.has(cell.id) || !inBand(cell)) continue
+    // The footer often spreads the identity over two rows: "Name - street, city - Tél." above
+    // "SARL au capital … - SIRET …". A row right next to a legal row belongs to the same footer.
+    const isLegal = legal.includes(cell)
+    const besideLegal = legal.some(
+      (l) => l.page === cell.page && Math.abs(l.y - cell.y) <= 2.5 * cell.fontSize,
     )
-      continue
+    if (!isLegal && !(besideLegal && cell.y < Math.min(...legal.map((l) => l.y)))) continue
     out.push(...linesOfCells([cell]))
   }
   return out
@@ -340,9 +349,12 @@ export function extractParties(
   }
 
   for (const party of parties) {
-    if (party.role === "delivery")
-      parseAddress("deliveryAddress", party.lines, party.factor * 0.75, party.rule, collector)
-    else parseParty(party, party.role, collector)
+    if (party.role === "delivery") {
+      // A labelled delivery block ("Adresse de livraison", "Livré à", or "Destinataire" beside a
+      // bill-to label) is read like the buyer block; its factor already carries the label's
+      // reliability (0.85 explicit, 0.75 recipient).
+      parseAddress("deliveryAddress", party.lines, party.factor, party.rule, collector)
+    } else parseParty(party, party.role, collector)
   }
   checkSirenConsistency(collector)
   // The whole layout block, including rows after a stop line (e.g. the buyer's own bank details).

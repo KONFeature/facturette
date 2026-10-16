@@ -21,7 +21,13 @@ function validIbanPrefix(raw: string): string | undefined {
   return undefined
 }
 
-function extractBank(layout: Layout, collector: Collector, buyerCells: Set<number>): void {
+/** Returns the country of the payee's checksum-valid IBAN, if one is printed. */
+function extractBank(
+  layout: Layout,
+  collector: Collector,
+  buyerCells: Set<number>,
+): string | undefined {
+  let payeeIbanCountry: string | undefined
   let ibanCountry: string | undefined
   // With a direct debit, the printed IBAN is usually the buyer's debited account.
   const directDebit = layout.cells.some((c) => /\bprelev(ement|e)\b/.test(c.folded))
@@ -30,7 +36,13 @@ function extractBank(layout: Layout, collector: Collector, buyerCells: Set<numbe
       const labelled =
         /^(iban|i\.b\.a\.n|n° iban|code iban|compte iban)\b/.test(part.folded) ||
         /\biban\s*:/.test(part.folded)
-      const m = IBAN_START_RE.exec(part.text.toUpperCase())
+      // An IBAN cut by a line wrap ("… IBAN FR76 1027 8360" / "0000 0612 …") continues at the
+      // start of the next row of the paragraph.
+      const nextRow = sentenceFrom(layout, cell).cells[1]
+      const upper = part.text.toUpperCase()
+      const wrapped =
+        nextRow && part === partsOf(cell).at(-1) && /\b[A-Z]{2}\d{2}[\sA-Z0-9]{0,30}$/.test(upper)
+      const m = IBAN_START_RE.exec(wrapped ? `${upper} ${nextRow.text.toUpperCase()}` : upper)
       if (!m?.[1]) continue
       // Stop at the next label ("IBAN : FR76… BIC : …" in one run).
       const raw = m[1].split(/\s(?=BIC|SWIFT|CODE)/)[0] ?? m[1]
@@ -41,6 +53,7 @@ function extractBank(layout: Layout, collector: Collector, buyerCells: Set<numbe
       } else if (valid) {
         collector.add("payment.iban", valid, labelled ? 0.97 : 0.9, [cell], "iban-checksum")
         ibanCountry = valid.slice(0, 2)
+        payeeIbanCountry ??= ibanCountry
       } else if (labelled) {
         const value = normalizeIban(raw)
         collector.add("payment.iban", value, 0.35, [cell], "iban-invalid")
@@ -62,6 +75,7 @@ function extractBank(layout: Layout, collector: Collector, buyerCells: Set<numbe
       }
     }
   }
+  return payeeIbanCountry
 }
 
 const MEANS: Array<[RegExp, string]> = [
@@ -86,7 +100,23 @@ function sentencesOf(cell: Cell): Array<{ text: string; folded: string }> {
   )
 }
 
-function extractMeans(layout: Layout, collector: Collector): void {
+/**
+ * A transfer to a French IBAN is a SEPA credit transfer (58); a bare "virement" without any
+ * IBAN stays the generic credit transfer (30). The SEPA reading is an inference, not printed
+ * (the fixture corpus labels the same wording either way): it is offered just below the
+ * pre-fill threshold, while an explicit "virement SEPA" keeps its label confidence.
+ */
+const INFERRED_SEPA_CONFIDENCE = 0.55
+
+function sepaAware(code: string, payeeIbanCountry: string | undefined): string {
+  return code === "30" && payeeIbanCountry === "FR" ? "58" : code
+}
+
+function extractMeans(
+  layout: Layout,
+  collector: Collector,
+  payeeIbanCountry: string | undefined,
+): void {
   for (const cell of layout.cells) {
     for (const part of sentencesOf(cell)) {
       const m =
@@ -96,56 +126,112 @@ function extractMeans(layout: Layout, collector: Collector): void {
       if (m) {
         // "Virement ou chèque": several means, let the user choose.
         const codes = meansIn(m[4] ?? "")
-        const code = codes[0]
+        const code = codes[0] && sepaAware(codes[0], payeeIbanCountry)
         if (code) {
-          const confidence = codes.length === 1 ? 0.86 : 0.45
+          let confidence = codes.length === 1 ? 0.86 : 0.45
+          if (code !== codes[0]) confidence = Math.min(confidence, INFERRED_SEPA_CONFIDENCE)
           collector.add("payment.meansCode", code, confidence, [cell], "payment-means-label")
         }
         continue
       }
       if (!/\b(reglement|paiement|payable|payer|regler|payment)\b/.test(part.folded)) continue
       const codes = meansIn(part.folded)
-      const code = codes.length === 1 ? codes[0] : undefined
+      const code =
+        codes.length === 1 && codes[0] ? sepaAware(codes[0], payeeIbanCountry) : undefined
       if (!code) continue
       // "Règlement par chèque", "payable par virement": explicit; a bare mention is weak.
       const explicit =
         /\b(reglement|paiement|payable|a regler|a payer)\s+(uniquement\s+)?(par|en)\b/.test(
           part.folded,
         )
-      collector.add("payment.meansCode", code, explicit ? 0.74 : 0.55, [cell], "payment-means-word")
+      const confidence = code !== codes[0] ? INFERRED_SEPA_CONFIDENCE : explicit ? 0.74 : 0.55
+      collector.add("payment.meansCode", code, confidence, [cell], "payment-means-word")
     }
   }
 }
 
 const TERMS_RE =
-  /(\b\d{1,3}\s*jours\b|\b\d{1,3}\s*days\b|\ba (la )?reception\b|\bcomptant\b|\bfin de mois\b|\ba l'echeance\b|\bimmediat|\bsous huitaine\b|\bdes reception\b|\bau plus tard\b|\bnet\s*\d+\b)/
+  /(\b\d{1,3}\s*jours\b|\b\d{1,3}\s*days\b|\ba (la )?reception\b|\bcomptant\b|\bfin de mois\b|\ba l'echeance\b|\bimmediat|\bsous huitaine\b|\bdes reception\b|\bau plus tard\b|\bavant le \d|\bnet\s*\d+\b)/
 const TERMS_START_RE =
   /^(paiement|payable|reglement|solde|a regler|a payer|delai de paiement|conditions de (paiement|reglement)|termes de paiement|echeance|net a \d+|net \d+ (jours|days)|montant a deduire|a deduire|cet avoir)/
 const TERMS_LABEL_RE =
-  /^(conditions de (paiement|reglement)|delais? de paiement|termes de paiement|modalites de paiement|payment terms)\s*:\s*(.+)$/
+  /^(conditions de (paiement|reglement)|delais? de (paiement|reglement)|termes de paiement|modalites de (paiement|reglement)|payment terms)\s*:\s*(.+)$/
+/**
+ * A short generic label before the terms sentence ("Paiement : Paiement à 30 jours",
+ * "Règlement : À régler avant le…", "Conditions : …"): the label is not part of the terms.
+ */
+const TERMS_SHORT_LABEL_RE =
+  /^(paiement|reglement|conditions|modalites|termes|echeance|delai|terms)\s*:\s*/
 const LEGAL_NOTE_RE = /penalite|indemnite|recouvrement|escompte|interet/
+
+/**
+ * Sentences of a cell, the last one completed with the rows it wraps onto ("… Règlement à 45
+ * jours fin de" / "mois, soit …").
+ */
+function wrappedSentencesOf(layout: Layout, cell: Cell): Array<{ text: string; folded: string }> {
+  const sentences = sentencesOf(cell)
+  const { text, cells } = sentenceFrom(layout, cell)
+  const last = sentences[sentences.length - 1]
+  if (cells.length < 2 || !last) return sentences
+  const tail = text.slice(cell.text.length)
+  const completed = `${last.text}${tail}`.split(/(?<=[\p{Ll}\d)]\.)\s+(?=\p{Lu})/u)[0] ?? last.text
+  return [...sentences.slice(0, -1), { text: completed, folded: fold(completed) }]
+}
 
 function extractTerms(layout: Layout, collector: Collector, isCreditNote: boolean): void {
   for (const cell of layout.cells) {
-    for (const part of sentencesOf(cell)) {
+    for (const part of wrappedSentencesOf(layout, cell)) {
       const f = part.folded
       if (LEGAL_NOTE_RE.test(f) || f.length > 140) continue
       const labelled = TERMS_LABEL_RE.exec(f)
-      if (labelled?.[3]) {
-        const text = part.text.slice(part.text.length - labelled[3].length)
-        collector.add("payment.termsText", text, 0.8, [cell], "payment-terms-label")
+      const labelledText = labelled?.[5]
+      if (labelledText) {
+        const text = part.text.slice(part.text.length - labelledText.length)
+        collector.add("payment.termsText", termsValue(text), 0.8, [cell], "payment-terms-label")
         continue
       }
-      if (TERMS_START_RE.test(f) && TERMS_RE.test(f) && !/^(mode|moyen)/.test(f)) {
-        collector.add("payment.termsText", part.text, 0.76, [cell], "payment-terms-sentence")
+      const short = TERMS_SHORT_LABEL_RE.exec(f)
+      const text = short ? part.text.slice(short[0].length) : part.text
+      const body = short ? f.slice(short[0].length) : f
+      if (TERMS_START_RE.test(body) && TERMS_RE.test(body) && !/^(mode|moyen)/.test(body)) {
+        collector.add(
+          "payment.termsText",
+          termsValue(text),
+          0.76,
+          [cell],
+          short ? "payment-terms-short-label" : "payment-terms-sentence",
+        )
       } else if (
         isCreditNote &&
-        /\b(a deduire|sera deduit|sera rembourse|remboursement|a imputer)\b/.test(f)
+        /\b(a deduire|sera deduit|sera rembourse|remboursement|a imputer)\b/.test(f) &&
+        !amountToTheRight(layout, cell)
       ) {
-        collector.add("payment.termsText", part.text, 0.62, [cell], "credit-note-terms")
+        // A totals label ("Montant à déduire | -1 396,68 €") is not the terms sentence.
+        collector.add("payment.termsText", termsValue(text), 0.62, [cell], "credit-note-terms")
       }
     }
   }
+}
+
+/** Terms text without the sentence's final full stop. */
+function termsValue(text: string): string {
+  // ", soit une échéance au 30/11" restates the due date: not part of the terms.
+  return text
+    .trim()
+    .replace(/,\s*soit\b.*$/i, "")
+    .replace(/\s*[.;]$/, "")
+}
+
+function amountToTheRight(layout: Layout, cell: Cell): boolean {
+  const row = layout.rows[cell.line]
+  return (
+    row?.cells.some(
+      (c) =>
+        c.x0 > cell.x1 &&
+        /\d/.test(c.text) &&
+        /^[-\u2212\d\s.,€()]+$/.test(c.text.replace(/eur/i, "")),
+    ) ?? false
+  )
 }
 
 /** A sentence may wrap: join following rows of the same block until it ends with a full stop. */
@@ -247,8 +333,8 @@ export function extractPayment(
   isCreditNote: boolean,
   buyerCells: Set<number>,
 ): void {
-  extractBank(layout, collector, buyerCells)
-  extractMeans(layout, collector)
+  const payeeIbanCountry = extractBank(layout, collector, buyerCells)
+  extractMeans(layout, collector, payeeIbanCountry)
   extractTerms(layout, collector, isCreditNote)
   extractLegalNotes(layout, collector)
 }

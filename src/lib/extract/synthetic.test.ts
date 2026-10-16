@@ -418,7 +418,10 @@ describe("party layouts", () => {
     expect(res.draft.buyer?.address?.city).toBe("Paris")
     const delivery = res.suggestions.find((s) => s.path === "deliveryAddress.city")
     expect(delivery?.value).toBe("Lille")
-    expect(delivery?.confidence).toBeLessThan(PREFILL_THRESHOLD)
+    // A "Destinataire" block beside a bill-to label is the delivery address: pre-filled into
+    // deliveryAddress (never into buyer.*), as the fixture corpus expects.
+    expect(delivery?.confidence).toBeGreaterThanOrEqual(PREFILL_THRESHOLD)
+    expect(res.draft.deliveryAddress?.line1).toBe("5 rue du Port")
   })
 })
 
