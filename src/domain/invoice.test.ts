@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest"
+import { z } from "zod"
 import { deriveSiren, emptyInvoiceDraft, invoiceSchema } from "./invoice"
+
+describe("zod configuration", () => {
+  it("runs without JIT so that the strict CSP (no unsafe-eval) sees no violation", () => {
+    expect(z.config().jitless).toBe(true)
+  })
+})
 
 describe("deriveSiren", () => {
   it("reads a SIREN, a SIRET or a French VAT number", () => {

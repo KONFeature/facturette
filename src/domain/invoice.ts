@@ -12,6 +12,11 @@
  */
 import { z } from "zod"
 
+// Zod's JIT compiles validators with `new Function`. The production build ships a strict
+// Content-Security-Policy without 'unsafe-eval' (scripts/csp.ts): the probe would be reported as a
+// violation even though zod falls back cleanly. Must run before any schema is constructed.
+z.config({ jitless: true })
+
 // ---------------------------------------------------------------------------------------------
 // Reference data
 // ---------------------------------------------------------------------------------------------
