@@ -1,0 +1,101 @@
+{
+  "number": "FAC-26-004571",
+  "typeCode": "380",
+  "issueDate": "2026-10-14",
+  "dueDate": "2026-10-28",
+  "deliveryDate": "2026-10-13",
+  "operationCategory": "goods",
+  "currency": "EUR",
+  "seller": {
+    "name": "Épicerie Teyssier SARL",
+    "kind": "company",
+    "siren": "258794635",
+    "siret": "25879463500163",
+    "vatNumber": "FR88258794635",
+    "address": {
+      "line1": "3 place Pasteur",
+      "postalCode": "25000",
+      "city": "Besançon",
+      "countryCode": "FR"
+    },
+    "email": "boutique@teyssier.example",
+    "phone": "03 53 01 38 84",
+    "legalForm": "SARL",
+    "shareCapital": "7 500 €",
+    "registration": "RCS Besançon 258 794 635"
+  },
+  "buyer": {
+    "name": "Hôtel Les Mouettes & Spa SARL",
+    "kind": "company",
+    "siren": "753168426",
+    "siret": "75316842600074",
+    "vatNumber": "FR94753168426",
+    "address": {
+      "line1": "18 rue de la Gare",
+      "postalCode": "25300",
+      "city": "Pontarlier",
+      "countryCode": "FR"
+    }
+  },
+  "deliveryAddress": {
+    "line1": "ZA du Pré Vert",
+    "line2": "Bâtiment C, quai 2",
+    "postalCode": "25770",
+    "city": "Franois",
+    "countryCode": "FR"
+  },
+  "orderReference": "Commande #10428",
+  "lines": [
+    {
+      "name": "Coffret dégustation foie gras et terrines",
+      "quantity": 6,
+      "unitCode": "C62",
+      "unitPrice": 38.9,
+      "vatCategory": "S",
+      "vatRate": 5.5
+    },
+    {
+      "name": "Huile d'olive vierge extra, bidon de 5 L",
+      "quantity": 4,
+      "unitCode": "C62",
+      "unitPrice": 52.4,
+      "vatCategory": "S",
+      "vatRate": 5.5
+    },
+    {
+      "name": "Confiture artisanale 370 g, carton de 12",
+      "quantity": 10,
+      "unitCode": "C62",
+      "unitPrice": 33.6,
+      "vatCategory": "S",
+      "vatRate": 5.5
+    },
+    {
+      "name": "Frais de port Colissimo Pro",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": 24.9,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Code promo AUTOMNE10 (-10 % sur les coffrets)",
+      "quantity": 1,
+      "unitCode": "C62",
+      "unitPrice": -23.34,
+      "vatCategory": "S",
+      "vatRate": 5.5
+    }
+  ],
+  "payment": {
+    "meansCode": "58",
+    "iban": "FR7612579800000417865332940",
+    "bic": "CCBPFRPPBES",
+    "termsText": "Virement à réception de facture"
+  },
+  "legalNotes": {
+    "latePaymentPenalty": "Pénalité de retard au taux de 10,5 % par an, exigible sans rappel.",
+    "recoveryFee": "Indemnité forfaitaire pour frais de recouvrement : 40 € (art. L.441-10 C. com.).",
+    "earlyPaymentDiscount": "Escompte de 2 % pour règlement sous 8 jours."
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "number": "2026-0457",
+  "typeCode": "380",
+  "issueDate": "2026-10-14",
+  "dueDate": "2026-11-13",
+  "deliveryDate": "2026-10-09",
+  "operationCategory": "mixed",
+  "currency": "EUR",
+  "seller": {
+    "name": "Atelier Duhamel Menuiserie SARL",
+    "kind": "company",
+    "siren": "531826477",
+    "siret": "53182647700139",
+    "vatNumber": "FR66531826477",
+    "address": {
+      "line1": "27 rue de la Sainte-Chapelle",
+      "postalCode": "21000",
+      "city": "Dijon",
+      "countryCode": "FR"
+    },
+    "email": "devis@duhamel-menuiserie.example",
+    "phone": "03 53 01 62 40",
+    "legalForm": "SARL",
+    "shareCapital": "20 000 €",
+    "registration": "RCS Dijon 531 826 477"
+  },
+  "buyer": {
+    "name": "SCI Les Hauts de Montchapet",
+    "kind": "company",
+    "siren": "492706155",
+    "siret": "49270615500081",
+    "vatNumber": "FR79492706155",
+    "address": {
+      "line1": "4 impasse des Vignerons",
+      "postalCode": "21000",
+      "city": "Dijon",
+      "countryCode": "FR"
+    }
+  },
+  "orderReference": "BC-MONT-26/18",
+  "lines": [
+    {
+      "name": "Fenêtre bois chêne 2 vantaux 120×135",
+      "description": "Double vitrage 4/16/4, finition lasure",
+      "quantity": 3,
+      "unitCode": "C62",
+      "unitPrice": 685,
+      "vatCategory": "S",
+      "vatRate": 10
+    },
+    {
+      "name": "Pose et finitions",
+      "quantity": 7.5,
+      "unitCode": "HUR",
+      "unitPrice": 58,
+      "vatCategory": "S",
+      "vatRate": 10
+    },
+    {
+      "name": "Quincaillerie et joints",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": 142.35,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Évacuation des anciens ouvrants",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": 90,
+      "vatCategory": "S",
+      "vatRate": 20
+    }
+  ],
+  "payment": {
+    "meansCode": "58",
+    "iban": "FR7630002005500000015784164",
+    "bic": "CRLYFRPPXXX",
+    "reference": "2026-0457",
+    "termsText": "Paiement à 30 jours, par virement"
+  },
+  "legalNotes": {
+    "latePaymentPenalty": "Tout retard de paiement entraîne l'application d'intérêts au taux de 12 % l'an.",
+    "recoveryFee": "Frais de recouvrement forfaitaires : 40,00 € (art. D.441-5 du Code de commerce).",
+    "earlyPaymentDiscount": "Aucun escompte consenti pour paiement comptant."
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "number": "ACPT-0031",
+  "typeCode": "380",
+  "issueDate": "2026-10-08",
+  "dueDate": "2026-10-18",
+  "operationCategory": "mixed",
+  "currency": "EUR",
+  "seller": {
+    "name": "Cuisines & Bains Fabregat SARL",
+    "kind": "company",
+    "siren": "460928138",
+    "siret": "46092813800250",
+    "vatNumber": "FR53460928138",
+    "address": {
+      "line1": "33 avenue du Maréchal Joffre",
+      "postalCode": "66000",
+      "city": "Perpignan",
+      "countryCode": "FR"
+    },
+    "email": "contact@fabregat-cuisines.example",
+    "phone": "04 65 71 28 55",
+    "legalForm": "SARL",
+    "shareCapital": "12 500 €",
+    "registration": "RCS Perpignan 460 928 138"
+  },
+  "buyer": {
+    "name": "Monsieur Étienne Vallès",
+    "kind": "individual",
+    "address": {
+      "line1": "6 rue des Mimosas",
+      "postalCode": "66000",
+      "city": "Perpignan",
+      "countryCode": "FR"
+    }
+  },
+  "orderReference": "Devis D-2026-0388",
+  "lines": [
+    {
+      "name": "Acompte de 30 % à la commande : cuisine équipée sur mesure",
+      "description": "Montant du devis : 9 450,00 € HT, soit 10 395,00 € TTC",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": 2835,
+      "vatCategory": "S",
+      "vatRate": 10
+    }
+  ],
+  "payment": {
+    "meansCode": "20",
+    "termsText": "Règlement par chèque à la signature du devis"
+  },
+  "legalNotes": {
+    "latePaymentPenalty": "Pénalité de retard au taux de 10,5 % par an, exigible sans rappel.",
+    "recoveryFee": "Indemnité forfaitaire pour frais de recouvrement : 40 € (art. L.441-10 C. com.).",
+    "earlyPaymentDiscount": "Escompte de 2 % pour règlement sous 8 jours."
+  }
+}

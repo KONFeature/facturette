@@ -1,0 +1,405 @@
+{
+  "number": "26-0457-FOR",
+  "typeCode": "380",
+  "issueDate": "2026-10-09",
+  "dueDate": "2026-11-23",
+  "operationCategory": "services",
+  "currency": "EUR",
+  "seller": {
+    "name": "Campus Pratique Formation SAS",
+    "kind": "company",
+    "siren": "862139474",
+    "siret": "86213947400095",
+    "vatNumber": "FR55862139474",
+    "address": {
+      "line1": "19 rue des Trois Cailloux",
+      "postalCode": "80000",
+      "city": "Amiens",
+      "countryCode": "FR"
+    },
+    "email": "gestion@campus-pratique.example",
+    "phone": "09 61 93 20 48",
+    "legalForm": "SAS",
+    "shareCapital": "20 000 €",
+    "registration": "RCS Amiens 862 139 474"
+  },
+  "buyer": {
+    "name": "Centre Hospitalier Privé Saint-Vaast SA",
+    "kind": "company",
+    "siren": "309476851",
+    "siret": "30947685100113",
+    "vatNumber": "FR12309476851",
+    "address": {
+      "line1": "88 avenue Foch",
+      "postalCode": "59300",
+      "city": "Valenciennes",
+      "countryCode": "FR"
+    }
+  },
+  "orderReference": "Convention CF-2026-52",
+  "lines": [
+    {
+      "name": "Sauveteur secouriste du travail, groupe 01",
+      "quantity": 2,
+      "unitCode": "DAY",
+      "unitPrice": 780,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Recyclage gestes et postures, groupe 01",
+      "quantity": 1,
+      "unitCode": "DAY",
+      "unitPrice": 640,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Habilitation électrique B0/H0, groupe 01",
+      "quantity": 1.5,
+      "unitCode": "DAY",
+      "unitPrice": 890,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Manipulation des extincteurs, groupe 01",
+      "quantity": 0.5,
+      "unitCode": "DAY",
+      "unitPrice": 420,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Sauveteur secouriste du travail, groupe 02",
+      "quantity": 2,
+      "unitCode": "DAY",
+      "unitPrice": 780,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Recyclage gestes et postures, groupe 02",
+      "quantity": 1,
+      "unitCode": "DAY",
+      "unitPrice": 640,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Habilitation électrique B0/H0, groupe 02",
+      "quantity": 1.5,
+      "unitCode": "DAY",
+      "unitPrice": 890,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Manipulation des extincteurs, groupe 02",
+      "quantity": 0.5,
+      "unitCode": "DAY",
+      "unitPrice": 420,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Sauveteur secouriste du travail, groupe 03",
+      "quantity": 2,
+      "unitCode": "DAY",
+      "unitPrice": 780,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Recyclage gestes et postures, groupe 03",
+      "quantity": 1,
+      "unitCode": "DAY",
+      "unitPrice": 640,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Habilitation électrique B0/H0, groupe 03",
+      "quantity": 1.5,
+      "unitCode": "DAY",
+      "unitPrice": 890,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Manipulation des extincteurs, groupe 03",
+      "quantity": 0.5,
+      "unitCode": "DAY",
+      "unitPrice": 420,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Sauveteur secouriste du travail, groupe 04",
+      "quantity": 2,
+      "unitCode": "DAY",
+      "unitPrice": 780,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Recyclage gestes et postures, groupe 04",
+      "quantity": 1,
+      "unitCode": "DAY",
+      "unitPrice": 640,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Habilitation électrique B0/H0, groupe 04",
+      "quantity": 1.5,
+      "unitCode": "DAY",
+      "unitPrice": 890,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Manipulation des extincteurs, groupe 04",
+      "quantity": 0.5,
+      "unitCode": "DAY",
+      "unitPrice": 420,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Sauveteur secouriste du travail, groupe 05",
+      "quantity": 2,
+      "unitCode": "DAY",
+      "unitPrice": 780,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Recyclage gestes et postures, groupe 05",
+      "quantity": 1,
+      "unitCode": "DAY",
+      "unitPrice": 640,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Habilitation électrique B0/H0, groupe 05",
+      "quantity": 1.5,
+      "unitCode": "DAY",
+      "unitPrice": 890,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Manipulation des extincteurs, groupe 05",
+      "quantity": 0.5,
+      "unitCode": "DAY",
+      "unitPrice": 420,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Sauveteur secouriste du travail, groupe 06",
+      "quantity": 2,
+      "unitCode": "DAY",
+      "unitPrice": 780,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Recyclage gestes et postures, groupe 06",
+      "quantity": 1,
+      "unitCode": "DAY",
+      "unitPrice": 640,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Habilitation électrique B0/H0, groupe 06",
+      "quantity": 1.5,
+      "unitCode": "DAY",
+      "unitPrice": 890,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Manipulation des extincteurs, groupe 06",
+      "quantity": 0.5,
+      "unitCode": "DAY",
+      "unitPrice": 420,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Sauveteur secouriste du travail, groupe 07",
+      "quantity": 2,
+      "unitCode": "DAY",
+      "unitPrice": 780,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Recyclage gestes et postures, groupe 07",
+      "quantity": 1,
+      "unitCode": "DAY",
+      "unitPrice": 640,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Habilitation électrique B0/H0, groupe 07",
+      "quantity": 1.5,
+      "unitCode": "DAY",
+      "unitPrice": 890,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Manipulation des extincteurs, groupe 07",
+      "quantity": 0.5,
+      "unitCode": "DAY",
+      "unitPrice": 420,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Sauveteur secouriste du travail, groupe 08",
+      "quantity": 2,
+      "unitCode": "DAY",
+      "unitPrice": 780,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Recyclage gestes et postures, groupe 08",
+      "quantity": 1,
+      "unitCode": "DAY",
+      "unitPrice": 640,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Habilitation électrique B0/H0, groupe 08",
+      "quantity": 1.5,
+      "unitCode": "DAY",
+      "unitPrice": 890,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Manipulation des extincteurs, groupe 08",
+      "quantity": 0.5,
+      "unitCode": "DAY",
+      "unitPrice": 420,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Sauveteur secouriste du travail, groupe 09",
+      "quantity": 2,
+      "unitCode": "DAY",
+      "unitPrice": 780,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Recyclage gestes et postures, groupe 09",
+      "quantity": 1,
+      "unitCode": "DAY",
+      "unitPrice": 640,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Habilitation électrique B0/H0, groupe 09",
+      "quantity": 1.5,
+      "unitCode": "DAY",
+      "unitPrice": 890,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Manipulation des extincteurs, groupe 09",
+      "quantity": 0.5,
+      "unitCode": "DAY",
+      "unitPrice": 420,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Sauveteur secouriste du travail, groupe 10",
+      "quantity": 2,
+      "unitCode": "DAY",
+      "unitPrice": 780,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Recyclage gestes et postures, groupe 10",
+      "quantity": 1,
+      "unitCode": "DAY",
+      "unitPrice": 640,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Habilitation électrique B0/H0, groupe 10",
+      "quantity": 1.5,
+      "unitCode": "DAY",
+      "unitPrice": 890,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Manipulation des extincteurs, groupe 10",
+      "quantity": 0.5,
+      "unitCode": "DAY",
+      "unitPrice": 420,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Sauveteur secouriste du travail, groupe 11",
+      "quantity": 2,
+      "unitCode": "DAY",
+      "unitPrice": 780,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Recyclage gestes et postures, groupe 11",
+      "quantity": 1,
+      "unitCode": "DAY",
+      "unitPrice": 640,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Habilitation électrique B0/H0, groupe 11",
+      "quantity": 1.5,
+      "unitCode": "DAY",
+      "unitPrice": 890,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Manipulation des extincteurs, groupe 11",
+      "quantity": 0.5,
+      "unitCode": "DAY",
+      "unitPrice": 420,
+      "vatCategory": "S",
+      "vatRate": 20
+    }
+  ],
+  "payment": {
+    "meansCode": "58",
+    "iban": "FR7618206001236520187932470",
+    "bic": "AGRIFRPP882",
+    "termsText": "Paiement à 45 jours"
+  },
+  "legalNotes": {
+    "latePaymentPenalty": "Pénalité de retard au taux de 10,5 % par an, exigible sans rappel.",
+    "recoveryFee": "Indemnité forfaitaire pour frais de recouvrement : 40 € (art. L.441-10 C. com.).",
+    "earlyPaymentDiscount": "Escompte de 2 % pour règlement sous 8 jours."
+  }
+}

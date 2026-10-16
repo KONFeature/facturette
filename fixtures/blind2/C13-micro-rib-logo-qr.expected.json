@@ -1,0 +1,75 @@
+{
+  "number": "GLB-2026-041",
+  "typeCode": "380",
+  "issueDate": "2026-10-15",
+  "dueDate": "2026-11-14",
+  "operationCategory": "services",
+  "currency": "EUR",
+  "seller": {
+    "name": "Gwenn Le Bihan",
+    "kind": "company",
+    "siren": "528743917",
+    "siret": "52874391700239",
+    "address": {
+      "line1": "4 rue Kéréon",
+      "postalCode": "29000",
+      "city": "Quimper",
+      "countryCode": "FR"
+    },
+    "email": "gwenn@bihan-traductions.example",
+    "phone": "02 61 91 62 77",
+    "legalForm": "Entrepreneur individuel",
+    "registration": "Immatriculée au RNE, Quimper"
+  },
+  "buyer": {
+    "name": "Agence Embrun Communication SAS",
+    "kind": "company",
+    "siren": "846301950",
+    "siret": "84630195000107",
+    "vatNumber": "FR23846301950",
+    "address": {
+      "line1": "25 boulevard de Sébastopol",
+      "postalCode": "75001",
+      "city": "Paris",
+      "countryCode": "FR"
+    }
+  },
+  "lines": [
+    {
+      "name": "Traduction anglais vers français, 4 200 mots",
+      "quantity": 4200,
+      "unitCode": "C62",
+      "unitPrice": 0.09,
+      "vatCategory": "E",
+      "vatRate": 0
+    },
+    {
+      "name": "Relecture et mise en page",
+      "quantity": 3,
+      "unitCode": "HUR",
+      "unitPrice": 35,
+      "vatCategory": "E",
+      "vatRate": 0
+    },
+    {
+      "name": "Glossaire terminologique",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": 60,
+      "vatCategory": "E",
+      "vatRate": 0
+    }
+  ],
+  "vatExemptionReason": "TVA non applicable, art. 293 B du CGI",
+  "payment": {
+    "meansCode": "58",
+    "iban": "FR7615589297550671823405181",
+    "bic": "CMBRFR2BARK",
+    "termsText": "Virement à 30 jours"
+  },
+  "legalNotes": {
+    "latePaymentPenalty": "Pénalités exigibles en cas de non-paiement à l'échéance : trois fois le taux légal.",
+    "recoveryFee": "En sus, indemnité de recouvrement de 40 euros due de plein droit.",
+    "earlyPaymentDiscount": "Pas d'escompte en cas de paiement anticipé."
+  }
+}

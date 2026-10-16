@@ -1,0 +1,79 @@
+{
+  "number": "2026-S03-118",
+  "typeCode": "380",
+  "issueDate": "2026-10-13",
+  "dueDate": "2026-11-12",
+  "deliveryDate": "2026-09-30",
+  "operationCategory": "services",
+  "currency": "EUR",
+  "seller": {
+    "name": "Maçonnerie Générale Roussel SARL",
+    "kind": "company",
+    "siren": "583071428",
+    "siret": "58307142800101",
+    "vatNumber": "FR07583071428",
+    "address": {
+      "line1": "9 route de Chauvigny",
+      "postalCode": "86000",
+      "city": "Poitiers",
+      "countryCode": "FR"
+    },
+    "email": "compta@roussel-maconnerie.example",
+    "phone": "02 61 91 44 03",
+    "legalForm": "SARL",
+    "shareCapital": "45 000 €",
+    "registration": "RCS Poitiers 583 071 428"
+  },
+  "buyer": {
+    "name": "Bâtisseurs de l'Ouest Promotion SAS",
+    "kind": "company",
+    "siren": "817394067",
+    "siret": "81739406700034",
+    "vatNumber": "FR00817394067",
+    "address": {
+      "line1": "21 avenue de Nantes",
+      "postalCode": "86000",
+      "city": "Poitiers",
+      "countryCode": "FR"
+    }
+  },
+  "orderReference": "Marché M-2026-0113, chantier Les Terrasses du Clain",
+  "lines": [
+    {
+      "name": "Lot 02 Gros œuvre",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": 12675,
+      "vatCategory": "AE",
+      "vatRate": 0
+    },
+    {
+      "name": "Lot 03 Enduits de façade",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": 6240,
+      "vatCategory": "AE",
+      "vatRate": 0
+    },
+    {
+      "name": "Avenant n° 1 Terrassement",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": 6800,
+      "vatCategory": "AE",
+      "vatRate": 0
+    }
+  ],
+  "vatExemptionReason": "Autoliquidation : TVA due par le preneur (art. 283-2 nonies du CGI)",
+  "payment": {
+    "meansCode": "58",
+    "iban": "FR7616806005000831725496122",
+    "bic": "AGRIFRPP868",
+    "termsText": "Paiement à 30 jours à compter de la réception de la situation"
+  },
+  "legalNotes": {
+    "latePaymentPenalty": "Tout retard de paiement entraîne l'application d'intérêts au taux de 12 % l'an.",
+    "recoveryFee": "Frais de recouvrement forfaitaires : 40,00 € (art. D.441-5 du Code de commerce).",
+    "earlyPaymentDiscount": "Aucun escompte consenti pour paiement comptant."
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "number": "FA-26-10-1203",
+  "typeCode": "380",
+  "issueDate": "2026-10-15",
+  "operationCategory": "mixed",
+  "currency": "EUR",
+  "seller": {
+    "name": "Garage Hamelin Automobiles SARL",
+    "kind": "company",
+    "siren": "634085922",
+    "siret": "63408592200181",
+    "vatNumber": "FR90634085922",
+    "address": {
+      "line1": "74 rue Caponière",
+      "postalCode": "14000",
+      "city": "Caen",
+      "countryCode": "FR"
+    },
+    "email": "atelier@garage-hamelin.example",
+    "phone": "02 61 91 18 36",
+    "legalForm": "SARL",
+    "shareCapital": "30 000 €",
+    "registration": "RCS Caen 634 085 922"
+  },
+  "buyer": {
+    "name": "Madame Aurélie Quéméner",
+    "kind": "individual",
+    "address": {
+      "line1": "12 rue des Cordeliers",
+      "postalCode": "14000",
+      "city": "Caen",
+      "countryCode": "FR"
+    }
+  },
+  "orderReference": "OR 3381",
+  "lines": [
+    {
+      "name": "Main d'œuvre atelier",
+      "quantity": 2.5,
+      "unitCode": "HUR",
+      "unitPrice": 68,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Kit de distribution avec pompe à eau",
+      "quantity": 1,
+      "unitCode": "C62",
+      "unitPrice": 289.9,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Liquide de refroidissement",
+      "quantity": 4.5,
+      "unitCode": "LTR",
+      "unitPrice": 11.9,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Recyclage des déchets d'atelier",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": 4.5,
+      "vatCategory": "S",
+      "vatRate": 20
+    }
+  ],
+  "payment": {
+    "meansCode": "48",
+    "termsText": "Réglée par carte bancaire le 15-10-2026"
+  },
+  "notes": "Véhicule : Peugeot 208, immatriculation GH-417-ZK, 84 512 km"
+}

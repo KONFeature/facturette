@@ -1,0 +1,72 @@
+{
+  "number": "AV/2026/012",
+  "typeCode": "381",
+  "issueDate": "2026-10-15",
+  "operationCategory": "goods",
+  "currency": "EUR",
+  "seller": {
+    "name": "Bonnet Équipement Pro SAS",
+    "kind": "company",
+    "siren": "276409158",
+    "siret": "27640915800140",
+    "vatNumber": "FR94276409158",
+    "address": {
+      "line1": "112 route de Thionville",
+      "postalCode": "57000",
+      "city": "Metz",
+      "countryCode": "FR"
+    },
+    "email": "sav@bonnet-equipement.example",
+    "phone": "03 53 01 77 12",
+    "legalForm": "SAS",
+    "shareCapital": "100 000 €",
+    "registration": "RCS Metz 276 409 158"
+  },
+  "buyer": {
+    "name": "Hôtel-Restaurant Le Grand Cerf SARL",
+    "kind": "company",
+    "siren": "359827102",
+    "siret": "35982710200021",
+    "vatNumber": "FR37359827102",
+    "address": {
+      "line1": "5 place Saint-Louis",
+      "postalCode": "57000",
+      "city": "Metz",
+      "countryCode": "FR"
+    }
+  },
+  "precedingInvoice": {
+    "number": "FA/2026/457",
+    "issueDate": "2026-10-02"
+  },
+  "orderReference": "Retour RMA-26-0884",
+  "lines": [
+    {
+      "name": "Perceuse-visseuse 18 V, lot de 12 (retour pour défaut)",
+      "quantity": 12,
+      "unitCode": "C62",
+      "unitPrice": 129,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Batterie 5 Ah (reprise)",
+      "quantity": 12,
+      "unitCode": "C62",
+      "unitPrice": 64.5,
+      "vatCategory": "S",
+      "vatRate": 20
+    }
+  ],
+  "payment": {
+    "meansCode": "30",
+    "iban": "FR7630003012340005081239430",
+    "bic": "SOGEFRPPXXX",
+    "termsText": "Avoir à imputer sur votre prochain règlement"
+  },
+  "legalNotes": {
+    "latePaymentPenalty": "Pénalité de retard au taux de 10,5 % par an, exigible sans rappel.",
+    "recoveryFee": "Indemnité forfaitaire pour frais de recouvrement : 40 € (art. L.441-10 C. com.).",
+    "earlyPaymentDiscount": "Escompte de 2 % pour règlement sous 8 jours."
+  }
+}

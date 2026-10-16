@@ -1,0 +1,90 @@
+{
+  "number": "2610/183",
+  "typeCode": "380",
+  "issueDate": "2026-10-01",
+  "dueDate": "2026-10-31",
+  "deliveryDate": "2026-09-22",
+  "operationCategory": "mixed",
+  "vatOnDebits": true,
+  "currency": "EUR",
+  "seller": {
+    "name": "Établissements Ménard-L'Hôte & Fils, Chauffage Sanitaire Énergies Renouvelables SARL",
+    "kind": "company",
+    "siren": "391057486",
+    "siret": "39105748600204",
+    "vatNumber": "FR53391057486",
+    "address": {
+      "line1": "28 rue de l'Ancien Hôtel-Dieu",
+      "line2": "ZA de la Croix-Rouge",
+      "postalCode": "16000",
+      "city": "Angoulême",
+      "countryCode": "FR"
+    },
+    "email": "contact@menard-lhote.example",
+    "phone": "05 36 49 02 77",
+    "legalForm": "SARL",
+    "shareCapital": "38 112 €",
+    "registration": "RCS Angoulême 391 057 486"
+  },
+  "buyer": {
+    "name": "Syndicat des copropriétaires de la Résidence « Le Clos des Œillets », représenté par son syndic Immo-Gestion Pasquier & Associés",
+    "kind": "company",
+    "siren": "215738949",
+    "siret": "21573894900019",
+    "address": {
+      "line1": "3 rue de l'Évêché",
+      "line2": "À l'attention de Mme Delphine Thévenet",
+      "postalCode": "16000",
+      "city": "Angoulême",
+      "countryCode": "FR"
+    }
+  },
+  "buyerReference": "COPRO-CLOS-0214",
+  "orderReference": "Ordre de service OS-2026-077",
+  "lines": [
+    {
+      "name": "Remplacement de la chaudière collective gaz à condensation",
+      "description": "Fourniture et pose, puissance 120 kW, évacuation des fumées comprise",
+      "quantity": 1,
+      "unitCode": "C62",
+      "unitPrice": 6480,
+      "vatCategory": "S",
+      "vatRate": 10
+    },
+    {
+      "name": "Désembouage du réseau de chauffage",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": 890,
+      "vatCategory": "S",
+      "vatRate": 10
+    },
+    {
+      "name": "Raccordements hydrauliques, main d'œuvre",
+      "quantity": 16,
+      "unitCode": "HUR",
+      "unitPrice": 62.5,
+      "vatCategory": "S",
+      "vatRate": 10
+    },
+    {
+      "name": "Mise en service et contrôle de combustion",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": 245,
+      "vatCategory": "S",
+      "vatRate": 20
+    }
+  ],
+  "payment": {
+    "meansCode": "58",
+    "iban": "FR7613807005000891234765035",
+    "bic": "CCBPFRPPNAN",
+    "termsText": "Paiement à 30 jours"
+  },
+  "legalNotes": {
+    "latePaymentPenalty": "Tout retard de paiement entraîne l'application d'intérêts au taux de 12 % l'an.",
+    "recoveryFee": "Frais de recouvrement forfaitaires : 40,00 € (art. D.441-5 du Code de commerce).",
+    "earlyPaymentDiscount": "Aucun escompte consenti pour paiement comptant."
+  }
+}

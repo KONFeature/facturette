@@ -1,0 +1,87 @@
+{
+  "number": "MH-2026-064",
+  "typeCode": "380",
+  "issueDate": "2026-10-05",
+  "dueDate": "2026-11-04",
+  "operationCategory": "services",
+  "currency": "EUR",
+  "seller": {
+    "name": "SELARL Ruault & Mercadier Avocats",
+    "kind": "company",
+    "siren": "620159384",
+    "siret": "62015938400218",
+    "vatNumber": "FR25620159384",
+    "address": {
+      "line1": "8 rue de la Loge",
+      "postalCode": "34000",
+      "city": "Montpellier",
+      "countryCode": "FR"
+    },
+    "email": "secretariat@ruault-mercadier.example",
+    "phone": "04 65 71 33 08",
+    "legalForm": "SELARL",
+    "shareCapital": "8 000 €",
+    "registration": "RCS Montpellier 620 159 384"
+  },
+  "buyer": {
+    "name": "Établissements Lacombe-Sarrazin SAS",
+    "kind": "company",
+    "siren": "384719209",
+    "siret": "38471920900064",
+    "vatNumber": "FR35384719209",
+    "address": {
+      "line1": "15 quai de Bosc",
+      "postalCode": "34200",
+      "city": "Sète",
+      "countryCode": "FR"
+    }
+  },
+  "orderReference": "Dossier 2026/0173",
+  "lines": [
+    {
+      "name": "Étude du dossier et consultation",
+      "quantity": 3,
+      "unitCode": "HUR",
+      "unitPrice": 220,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Rédaction des conclusions en défense",
+      "quantity": 6.5,
+      "unitCode": "HUR",
+      "unitPrice": 220,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Audience devant le tribunal de commerce",
+      "quantity": 0.5,
+      "unitCode": "DAY",
+      "unitPrice": 1600,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Frais de déplacement et de dossier",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": 85,
+      "vatCategory": "S",
+      "vatRate": 20
+    }
+  ],
+  "prepaidAmount": 1000,
+  "payment": {
+    "meansCode": "58",
+    "iban": "FR7611315000010801234658935",
+    "bic": "CEPAFRPP131",
+    "termsText": "Dès réception du mémoire, au plus tard sous 30 jours"
+  },
+  "legalNotes": {
+    "latePaymentPenalty": "Pénalités exigibles en cas de non-paiement à l'échéance : trois fois le taux légal.",
+    "recoveryFee": "En sus, indemnité de recouvrement de 40 euros due de plein droit.",
+    "earlyPaymentDiscount": "Pas d'escompte en cas de paiement anticipé."
+  },
+  "notes": "Affaire Lacombe-Sarrazin contre Brasserie du Port, RG 26/01234"
+}

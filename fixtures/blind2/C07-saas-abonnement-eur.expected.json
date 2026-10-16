@@ -1,0 +1,85 @@
+{
+  "number": "2026-10-0457",
+  "typeCode": "380",
+  "issueDate": "2026-10-15",
+  "dueDate": "2026-10-30",
+  "operationCategory": "services",
+  "currency": "EUR",
+  "seller": {
+    "name": "Ouvroir Numérique SAS",
+    "kind": "company",
+    "siren": "902315746",
+    "siret": "90231574600369",
+    "vatNumber": "FR66902315746",
+    "address": {
+      "line1": "14 rue Eau de Robec",
+      "postalCode": "76000",
+      "city": "Rouen",
+      "countryCode": "FR"
+    },
+    "email": "facturation@ouvroir-numerique.example",
+    "legalForm": "SAS",
+    "shareCapital": "15 000 €",
+    "registration": "RCS Rouen 902 315 746"
+  },
+  "buyer": {
+    "name": "Cabinet Aubertin-Lévêque & Associés",
+    "kind": "company",
+    "siren": "340568211",
+    "siret": "34056821100122",
+    "vatNumber": "FR56340568211",
+    "address": {
+      "line1": "33 cours de la République",
+      "postalCode": "76600",
+      "city": "Le Havre",
+      "countryCode": "FR"
+    }
+  },
+  "lines": [
+    {
+      "name": "Plan Professionnel, 15 sièges",
+      "description": "Du 1 oct. 2026 au 31 oct. 2026",
+      "quantity": 15,
+      "unitCode": "C62",
+      "unitPrice": 12,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Signature électronique, pack 50",
+      "quantity": 1,
+      "unitCode": "C62",
+      "unitPrice": 39.9,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Stockage supplémentaire (200 Go)",
+      "quantity": 4,
+      "unitCode": "C62",
+      "unitPrice": 6.5,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Remise fidélité (-10 % sur le plan)",
+      "quantity": 1,
+      "unitCode": "C62",
+      "unitPrice": -18,
+      "vatCategory": "S",
+      "vatRate": 20
+    }
+  ],
+  "payment": {
+    "meansCode": "58",
+    "iban": "FR7630004003110001056278926",
+    "bic": "BNPAFRPPXXX",
+    "reference": "2026-10-0457",
+    "termsText": "Paiement par virement avant le 30 oct. 2026"
+  },
+  "legalNotes": {
+    "latePaymentPenalty": "Pénalités exigibles en cas de non-paiement à l'échéance : trois fois le taux légal.",
+    "recoveryFee": "En sus, indemnité de recouvrement de 40 euros due de plein droit.",
+    "earlyPaymentDiscount": "Pas d'escompte en cas de paiement anticipé."
+  }
+}

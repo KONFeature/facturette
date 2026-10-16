@@ -1,0 +1,86 @@
+{
+  "number": "E26-10-884102",
+  "typeCode": "380",
+  "issueDate": "2026-10-12",
+  "dueDate": "2026-10-27",
+  "operationCategory": "goods",
+  "currency": "EUR",
+  "seller": {
+    "name": "Énergies du Limousin SA",
+    "kind": "company",
+    "siren": "785132044",
+    "siret": "78513204400419",
+    "vatNumber": "FR46785132044",
+    "address": {
+      "line1": "1 place de la République",
+      "postalCode": "87000",
+      "city": "Limoges",
+      "countryCode": "FR"
+    },
+    "email": "pro@limousin-energies.example",
+    "phone": "05 36 49 71 20",
+    "legalForm": "SA",
+    "shareCapital": "2 450 000 €",
+    "registration": "RCS Limoges 785 132 044"
+  },
+  "buyer": {
+    "name": "Boucherie-Charcuterie Maillard SARL",
+    "kind": "company",
+    "siren": "526901475",
+    "siret": "52690147500057",
+    "vatNumber": "FR03526901475",
+    "address": {
+      "line1": "23 rue du Clocher",
+      "postalCode": "87000",
+      "city": "Limoges",
+      "countryCode": "FR"
+    }
+  },
+  "lines": [
+    {
+      "name": "Abonnement (puissance 12 kVA)",
+      "description": "Période du 12/09/2026 au 11/10/2026",
+      "quantity": 1,
+      "unitCode": "MON",
+      "unitPrice": 17.85,
+      "vatCategory": "S",
+      "vatRate": 5.5
+    },
+    {
+      "name": "Consommation heures pleines",
+      "quantity": 1842,
+      "unitCode": "KWH",
+      "unitPrice": 0.2516,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Consommation heures creuses",
+      "quantity": 623,
+      "unitCode": "KWH",
+      "unitPrice": 0.1894,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Contribution tarifaire CTA",
+      "quantity": 1,
+      "unitCode": "LS",
+      "unitPrice": 14.86,
+      "vatCategory": "S",
+      "vatRate": 5.5
+    }
+  ],
+  "payment": {
+    "meansCode": "59",
+    "iban": "FR7610278360060002054190314",
+    "bic": "CMCIFRPP",
+    "reference": "Contrat 7710-0349-51",
+    "termsText": "Prélèvement automatique le 27/10/2026"
+  },
+  "legalNotes": {
+    "latePaymentPenalty": "Pénalités exigibles en cas de non-paiement à l'échéance : trois fois le taux légal.",
+    "recoveryFee": "En sus, indemnité de recouvrement de 40 euros due de plein droit.",
+    "earlyPaymentDiscount": "Pas d'escompte en cas de paiement anticipé."
+  }
+}

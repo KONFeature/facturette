@@ -1,0 +1,78 @@
+{
+  "number": "F2026-00457",
+  "typeCode": "380",
+  "issueDate": "2026-10-15",
+  "dueDate": "2026-11-14",
+  "deliveryDate": "2026-10-09",
+  "operationCategory": "services",
+  "currency": "EUR",
+  "seller": {
+    "name": "EURL Marchetti Stratégie",
+    "kind": "company",
+    "siren": "716048293",
+    "siret": "71604829300170",
+    "vatNumber": "FR60716048293",
+    "address": {
+      "line1": "58 boulevard Gambetta",
+      "postalCode": "06000",
+      "city": "Nice",
+      "countryCode": "FR"
+    },
+    "email": "hmarchetti@marchetti-strategie.example",
+    "phone": "04 65 71 90 17",
+    "legalForm": "EURL",
+    "shareCapital": "5 000 €",
+    "registration": "RCS Nice 716 048 293"
+  },
+  "buyer": {
+    "name": "Groupe Hôtelier Bellevue-Méditerranée SAS",
+    "kind": "company",
+    "siren": "448193722",
+    "siret": "44819372200049",
+    "vatNumber": "FR61448193722",
+    "address": {
+      "line1": "17 rue d'Antibes",
+      "postalCode": "06400",
+      "city": "Cannes",
+      "countryCode": "FR"
+    }
+  },
+  "orderReference": "PO-BM-8841",
+  "lines": [
+    {
+      "name": "Atelier de cadrage stratégique",
+      "quantity": 2.5,
+      "unitCode": "DAY",
+      "unitPrice": 950,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Analyse concurrentielle et benchmark",
+      "quantity": 4,
+      "unitCode": "DAY",
+      "unitPrice": 950,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Coaching du comité de direction",
+      "quantity": 3,
+      "unitCode": "HUR",
+      "unitPrice": 140,
+      "vatCategory": "S",
+      "vatRate": 20
+    }
+  ],
+  "payment": {
+    "meansCode": "58",
+    "iban": "FR7617515900000842375941336",
+    "bic": "CEPAFRPP751",
+    "termsText": "Virement à 30 jours date de facture"
+  },
+  "legalNotes": {
+    "latePaymentPenalty": "Pénalité de retard au taux de 10,5 % par an, exigible sans rappel.",
+    "recoveryFee": "Indemnité forfaitaire pour frais de recouvrement : 40 € (art. L.441-10 C. com.).",
+    "earlyPaymentDiscount": "Escompte de 2 % pour règlement sous 8 jours."
+  }
+}

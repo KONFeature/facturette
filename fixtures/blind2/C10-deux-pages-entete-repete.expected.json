@@ -1,0 +1,630 @@
+{
+  "number": "FC-26-104286",
+  "typeCode": "380",
+  "issueDate": "2026-10-09",
+  "dueDate": "2026-11-08",
+  "operationCategory": "goods",
+  "currency": "EUR",
+  "seller": {
+    "name": "Papeteries Sanchez Distribution SAS",
+    "kind": "company",
+    "siren": "471052365",
+    "siret": "47105236500270",
+    "vatNumber": "FR94471052365",
+    "address": {
+      "line1": "6 rue Gutenberg",
+      "line2": "ZI Les Aydes",
+      "postalCode": "45100",
+      "city": "Orléans",
+      "countryCode": "FR"
+    },
+    "email": "commandes@sanchez-distribution.example",
+    "phone": "02 61 91 55 29",
+    "legalForm": "SAS",
+    "shareCapital": "250 000 €",
+    "registration": "RCS Orléans 471 052 365"
+  },
+  "buyer": {
+    "name": "Lycée des Métiers Armand-Lecomte",
+    "kind": "company",
+    "siren": "193847563",
+    "siret": "19384756300197",
+    "address": {
+      "line1": "10 rue du Collège",
+      "postalCode": "45000",
+      "city": "Orléans",
+      "countryCode": "FR"
+    }
+  },
+  "buyerReference": "SERVICE-GEST-0045",
+  "orderReference": "BC 2026-1187",
+  "lines": [
+    {
+      "name": "Cahier 96 pages grands carreaux, réf. PS-1000",
+      "quantity": 2,
+      "unitCode": "C62",
+      "unitPrice": 1.2,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Classeur à levier A4 dos 80, réf. PS-1007",
+      "quantity": 3,
+      "unitCode": "C62",
+      "unitPrice": 1.7,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Stylo bille bleu (boîte de 50), réf. PS-1014",
+      "quantity": 4,
+      "unitCode": "C62",
+      "unitPrice": 2.2,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Surligneur jaune (étui de 10), réf. PS-1021",
+      "quantity": 5,
+      "unitCode": "C62",
+      "unitPrice": 2.7,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Pochettes transparentes perforées (100), réf. PS-1028",
+      "quantity": 6,
+      "unitCode": "C62",
+      "unitPrice": 3.2,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Intercalaires 12 positions, réf. PS-1035",
+      "quantity": 7,
+      "unitCode": "C62",
+      "unitPrice": 3.7,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Colle en bâton 21 g (lot de 12), réf. PS-1042",
+      "quantity": 8,
+      "unitCode": "C62",
+      "unitPrice": 4.2,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Ciseaux scolaires 17 cm, réf. PS-1049",
+      "quantity": 9,
+      "unitCode": "C62",
+      "unitPrice": 3.79,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Règle plate 30 cm, réf. PS-1056",
+      "quantity": 10,
+      "unitCode": "C62",
+      "unitPrice": 4.29,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Équerre 60° 21 cm, réf. PS-1063",
+      "quantity": 2,
+      "unitCode": "C62",
+      "unitPrice": 4.79,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Compas à bague, réf. PS-1070",
+      "quantity": 3,
+      "unitCode": "C62",
+      "unitPrice": 5.29,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Trousse en toile, réf. PS-1077",
+      "quantity": 4,
+      "unitCode": "C62",
+      "unitPrice": 5.79,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Agrafeuse 25 feuilles, réf. PS-1084",
+      "quantity": 5,
+      "unitCode": "C62",
+      "unitPrice": 6.29,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Agrafes 24/6 (boîte de 1000), réf. PS-1091",
+      "quantity": 6,
+      "unitCode": "C62",
+      "unitPrice": 6.79,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Perforateur 2 trous, réf. PS-1098",
+      "quantity": 7,
+      "unitCode": "C62",
+      "unitPrice": 6.38,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Ruban adhésif 19 mm (lot de 8), réf. PS-1105",
+      "quantity": 8,
+      "unitCode": "C62",
+      "unitPrice": 6.88,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Feutres effaçables tableau (lot de 4), réf. PS-1112",
+      "quantity": 9,
+      "unitCode": "C62",
+      "unitPrice": 7.38,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Gomme blanche (boîte de 20), réf. PS-1119",
+      "quantity": 10,
+      "unitCode": "C62",
+      "unitPrice": 7.88,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Taille-crayon métal (lot de 10), réf. PS-1126",
+      "quantity": 2,
+      "unitCode": "C62",
+      "unitPrice": 8.38,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Papier calque A4 (50 feuilles), réf. PS-1133",
+      "quantity": 3,
+      "unitCode": "C62",
+      "unitPrice": 8.88,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Papier dessin 180 g A3 (pochette de 25), réf. PS-1140",
+      "quantity": 4,
+      "unitCode": "C62",
+      "unitPrice": 9.38,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Gouache 12 tubes, réf. PS-1147",
+      "quantity": 5,
+      "unitCode": "C62",
+      "unitPrice": 8.97,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Pinceaux assortis (lot de 10), réf. PS-1154",
+      "quantity": 6,
+      "unitCode": "C62",
+      "unitPrice": 9.47,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Cahier 96 pages grands carreaux, réf. PS-1161",
+      "quantity": 7,
+      "unitCode": "C62",
+      "unitPrice": 9.97,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Classeur à levier A4 dos 80, réf. PS-1168",
+      "quantity": 8,
+      "unitCode": "C62",
+      "unitPrice": 10.47,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Stylo bille bleu (boîte de 50), réf. PS-1175",
+      "quantity": 9,
+      "unitCode": "C62",
+      "unitPrice": 1.97,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Surligneur jaune (étui de 10), réf. PS-1182",
+      "quantity": 10,
+      "unitCode": "C62",
+      "unitPrice": 2.47,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Pochettes transparentes perforées (100), réf. PS-1189",
+      "quantity": 2,
+      "unitCode": "C62",
+      "unitPrice": 2.97,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Intercalaires 12 positions, réf. PS-1196",
+      "quantity": 3,
+      "unitCode": "C62",
+      "unitPrice": 2.56,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Colle en bâton 21 g (lot de 12), réf. PS-1203",
+      "quantity": 4,
+      "unitCode": "C62",
+      "unitPrice": 3.06,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Ciseaux scolaires 17 cm, réf. PS-1210",
+      "quantity": 5,
+      "unitCode": "C62",
+      "unitPrice": 3.56,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Règle plate 30 cm, réf. PS-1217",
+      "quantity": 6,
+      "unitCode": "C62",
+      "unitPrice": 4.06,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Équerre 60° 21 cm, réf. PS-1224",
+      "quantity": 7,
+      "unitCode": "C62",
+      "unitPrice": 4.56,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Compas à bague, réf. PS-1231",
+      "quantity": 8,
+      "unitCode": "C62",
+      "unitPrice": 5.06,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Trousse en toile, réf. PS-1238",
+      "quantity": 9,
+      "unitCode": "C62",
+      "unitPrice": 5.56,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Agrafeuse 25 feuilles, réf. PS-1245",
+      "quantity": 10,
+      "unitCode": "C62",
+      "unitPrice": 5.15,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Agrafes 24/6 (boîte de 1000), réf. PS-1252",
+      "quantity": 2,
+      "unitCode": "C62",
+      "unitPrice": 5.65,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Perforateur 2 trous, réf. PS-1259",
+      "quantity": 3,
+      "unitCode": "C62",
+      "unitPrice": 6.15,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Ruban adhésif 19 mm (lot de 8), réf. PS-1266",
+      "quantity": 4,
+      "unitCode": "C62",
+      "unitPrice": 6.65,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Feutres effaçables tableau (lot de 4), réf. PS-1273",
+      "quantity": 5,
+      "unitCode": "C62",
+      "unitPrice": 7.15,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Gomme blanche (boîte de 20), réf. PS-1280",
+      "quantity": 6,
+      "unitCode": "C62",
+      "unitPrice": 7.65,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Taille-crayon métal (lot de 10), réf. PS-1287",
+      "quantity": 7,
+      "unitCode": "C62",
+      "unitPrice": 8.15,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Papier calque A4 (50 feuilles), réf. PS-1294",
+      "quantity": 8,
+      "unitCode": "C62",
+      "unitPrice": 7.74,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Papier dessin 180 g A3 (pochette de 25), réf. PS-1301",
+      "quantity": 9,
+      "unitCode": "C62",
+      "unitPrice": 8.24,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Gouache 12 tubes, réf. PS-1308",
+      "quantity": 10,
+      "unitCode": "C62",
+      "unitPrice": 8.74,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Pinceaux assortis (lot de 10), réf. PS-1315",
+      "quantity": 2,
+      "unitCode": "C62",
+      "unitPrice": 9.24,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Cahier 96 pages grands carreaux, réf. PS-1322",
+      "quantity": 3,
+      "unitCode": "C62",
+      "unitPrice": 9.74,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Classeur à levier A4 dos 80, réf. PS-1329",
+      "quantity": 4,
+      "unitCode": "C62",
+      "unitPrice": 10.24,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Stylo bille bleu (boîte de 50), réf. PS-1336",
+      "quantity": 5,
+      "unitCode": "C62",
+      "unitPrice": 10.74,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Surligneur jaune (étui de 10), réf. PS-1343",
+      "quantity": 6,
+      "unitCode": "C62",
+      "unitPrice": 1.33,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Pochettes transparentes perforées (100), réf. PS-1350",
+      "quantity": 7,
+      "unitCode": "C62",
+      "unitPrice": 1.83,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Intercalaires 12 positions, réf. PS-1357",
+      "quantity": 8,
+      "unitCode": "C62",
+      "unitPrice": 2.33,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Colle en bâton 21 g (lot de 12), réf. PS-1364",
+      "quantity": 9,
+      "unitCode": "C62",
+      "unitPrice": 2.83,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Ciseaux scolaires 17 cm, réf. PS-1371",
+      "quantity": 10,
+      "unitCode": "C62",
+      "unitPrice": 3.33,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Règle plate 30 cm, réf. PS-1378",
+      "quantity": 2,
+      "unitCode": "C62",
+      "unitPrice": 3.83,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Équerre 60° 21 cm, réf. PS-1385",
+      "quantity": 3,
+      "unitCode": "C62",
+      "unitPrice": 4.33,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Compas à bague, réf. PS-1392",
+      "quantity": 4,
+      "unitCode": "C62",
+      "unitPrice": 3.92,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Trousse en toile, réf. PS-1399",
+      "quantity": 5,
+      "unitCode": "C62",
+      "unitPrice": 4.42,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Agrafeuse 25 feuilles, réf. PS-1406",
+      "quantity": 6,
+      "unitCode": "C62",
+      "unitPrice": 4.92,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Agrafes 24/6 (boîte de 1000), réf. PS-1413",
+      "quantity": 7,
+      "unitCode": "C62",
+      "unitPrice": 5.42,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Perforateur 2 trous, réf. PS-1420",
+      "quantity": 8,
+      "unitCode": "C62",
+      "unitPrice": 5.92,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Ruban adhésif 19 mm (lot de 8), réf. PS-1427",
+      "quantity": 9,
+      "unitCode": "C62",
+      "unitPrice": 6.42,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Feutres effaçables tableau (lot de 4), réf. PS-1434",
+      "quantity": 10,
+      "unitCode": "C62",
+      "unitPrice": 6.92,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Gomme blanche (boîte de 20), réf. PS-1441",
+      "quantity": 2,
+      "unitCode": "C62",
+      "unitPrice": 6.51,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Taille-crayon métal (lot de 10), réf. PS-1448",
+      "quantity": 3,
+      "unitCode": "C62",
+      "unitPrice": 7.01,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Papier calque A4 (50 feuilles), réf. PS-1455",
+      "quantity": 4,
+      "unitCode": "C62",
+      "unitPrice": 7.51,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Papier dessin 180 g A3 (pochette de 25), réf. PS-1462",
+      "quantity": 5,
+      "unitCode": "C62",
+      "unitPrice": 8.01,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Gouache 12 tubes, réf. PS-1469",
+      "quantity": 6,
+      "unitCode": "C62",
+      "unitPrice": 8.51,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Pinceaux assortis (lot de 10), réf. PS-1476",
+      "quantity": 7,
+      "unitCode": "C62",
+      "unitPrice": 9.01,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Cahier 96 pages grands carreaux, réf. PS-1483",
+      "quantity": 8,
+      "unitCode": "C62",
+      "unitPrice": 9.51,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Classeur à levier A4 dos 80, réf. PS-1490",
+      "quantity": 9,
+      "unitCode": "C62",
+      "unitPrice": 9.1,
+      "vatCategory": "S",
+      "vatRate": 20
+    },
+    {
+      "name": "Stylo bille bleu (boîte de 50), réf. PS-1497",
+      "quantity": 10,
+      "unitCode": "C62",
+      "unitPrice": 9.6,
+      "vatCategory": "S",
+      "vatRate": 20
+    }
+  ],
+  "payment": {
+    "meansCode": "58",
+    "iban": "FR7620041010050432187650965",
+    "bic": "PSSTFRPPPAR",
+    "termsText": "Mandat administratif à 30 jours"
+  },
+  "legalNotes": {
+    "latePaymentPenalty": "Tout retard de paiement entraîne l'application d'intérêts au taux de 12 % l'an.",
+    "recoveryFee": "Frais de recouvrement forfaitaires : 40,00 € (art. D.441-5 du Code de commerce).",
+    "earlyPaymentDiscount": "Aucun escompte consenti pour paiement comptant."
+  }
+}
