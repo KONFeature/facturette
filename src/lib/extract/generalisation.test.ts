@@ -561,6 +561,39 @@ describe("robustness", () => {
     expect(Array.isArray(res.suggestions)).toBe(true)
   })
 
+  // Shapes that make nested quantifiers backtrack: each is fed as a seller line, a buyer line
+  // and a footer line, and must be processed in under 100 ms.
+  it.each([
+    ["RCS hyphen chain", `RCS ${"A-".repeat(60)}`],
+    ["RCS hyphen chain with number", `RCS ${"A-".repeat(60)} 523 456 788 ${"B-".repeat(60)}`],
+    ["RCS space chain", `R.C.S. ${"Ab ".repeat(150)}x`],
+    ["registry words", `Registre du commerce et des sociétés de ${"Aa-a".repeat(80)}!`],
+    ["company name", `${"Atelier-".repeat(60)}SARL ${"SAS ".repeat(60)}`],
+    ["postal chain", `${"1, ".repeat(150)}75001 ${"Paris-".repeat(60)}1`],
+    ["street chain", `${"12 bis ".repeat(100)}rue ${"des ".repeat(100)}`],
+    ["siren digits", `SIREN ${"1 ".repeat(150)}x`],
+    ["siret digits", `SIRET ${"1.".repeat(150)}x`],
+    ["capital digits", `Capital de ${"1 0".repeat(150)}x`],
+    ["email dots", `${"a.".repeat(150)}@${"b-".repeat(100)}`],
+    ["phone chain", `Tél. ${"01 ".repeat(150)}x`],
+    ["iban chain", `IBAN ${"FR76 ".repeat(100)}`],
+  ])("%s finishes in under 100 ms", (_label, text) => {
+    const parties: SynthRow[] = [
+      ...stackedRows(40, 40, [SELLER[0] ?? "", text, ...SELLER.slice(1)]),
+      [130, [[320, "Facturé à"]]],
+      ...stackedRows(320, 144, [BUYER[0] ?? "", text, ...BUYER.slice(1)]),
+    ]
+    const footer: SynthRow[] = [
+      [790, [[40, text]]],
+      [801, [[40, `SIRET 523 456 788 00026 - ${text}`]]],
+    ]
+    const d = syntheticDoc([[...HEADER, ...parties, ...STANDARD_TABLE, ...footer]])
+    const start = performance.now()
+    const res = extractInvoice(d)
+    expect(performance.now() - start).toBeLessThan(100)
+    expect(Array.isArray(res.suggestions)).toBe(true)
+  })
+
   it("extracts a 3-page invoice in under 50 ms", () => {
     const page = (offset: number): SynthRow[] =>
       Array.from({ length: 30 }, (_, i) =>

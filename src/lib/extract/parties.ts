@@ -515,8 +515,17 @@ const SIRET_RE = /\bsiret\s*(?:n°|:)?\s*:?\s*((?:\d[\s.]?){13,}\d)/
 const VAT_FR_RE = /\bFR\s?[0-9A-Z]{2}\s?\d{3}\s?\d{3}\s?\d{3}\b/
 const VAT_LABEL_RE =
   /\b(tva|vat|n° tva|tva intracom\w*|identifiant tva)\b[^:]*:?\s*([A-Z]{2}[\s0-9A-Z]{2,14})/i
-const RCS_RE =
-  /(?:immatricul\S*\s+au\s+)?\b(R\.?\s?C\.?\s?S\.?|R\.?\s?M\.?|Registre du commerce(?: et des sociétés)?|Répertoire des métiers)\s*(?:de\s+|d')?(?:[A-Z]\s+)?([\p{Lu}][\p{L}'’-]*(?:[ -][\p{Lu}][\p{L}'’-]*)*\s+)?(?:[A-Z]\s+)?(?:n°\s*)?(\d{3}\s?\d{3}\s?\d{3})(?:\s+(?!\d)([\p{Lu}][\p{L}'’-]*(?:[ -][\p{Lu}][\p{L}'’-]*)*))?/u
+/**
+ * Registry city: capitalised words separated by spaces, each word possibly hyphenated
+ * ("Lille Métropole", "Aix-en-Provence"). A hyphen is only ever consumed by the inner
+ * `-letters` group (never also as a word separator) so that "A-A-A-…" cannot backtrack
+ * exponentially.
+ */
+const CITY_WORDS = String.raw`[\p{Lu}][\p{L}'’]*(?:-[\p{L}'’]+)*(?: [\p{Lu}][\p{L}'’]*(?:-[\p{L}'’]+)*)*`
+const RCS_RE = new RegExp(
+  String.raw`(?:immatricul\S*\s+au\s+)?\b(R\.?\s?C\.?\s?S\.?|R\.?\s?M\.?|Registre du commerce(?: et des sociétés)?|Répertoire des métiers)\s*(?:de\s+|d')?(?:[A-Z]\s+)?(${CITY_WORDS}\s+)?(?:[A-Z]\s+)?(?:n°\s*)?(\d{3}\s?\d{3}\s?\d{3})(?:\s+(?!\d)(${CITY_WORDS}))?`,
+  "u",
+)
 const CAPITAL_RE = /capital(?:\s+social)?\s*(?:de|:)?\s*(\d[\d\s.,]*\s?(?:€|euros?|EUR))/i
 const EMAIL_RE = /[\w.+-]+@[\w-]+(?:\.[\w-]+)+/
 const PHONE_RE = /(?:\+33\s?\(0\)\s?|\+33\s?|0033\s?|\b0)[1-9](?:[\s.-]?\d{2}){4}\b/
