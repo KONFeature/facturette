@@ -1,5 +1,9 @@
 import { useFormContext, useWatch } from "react-hook-form"
-import { DEFAULT_LEGAL_NOTES, VAT_FRANCHISE_REASON } from "../../domain/invoice"
+import {
+  DEFAULT_LEGAL_NOTES,
+  VAT_FRANCHISE_REASON,
+  VAT_FRANCHISE_REASON_CIBS,
+} from "../../domain/invoice"
 import { Section } from "../ui"
 import type { FormValues } from "./formModel"
 import { useReview } from "./ReviewContext"
@@ -45,6 +49,19 @@ export function VatSection() {
                     onClick={() => fill("vatExemptionReason", VAT_FRANCHISE_REASON)}
                   >
                     Utiliser « {VAT_FRANCHISE_REASON} »
+                  </button>
+                </>
+              )}
+              {exemptionNeeded && reason.trim() !== VAT_FRANCHISE_REASON_CIBS && (
+                <>
+                  {" "}
+                  <button
+                    type="button"
+                    className={helperButton}
+                    title={VAT_FRANCHISE_REASON_CIBS}
+                    onClick={() => fill("vatExemptionReason", VAT_FRANCHISE_REASON_CIBS)}
+                  >
+                    Ou la nouvelle formulation (CIBS)
                   </button>
                 </>
               )}

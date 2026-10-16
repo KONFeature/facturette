@@ -87,6 +87,14 @@ export const DEFAULT_LEGAL_NOTES = {
 
 export const VAT_FRANCHISE_REASON = "TVA non applicable, art. 293 B du CGI"
 
+/**
+ * New wording of the franchise mention. service-public.fr (F36008) says it replaces the 293 B one
+ * from 1 September 2026, the old wording being tolerated until 31 December 2027, while another
+ * official page (F31808) still shows 293 B: both are offered and both keep VATEX-FR-FRANCHISE.
+ */
+export const VAT_FRANCHISE_REASON_CIBS =
+  "TVA non applicable, art. L. 223 et s. du code des impositions sur les biens et services (CIBS)"
+
 // ---------------------------------------------------------------------------------------------
 // Schemas
 // ---------------------------------------------------------------------------------------------

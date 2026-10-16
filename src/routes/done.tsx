@@ -154,6 +154,11 @@ function DoneStep() {
             {profileLabel(state.result.profile)}). Il n’a pas été envoyé sur Internet. Pensez à
             conserver l’original.
           </p>
+          <p className="max-w-prose text-sm text-ink-muted">
+            Ce fichier n’a été transmis ni à votre client ni à l’administration. Dès que
+            l’obligation d’émission s’applique à votre entreprise, déposez-le sur votre plateforme
+            agréée : un simple envoi par e-mail ne suffit pas.
+          </p>
         </div>
       )}
     </div>

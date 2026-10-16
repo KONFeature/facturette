@@ -9,7 +9,9 @@ compliant **Factur-X** invoice (PDF/A-3 with an embedded CII XML), as required b
 e-invoicing reform (reception obligatory since 1 Sept 2026 for everyone; issuing obligation phased
 in: large/mid companies 2026, small/micro 2027).
 
-User flow (single linear wizard, state kept in memory + a draft in localStorage):
+User flow (single linear wizard; state is kept in memory only. Nothing is written to localStorage
+unless the user ticks a box in the review step: saved company profile, saved customers, and with
+the profile the last invoice number. No draft is ever persisted):
 
 1. **Import**: drop/select a classic PDF invoice.
 2. **Extract**: read the PDF text layer (pdf.js) and heuristically detect fields.

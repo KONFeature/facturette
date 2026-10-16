@@ -259,7 +259,12 @@ function extractLegalNotes(layout: Layout, collector: Collector): void {
     for (const sentence of splitSentences(text)) {
       const ft = fold(sentence)
       // One sentence may carry both the penalty and the 40 € fee: it then fills both mentions.
-      if (/\b(indemnite (forfaitaire|de recouvrement)|frais (forfaitaires? )?de recouvrement)\b/.test(ft) && /\b40\b/.test(ft)) {
+      if (
+        /\b(indemnite (forfaitaire|de recouvrement)|frais (forfaitaires? )?de recouvrement)\b/.test(
+          ft,
+        ) &&
+        /\b40\b/.test(ft)
+      ) {
         collector.add("legalNotes.recoveryFee", sentence, 0.85, cells, "legal-recovery-fee")
       }
       if (

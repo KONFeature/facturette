@@ -175,10 +175,18 @@ function ImportStep() {
         <h2 className="mt-10 text-xl">Qu’est-ce que Factur-X ?</h2>
         <p className="mt-3 text-ink-soft">
           Un PDF lisible par une personne qui contient les mêmes données en XML, lisibles par les
-          logiciels. La réforme française de la facturation électronique impose de pouvoir en
-          recevoir depuis le 1er septembre 2026 ; l’émission devient obligatoire en 2026 ou 2027
-          selon la taille de l’entreprise. Profil produit : EN 16931.
+          logiciels. Depuis le 1er septembre 2026, toute entreprise doit pouvoir recevoir des
+          factures électroniques ; l’émission est obligatoire dès le 1er septembre 2026 pour les
+          grandes entreprises et les ETI, et le 1er septembre 2027 pour les PME et les
+          micro-entreprises. Profil produit : EN 16931.
         </p>
+        <Alert tone="info" title="Ce site produit le fichier, il ne l’envoie pas" className="mt-5">
+          Il n’est pas une plateforme agréée (PA) et ne transmet la facture ni à votre client ni à
+          l’administration. Dès que l’obligation d’émission s’applique à votre entreprise, vos
+          factures entre assujettis établis en France doivent être émises et transmises par une
+          plateforme agréée : envoyer ce PDF par e-mail ne suffit pas. Le fichier produit ici est au
+          format Factur-X, l’un des formats que ces plateformes acceptent.
+        </Alert>
       </aside>
     </div>
   )
