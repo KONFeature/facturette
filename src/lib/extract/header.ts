@@ -58,7 +58,16 @@ const NUMBER_LABELS: LabelRule[] = [
     confidence: 0.72,
     rule: "number-title",
   },
+  {
+    // "Facture : FA2610-0042" (a date after the colon is refused by the reader).
+    re: /^(facture d'avoir|facture|avoir|invoice)\s*:\s*(?=\S*\d)/,
+    confidence: 0.8,
+    rule: "number-title-colon",
+  },
 ]
+
+/** Bare "N° 2026/0415" / "No FAC-26-0198": a number only when printed right under the title. */
+const BARE_NUMBER_RE = /^(n°|nº|no\.?|num\.?|#)\s*:?\s*(?=\S*\d)/
 
 const ISSUE_DATE_LABELS: LabelRule[] = [
   {
@@ -97,9 +106,15 @@ const ORDER_LABELS: LabelRule[] = [
 
 const BUYER_REF_LABELS: LabelRule[] = [
   {
-    re: /^(votre reference|vos references?|v\/ref(\.|erence)?|code service|service executant|reference d'engagement|n° d'engagement|your reference|buyer reference)\s*:?/,
+    re: /^(votre reference|vos references?|votre ref\.?|v\/ref(\.|erence)?|code service|service executant|reference d'engagement|n° d'engagement|your reference|your ref\.?|buyer reference)\s*:?/,
     confidence: 0.75,
     rule: "buyer-ref-label",
+  },
+  {
+    // "Service : DAF-SERVICE-07": the buyer's service code (Chorus Pro), a coded value only.
+    re: /^service\s*:\s*(?=\S*[\d-])/,
+    confidence: 0.62,
+    rule: "buyer-ref-service",
   },
   {
     re: /^(reference client|ref\.? client|reference acheteur)\s*:?/,
@@ -121,12 +136,22 @@ const PAYMENT_REF_LABELS: LabelRule[] = [
   },
 ]
 
+/**
+ * A buyer reference label ("Réf. client", "Your ref.") whose value is an order number
+ * ("CMD-2610-17", "PO-88412", "BC 2026-7781") is an order reference: the value's own prefix
+ * (commande, bon de commande, purchase order) says what it is.
+ */
+function orderLikeValue(value: string): string | undefined {
+  return /^(cmd|bc|bdc|po|commande|order)[\s\-_/.]*\d/i.test(value) ? "orderReference" : undefined
+}
+
 function applyLabels<T extends string>(
   layout: Layout,
   collector: Collector,
   path: string,
   rules: LabelRule[],
   read: ValueReader<T>,
+  reroute?: (value: T) => string | undefined,
 ): void {
   for (const rule of rules) {
     for (const m of findLabeled(layout, rule.re, read)) {
@@ -136,7 +161,7 @@ function applyLabels<T extends string>(
       const penalty = m.placement === "below" ? 0.06 : 0
       const cells = m.valueCell === m.labelCell ? [m.labelCell] : [m.labelCell, m.valueCell]
       collector.add(
-        path,
+        reroute?.(m.value) ?? path,
         m.value,
         rule.confidence - penalty,
         cells,
@@ -185,13 +210,14 @@ export function extractHeader(layout: Layout, collector: Collector): { isCreditN
   applyLabels(layout, collector, "issueDate", ISSUE_DATE_LABELS, readDate)
   applyLabels(layout, collector, "dueDate", DUE_DATE_LABELS, readDate)
   applyLabels(layout, collector, "deliveryDate", DELIVERY_DATE_LABELS, readDate)
+  extractBareNumber(layout, collector, type?.cells[0])
   applyLabels(layout, collector, "orderReference", ORDER_LABELS, readReference)
-  applyLabels(layout, collector, "buyerReference", BUYER_REF_LABELS, readFreeText)
+  applyLabels(layout, collector, "buyerReference", BUYER_REF_LABELS, readFreeText, orderLikeValue)
   applyLabels(layout, collector, "payment.reference", PAYMENT_REF_LABELS, readPaymentReference)
   extractPeriod(layout, collector)
   extractCurrency(layout, collector)
   extractOperationCategory(layout, collector)
-  if (type?.code === "381") extractCreditNoteNote(layout, collector)
+  if (type?.code === "381") extractPrecedingInvoice(layout, collector)
   return { isCreditNote: type?.code === "381" }
 }
 
@@ -257,16 +283,63 @@ function extractOperationCategory(layout: Layout, collector: Collector): void {
   )
 }
 
-/** "Avoir sur facture F-2026-0412 du 12/09/2026" → note carrying the original invoice reference. */
-function extractCreditNoteNote(layout: Layout, collector: Collector): void {
+function extractBareNumber(
+  layout: Layout,
+  collector: Collector,
+  title: Layout["cells"][number] | undefined,
+): void {
+  if (!title) return
   for (const cell of layout.cells) {
-    if (
-      /^(avoir|annule et remplace|annulation|en reference a|relatif a)\b.*\bfacture\b.*\d/.test(
-        cell.folded,
-      )
-    ) {
-      collector.add("notes", cell.text, 0.66, [cell], "credit-note-reference")
-      return
+    if (cell.page !== title.page || cell === title) continue
+    // Right under the title (or beside it), overlapping it horizontally.
+    const dy = cell.y - title.y
+    if (dy < -2 || dy > 4 * title.fontSize) continue
+    if (cell.x1 < title.x0 - 20 || cell.x0 > title.x1 + 20) continue
+    const m = BARE_NUMBER_RE.exec(cell.folded)
+    if (!m) continue
+    const v = readDocumentNumber(cell.text.slice(m[0].length))
+    if (v) collector.add("number", v.value, 0.7, [title, cell], "number-under-title", cell.text)
+  }
+}
+
+const CREDIT_REFERENCE_RE =
+  /^(avoir|annule et remplace|annulation|en reference a|relatif a|rectifi\w*|correction)\b.*?\bfacture\b/
+
+/**
+ * "Avoir sur facture n° F-2026-0412 du 12/09/2026" → precedingInvoice.number / issueDate. The
+ * sentence itself is only offered as a note (the reference has its own fields).
+ */
+function extractPrecedingInvoice(layout: Layout, collector: Collector): void {
+  for (const cell of layout.cells) {
+    const m = CREDIT_REFERENCE_RE.exec(cell.folded)
+    if (!m || !/\d/.test(cell.folded)) continue
+    const after = cell.text
+      .slice(m[0].length)
+      .replace(/^\s*(d'origine|initiale|n°|nº|no\.?|numero|numéro|:|\s)*/i, "")
+    const number = readDocumentNumber(after)
+    if (number) {
+      collector.add("precedingInvoice.number", number.value, 0.8, [cell], "credit-note-reference")
+      const rest = after.slice(number.text.length)
+      const date = /^\s*,?\s*(du|en date du|emise le|émise le|of)\s+/i.exec(rest)
+      const first = date ? findDates(rest.slice(date[0].length))[0] : undefined
+      if (first && first.index <= 1)
+        collector.add("precedingInvoice.issueDate", first.iso, 0.8, [cell], "credit-note-reference")
     }
+    collector.add("notes", cell.text, 0.45, [cell], "credit-note-reference")
+    return
+  }
+  // "Facture d'origine : F-2026-0412" / "Facture concernée : …" labels.
+  for (const m of findLabeled(
+    layout,
+    /^(facture (d'origine|initiale|concernee|annulee|rectifiee)|ref(\.|erence)? (de la )?facture (d'origine|initiale))\s*:?/,
+    readDocumentNumber,
+  )) {
+    collector.add(
+      "precedingInvoice.number",
+      m.value,
+      0.78,
+      [m.labelCell],
+      "preceding-invoice-label",
+    )
   }
 }

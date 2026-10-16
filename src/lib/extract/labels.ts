@@ -34,6 +34,27 @@ function sliceAfter(part: Part, foldedLength: number): string {
 }
 
 /**
+ * Bilingual labels "Facture / Invoice No. 2026-FR-0031", "Due date / Échéance : 06/11/2026":
+ * after a matched label, a "/ translation" (letters only, up to a colon or to the first token
+ * holding a digit) is part of the label, never of the value.
+ */
+export function stripLabelGloss(rest: string): string {
+  if (!rest.startsWith("/")) return rest
+  const colon = /^\/[^:\d]{1,40}?:\s*/.exec(rest)
+  if (colon) return rest.slice(colon[0].length)
+  const words = /^\/(\s*[\p{L}.'#°º]+){1,4}\s*/u.exec(rest)
+  return words ? rest.slice(words[0].length) : rest
+}
+
+/** "Facture / Invoice No. 2026": the second-language half as a part of its own. */
+function glossVariant(part: Part): Part | undefined {
+  const m = /^[^/\d:]{2,30}?\s+\/\s+(?=\p{L})/u.exec(part.text)
+  if (!m) return undefined
+  const text = part.text.slice(m[0].length)
+  return { cell: part.cell, text, folded: part.folded.slice(m[0].length) }
+}
+
+/**
  * Every place where `label` (a regex on folded text, anchored at the start of a cell part)
  * is followed by a value that `read` accepts.
  */
@@ -46,12 +67,21 @@ export function findLabeled<T>(
   for (const cell of layout.cells) {
     const parts = partsOf(cell)
     for (let p = 0; p < parts.length; p++) {
-      const part = parts[p]
-      if (!part) continue
-      const m = label.exec(part.folded)
-      if (m?.index !== 0) continue
+      const original = parts[p]
+      if (!original) continue
+      let part = original
+      let m = label.exec(part.folded)
+      if (m?.index !== 0) {
+        const variant = glossVariant(original)
+        m = variant ? label.exec(variant.folded) : null
+        if (!variant || m?.index !== 0) continue
+        part = variant
+      }
       const labelText = part.text.slice(0, m[0].length)
-      const rest = sliceAfter(part, m[0].length).replace(LEADING_PUNCT_RE, "")
+      const rest = stripLabelGloss(sliceAfter(part, m[0].length).replace(/^\s+/, "")).replace(
+        LEADING_PUNCT_RE,
+        "",
+      )
       if (rest !== "") {
         const v = read(rest)
         if (v) {
