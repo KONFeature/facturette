@@ -5,7 +5,7 @@
 import { isValidIban, normalizeIban } from "../validation/identifiers"
 import type { Collector } from "./collect"
 import { type Cell, type Layout, partsOf } from "./layout"
-import { fold } from "./text"
+import { fold, splitSentences } from "./text"
 
 const IBAN_START_RE = /\b([A-Z]{2}\d{2}(?:\s?[A-Z0-9]){10,32})/
 const BIC_RE =
@@ -96,7 +96,7 @@ function meansIn(folded: string): string[] {
 /** Parts of a cell, further split into sentences ("Date des travaux : … . Paiement à 15 jours."). */
 function sentencesOf(cell: Cell): Array<{ text: string; folded: string }> {
   return partsOf(cell).flatMap((p) =>
-    p.text.split(/(?<=[\p{Ll}\d)]\.)\s+(?=\p{Lu})/u).map((text) => ({ text, folded: fold(text) })),
+    splitSentences(p.text).map((text) => ({ text, folded: fold(text) })),
   )
 }
 
@@ -256,10 +256,10 @@ function extractLegalNotes(layout: Layout, collector: Collector): void {
     if (f.length < 15 || consumed.has(cell.id)) continue
     const { text, cells } = sentenceFrom(layout, cell)
     for (const c of cells) consumed.add(c.id)
-    for (const sentence of text.split(/(?<=[.!])\s+(?=[\p{Lu}])/u)) {
+    for (const sentence of splitSentences(text)) {
       const ft = fold(sentence)
       // One sentence may carry both the penalty and the 40 € fee: it then fills both mentions.
-      if (/\b(indemnite forfaitaire|frais de recouvrement)\b/.test(ft) && /\b40\b/.test(ft)) {
+      if (/\b(indemnite (forfaitaire|de recouvrement)|frais (forfaitaires? )?de recouvrement)\b/.test(ft) && /\b40\b/.test(ft)) {
         collector.add("legalNotes.recoveryFee", sentence, 0.85, cells, "legal-recovery-fee")
       }
       if (

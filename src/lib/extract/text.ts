@@ -235,3 +235,36 @@ export function parseQuantity(
 export function compact(s: string): string {
   return s.replace(/[\s\u00a0\u202f]+/g, "")
 }
+
+/** Abbreviations whose full stop does not end a sentence ("art. L.441-10", "C. com.", "n. 3"). */
+const ABBREVIATION_RE =
+  /(?:^|[\s(])(?:art|arts|al|cf|ex|env|etc|ref|réf|no|n°|num|p|pp|c|com|civ|cgi|ss|suiv|min|max|mme|mlle|mm|m|dr|me|st|ste|sté|av|bd|bld|tél|tel|fax|hors|tx)\.$/iu
+
+/**
+ * Split a text into sentences at ". " or "! " followed by a capital letter, never inside
+ * parentheses ("(art. D.441-5 du Code de commerce).") nor after an abbreviation full stop or a
+ * single initial.
+ */
+export function splitSentences(text: string): string[] {
+  const out: string[] = []
+  let depth = 0
+  let start = 0
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i]
+    if (ch === "(") depth++
+    else if (ch === ")") depth = Math.max(0, depth - 1)
+    else if ((ch === "." || ch === "!") && depth === 0) {
+      const rest = text.slice(i + 1)
+      const gap = /^\s+(?=\p{Lu})/u.exec(rest)
+      if (!gap) continue
+      const head = text.slice(start, i + 1)
+      if (ch === "." && (ABBREVIATION_RE.test(head) || /(?:^|[\s(.])\p{L}\.$/u.test(head))) continue
+      out.push(head.trim())
+      start = i + 1 + gap[0].length
+      i = start - 1
+    }
+  }
+  const tail = text.slice(start).trim()
+  if (tail) out.push(tail)
+  return out
+}
