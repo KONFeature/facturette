@@ -125,15 +125,45 @@ const DEFAULT_EXEMPTION_REASONS: Partial<Record<VatCategory, string>> = {
   O: "TVA non applicable",
 }
 
-/** BT-23 billing mode of the French e-invoicing spec (XP Z12-012): 1 = standard invoice. */
-const BILLING_MODES: Record<Invoice["operationCategory"], string> = {
-  services: "S1",
-  goods: "B1",
-  mixed: "M1",
+/** Which exempt regime receives the user's typed exemption reason when an invoice mixes several. */
+const EXEMPTION_PRIORITY: readonly VatCategory[] = ["E", "AE", "K", "G", "O"]
+
+/** First letter of the BT-23 billing mode (XP Z12-012): Service, Bien (goods), Mixte. */
+const BILLING_LETTER: Record<Invoice["operationCategory"], string> = {
+  services: "S",
+  goods: "B",
+  mixed: "M",
 }
 
+/**
+ * BT-23 "cadre de facturation", per the FNFE-MPE French schematron (BR-FR-08, BR-FR-CO-08/09) and
+ * its flash notes:
+ *  - 2 = invoice already paid: needs BT-113 = BT-112 and BT-115 = 0 (and BT-9 = payment date);
+ *  - 4 = final invoice after a deposit: BT-3 stays 380 and the deposit invoice is referenced in
+ *    BT-25 (we only claim it when the user gave that reference);
+ *  - 1 = anything else (a plain invoice, or a partial payment with no deposit invoice).
+ */
+function billingMode(invoice: Invoice, totals: InvoiceTotals): string {
+  const letter = BILLING_LETTER[invoice.operationCategory]
+  if (totals.prepaid > 0 && totals.dueAmount === 0) return `${letter}2`
+  if (
+    invoice.typeCode === "380" &&
+    totals.prepaid > 0 &&
+    totals.dueAmount > 0 &&
+    invoice.precedingInvoice?.number.trim()
+  ) {
+    return `${letter}4`
+  }
+  return `${letter}1`
+}
+
+/**
+ * The franchise en base mention: art. 293 B du CGI, which service-public says becomes "art. L. 223
+ * et s. du CIBS" from 1 September 2026 (the old wording stays tolerated until end 2027). Both
+ * wordings are recognised so that the VATEX-FR-FRANCHISE code is never lost to a wording change.
+ */
 const isFranchiseReason = (reason: string | undefined): boolean =>
-  !!reason && /293\s*B/i.test(reason)
+  !!reason && /293\s*B|L\.?\s*223|CIBS/i.test(reason)
 
 // ---------------------------------------------------------------------------------------------
 // Builders
@@ -167,15 +197,21 @@ function buildNotes(invoice: Invoice): Note[] {
   if (identity.length > 0) {
     notes.push({ content: [seller.name, ...identity].join(" - "), subjectCode: "ABL" })
   }
-  if (legalNotes?.latePaymentPenalty?.trim()) {
-    notes.push({ content: legalNotes.latePaymentPenalty, subjectCode: "PMD" })
-  }
-  if (legalNotes?.recoveryFee?.trim()) {
-    notes.push({ content: legalNotes.recoveryFee, subjectCode: "PMT" })
-  }
-  if (legalNotes?.earlyPaymentDiscount?.trim()) {
-    notes.push({ content: legalNotes.earlyPaymentDiscount, subjectCode: "AAB" })
-  }
+  // The French schematron (BR-FR-05) wants PMD, PMT and AAB on every invoice. Towards a private
+  // customer the 40 \u20ac recovery indemnity (art. D441-5) cannot be charged, so the PMT text is
+  // always "not applicable" there, whatever was typed; the other two fall back to the same wording.
+  const b2c = invoice.buyer.kind === "individual"
+  const notApplicable = "Non applicable (client non professionnel)."
+  const penalty = legalNotes?.latePaymentPenalty?.trim() || (b2c ? notApplicable : undefined)
+  const recoveryFee = b2c
+    ? "Indemnit\u00e9 forfaitaire de recouvrement non applicable (client non professionnel)."
+    : legalNotes?.recoveryFee?.trim()
+  const discount = legalNotes?.earlyPaymentDiscount?.trim() || (b2c ? notApplicable : undefined)
+  if (penalty) notes.push({ content: penalty, subjectCode: "PMD" })
+  if (recoveryFee) notes.push({ content: recoveryFee, subjectCode: "PMT" })
+  if (discount) notes.push({ content: discount, subjectCode: "AAB" })
+  // BAR tells the platform how to route the invoice; B2C is e-reporting, not e-invoicing.
+  if (b2c) notes.push({ content: "B2C", subjectCode: "BAR" })
   if (invoice.vatOnDebits) {
     notes.push({
       content: "Option pour le paiement de la TVA d'après les débits.",
@@ -184,6 +220,15 @@ function buildNotes(invoice: Invoice): Note[] {
   }
   if (invoice.notes?.trim()) notes.push({ content: invoice.notes, subjectCode: "AAI" })
   return notes
+}
+
+/** "SARL - Capital social : 10 000 \u20ac" (BT-33), or undefined when there is nothing to say. */
+function sellerLegalDescription(seller: Invoice["seller"]): string | undefined {
+  const parts = [
+    seller.legalForm?.trim(),
+    seller.shareCapital?.trim() ? `Capital social : ${seller.shareCapital.trim()}` : undefined,
+  ].filter((p): p is string => !!p)
+  return parts.length > 0 ? parts.join(" - ") : undefined
 }
 
 function addressNode(address: Address): XmlNode {
@@ -203,6 +248,8 @@ interface PartyOptions {
   withContact: boolean
   /** Seller without VAT number: SIREN as fiscal registration (BT-32, scheme FC). */
   fiscalRegistrationFallback: boolean
+  /** BT-33 "seller additional legal information" (legal form, share capital). EN 16931 only. */
+  description?: string
 }
 
 function partyNode(name: string, party: Party, options: PartyOptions): XmlNode {
@@ -224,6 +271,7 @@ function partyNode(name: string, party: Party, options: PartyOptions): XmlNode {
   return node(name, [
     siret && /^\d{14}$/.test(siret) ? leaf("ram:GlobalID", siret, { schemeID: "0009" }) : undefined,
     leaf("ram:Name", party.name),
+    options.description ? leaf("ram:Description", options.description) : undefined,
     siren
       ? node("ram:SpecifiedLegalOrganization", [leaf("ram:ID", siren, { schemeID: "0002" })])
       : undefined,
@@ -327,9 +375,18 @@ function paymentMeansNode(invoice: Invoice, profile: FacturXProfile): XmlNode {
 
 function settlementNode(invoice: Invoice, totals: InvoiceTotals, profile: FacturXProfile): XmlNode {
   const { payment } = invoice
+  // The invoice carries ONE free-text exemption reason, which can only describe ONE regime. With
+  // several exempt categories on the same invoice, giving it to all of them would print a wrong
+  // legal basis on the others (CGI 242 nonies A annexe II wants the provision per operation): the
+  // typed text goes to the primary regime and the others use their standard wording.
+  const exemptCategories = new Set<VatCategory>(
+    totals.vatBreakdown.map((b) => b.category).filter((c) => c !== "S" && c !== "Z"),
+  )
+  const primaryExempt = EXEMPTION_PRIORITY.find((c) => exemptCategories.has(c))
   const reasonFor = (category: VatCategory): string | undefined => {
     if (category === "S" || category === "Z") return undefined
-    return invoice.vatExemptionReason?.trim() || DEFAULT_EXEMPTION_REASONS[category]
+    const typed = category === primaryExempt ? invoice.vatExemptionReason?.trim() : undefined
+    return typed || DEFAULT_EXEMPTION_REASONS[category]
   }
   const reasonCodeFor = (category: VatCategory, reason: string | undefined): string | undefined => {
     if (category === "E") return isFranchiseReason(reason) ? "VATEX-FR-FRANCHISE" : undefined
@@ -407,7 +464,7 @@ export function buildFacturXXml(invoice: Invoice, options?: { profile?: FacturXP
     [
       node("rsm:ExchangedDocumentContext", [
         node("ram:BusinessProcessSpecifiedDocumentContextParameter", [
-          leaf("ram:ID", BILLING_MODES[invoice.operationCategory]),
+          leaf("ram:ID", billingMode(invoice, totals)),
         ]),
         node("ram:GuidelineSpecifiedDocumentContextParameter", [
           leaf("ram:ID", GUIDELINE_IDS[profile]),
@@ -429,6 +486,8 @@ export function buildFacturXXml(invoice: Invoice, options?: { profile?: FacturXP
             withVatNumber: !notSubject,
             withContact: profile === "EN16931",
             fiscalRegistrationFallback: true,
+            // Legal form and share capital are BT-33; the RCS identity stays in the ABL note.
+            description: profile === "EN16931" ? sellerLegalDescription(invoice.seller) : undefined,
           }),
           partyNode("ram:BuyerTradeParty", invoice.buyer, {
             withVatNumber: !notSubject,

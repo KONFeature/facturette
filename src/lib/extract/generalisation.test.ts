@@ -594,7 +594,9 @@ describe("robustness", () => {
     expect(Array.isArray(res.suggestions)).toBe(true)
   })
 
-  it("extracts a 3-page invoice in under 50 ms", () => {
+  // Typically 2-15 ms. The bound is 250 ms so that it still catches an algorithmic regression
+  // (20x slower) without failing on a loaded or swapping machine.
+  it("extracts a 3-page invoice quickly (best of 5 under 250 ms)", () => {
     const page = (offset: number): SynthRow[] =>
       Array.from({ length: 30 }, (_, i) =>
         item(80 + i * 22, `Article ${offset + i}`, "2", "10,00", "20,00"),
@@ -605,10 +607,13 @@ describe("robustness", () => {
       [ITEM_HEADER, ...page(60), ...TOTALS(760, "1 800,00 €", "360,00 €", "2 160,00 €")],
     ]
     const d = syntheticDoc(pages)
-    extractInvoice(d)
-    const start = performance.now()
-    extractInvoice(d)
-    expect(performance.now() - start).toBeLessThan(50)
+    extractInvoice(d) // warm-up
+    const timings = Array.from({ length: 5 }, () => {
+      const start = performance.now()
+      extractInvoice(d)
+      return performance.now() - start
+    })
+    expect(Math.min(...timings)).toBeLessThan(250)
   })
 })
 

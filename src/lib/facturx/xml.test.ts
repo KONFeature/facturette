@@ -63,6 +63,82 @@ describe("buildFacturXXml envelope", () => {
   })
 })
 
+describe("BT-23 billing mode", () => {
+  const mode = (name: string): string =>
+    build(name)["rsm:CrossIndustryInvoice"]["rsm:ExchangedDocumentContext"][
+      "ram:BusinessProcessSpecifiedDocumentContextParameter"
+    ]["ram:ID"]
+
+  it("is S1 for a plain service invoice", () => {
+    expect(mode("standard-20")).toBe("S1")
+  })
+
+  it("is S2 when the invoice is already fully paid (BR-FR-CO-09)", () => {
+    expect(mode("fully-paid")).toBe("S2")
+  })
+
+  it("is S4 for a final invoice that references its deposit invoice", () => {
+    expect(mode("final-after-deposit")).toBe("S4")
+  })
+
+  it("stays S1 for a partial payment with no deposit invoice to reference", () => {
+    expect(mode("deposit-prepaid")).toBe("S1")
+  })
+})
+
+describe("private customers", () => {
+  it("never carries the 40 \u20ac recovery fee and is routed as B2C", () => {
+    const byCode = Object.fromEntries(
+      notes(build("private-customer")).map((n: Tree) => [n["ram:SubjectCode"], n["ram:Content"]]),
+    )
+    expect(byCode.PMT).toContain("non applicable")
+    expect(byCode.PMT).not.toContain("40")
+    expect(byCode.BAR).toBe("B2C")
+    // BR-FR-05 wants all three mentions, so the other two are present as well.
+    expect(byCode.PMD).toBeTruthy()
+    expect(byCode.AAB).toBeTruthy()
+  })
+
+  it("does not add a BAR note for a business customer", () => {
+    expect(notes(build("standard-20")).map((n: Tree) => n["ram:SubjectCode"])).not.toContain("BAR")
+  })
+})
+
+describe("seller legal information (BT-33)", () => {
+  it("carries the legal form and share capital in the party description", () => {
+    const seller = agreement(build("standard-20"))["ram:SellerTradeParty"]["ram:Description"] ?? ""
+    expect(seller).toContain("Capital social")
+  })
+})
+
+describe("franchise wording", () => {
+  it("keeps VATEX-FR-FRANCHISE for the new CIBS wording as well", () => {
+    const inv = {
+      ...scenario("franchise-en-base"),
+      vatExemptionReason:
+        "TVA non applicable, art. L. 223 et s. du code des impositions sur les biens et services (CIBS)",
+    }
+    const tax = arr(settlement(parse(buildFacturXXml(inv)))["ram:ApplicableTradeTax"])
+    expect(tax[0]["ram:ExemptionReasonCode"]).toBe("VATEX-FR-FRANCHISE")
+  })
+})
+
+describe("exemption reasons with several exempt regimes", () => {
+  it("gives the typed text to the primary regime only and the standard wording to the others", () => {
+    const tax = arr(settlement(build("mixed-exemptions"))["ram:ApplicableTradeTax"])
+    const byCategory = Object.fromEntries(
+      tax.map((t: Tree) => [t["ram:CategoryCode"], t["ram:ExemptionReason"]]),
+    )
+    expect(byCategory.E).toBe("Exon\u00e9ration de TVA, art. 261 D du CGI")
+    expect(byCategory.AE).toBe("Autoliquidation")
+  })
+
+  it("still uses the typed text for a single exempt regime", () => {
+    const tax = arr(settlement(build("autoliquidation"))["ram:ApplicableTradeTax"])
+    expect(tax[0]["ram:ExemptionReason"]).toBe("Autoliquidation - art. 283-2 nonies du CGI")
+  })
+})
+
 describe("document header", () => {
   it("writes number, type code and format-102 issue date", () => {
     const d = doc(build("credit-note"))

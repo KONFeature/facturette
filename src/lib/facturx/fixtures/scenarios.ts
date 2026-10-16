@@ -164,6 +164,34 @@ export const scenarios: Scenario[] = [
     profiles: ["EN16931"],
   },
   {
+    // Two exempt regimes on one invoice: the typed reason belongs to ONE of them (the primary,
+    // E), the other must not inherit it.
+    name: "mixed-exemptions",
+    invoice: make({
+      number: "FA-2026-0004B",
+      vatExemptionReason: "Exon\u00e9ration de TVA, art. 261 D du CGI",
+      lines: [
+        {
+          name: "Location de locaux nus",
+          quantity: 1,
+          unitCode: "MON",
+          unitPrice: 900,
+          vatCategory: "E",
+          vatRate: 0,
+        },
+        {
+          name: "Sous-traitance BTP",
+          quantity: 1,
+          unitCode: "LS",
+          unitPrice: 8000,
+          vatCategory: "AE",
+          vatRate: 0,
+        },
+      ],
+    }),
+    profiles: ["EN16931"],
+  },
+  {
     name: "intra-community-supply",
     invoice: make({
       number: "FA-2026-0005",
@@ -273,6 +301,47 @@ export const scenarios: Scenario[] = [
       ],
     }),
     profiles: ["EN16931", "BASIC"],
+  },
+  {
+    // Already paid: BT-113 = BT-112, BT-115 = 0 and BT-9 = payment date -> BT-23 S2 (BR-FR-CO-09).
+    name: "fully-paid",
+    invoice: make({
+      number: "FA-2026-0008B",
+      dueDate: "2026-10-05",
+      prepaidAmount: 2880,
+      payment: { meansCode: "48", termsText: "Pay\u00e9 par carte bancaire le 05/10/2026" },
+      lines: [
+        {
+          name: "D\u00e9veloppement site",
+          quantity: 1,
+          unitCode: "LS",
+          unitPrice: 2400,
+          vatCategory: "S",
+          vatRate: 20,
+        },
+      ],
+    }),
+    profiles: ["EN16931"],
+  },
+  {
+    // Final invoice after a deposit invoice: BT-3 stays 380, BT-25 references the deposit -> S4.
+    name: "final-after-deposit",
+    invoice: make({
+      number: "FA-2026-0008C",
+      prepaidAmount: 800,
+      precedingInvoice: { number: "AC-2026-0003", issueDate: "2026-08-20" },
+      lines: [
+        {
+          name: "D\u00e9veloppement site (solde)",
+          quantity: 1,
+          unitCode: "LS",
+          unitPrice: 2400,
+          vatCategory: "S",
+          vatRate: 20,
+        },
+      ],
+    }),
+    profiles: ["EN16931"],
   },
   {
     name: "delivery-address",

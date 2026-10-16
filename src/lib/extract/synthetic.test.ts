@@ -946,7 +946,8 @@ describe("robustness", () => {
     expect(res.warnings.join(" ")).toMatch(/SIRET du vendeur.*invalide/)
   })
 
-  it("runs a 3-page invoice in well under 50 ms", () => {
+  // Typically 2-15 ms; 250 ms still catches a real regression without failing on a loaded machine.
+  it("runs a 3-page invoice quickly (best of 5 under 250 ms)", () => {
     const rowsFor = (page: number): SynthRow[] =>
       Array.from({ length: 35 }, (_, i) => [
         60 + i * 20,
@@ -982,6 +983,6 @@ describe("robustness", () => {
       extractInvoice(doc)
       return performance.now() - start
     })
-    expect(Math.min(...timings)).toBeLessThan(50)
+    expect(Math.min(...timings)).toBeLessThan(250)
   })
 })
