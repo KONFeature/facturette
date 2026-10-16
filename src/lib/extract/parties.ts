@@ -301,6 +301,27 @@ export function extractParties(
   const hasSeller = parties.some((p) => p.role === "seller")
   const hasBuyer = parties.some((p) => p.role === "buyer")
   const remaining = [...candidates]
+  // "Émetteur" block holding only legal identifiers (capital, RCS, SIRET) while the name and
+  // address sit in an unlabelled letterhead: that letterhead is the seller's.
+  const namelessSeller = parties.find(
+    (p) => p.role === "seller" && p.lines[0] && LEGAL_LINE_RE.test(p.lines[0].folded),
+  )
+  if (namelessSeller) {
+    const letterhead = remaining
+      .filter((c) => c.lines.some((l) => POSTAL_RE.test(l.text)) && c.lines.length >= 2)
+      .sort((a, b) => a.y - b.y)[0]
+    const first = letterhead?.lines[0]
+    if (letterhead && first && !LEGAL_LINE_RE.test(first.folded) && !POSTAL_RE.test(first.text)) {
+      parties.push({
+        role: "seller",
+        factor: 0.85,
+        rule: "seller-letterhead-beside-label",
+        lines: letterhead.lines,
+        hasName: true,
+      })
+      remaining.splice(remaining.indexOf(letterhead), 1)
+    }
+  }
   if (!hasSeller) {
     const hinted = remaining.find((c) => c.hinted)
     const ranked = [...remaining]

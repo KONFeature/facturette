@@ -578,3 +578,25 @@ describe("robustness", () => {
     expect(performance.now() - start).toBeLessThan(50)
   })
 })
+
+describe("seller name in a letterhead beside an identifiers-only seller block", () => {
+  it.each([
+    ["Émetteur", "SARL au capital de 15 000 €"],
+    ["Vendeur", "RCS Bordeaux 451 287 304"],
+    ["Émetteur :", "SIRET : 451 287 304 00278"],
+    ["Fournisseur", "Capital social 15 000 €"],
+  ])("%s / %s", (label, firstLine) => {
+    const parties: SynthRow[] = [
+      ...stackedRows(440, 40, ["Cuisines Delmas SARL", "19 avenue Jean Jaurès", "33000 Bordeaux"]),
+      [166, [[307, label]]],
+      ...stackedRows(307, 180, [firstLine, "SIRET : 451 287 304 00278", "TVA : FR41451287304"]),
+      [172, [[49, "Client"]]],
+      ...stackedRows(49, 186, ["Mme Sophie Lambert", "22 rue Nationale", "33200 Bordeaux"]),
+    ]
+    const header: SynthRow[] = [[110, [[73, "Facture n° 2026-0301"]]]]
+    const res = extractInvoice(syntheticDoc([[...header, ...parties, ...STANDARD_TABLE]]))
+    expect(res.draft.seller?.name).toBe("Cuisines Delmas SARL")
+    expect(res.draft.seller?.address?.line1).toBe("19 avenue Jean Jaurès")
+    expect(res.draft.buyer?.name).toBe("Mme Sophie Lambert")
+  })
+})
